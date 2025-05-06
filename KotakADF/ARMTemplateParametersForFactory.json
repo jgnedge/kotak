@@ -1,0 +1,120 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "KotakADF"
+		},
+		"AzureBlobStorage_ufce_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStoragenew111_connectionString": {
+			"value": ""
+		},
+		"AzureDataLakeStorage_ufce_accountKey": {
+			"value": ""
+		},
+		"AzurePostgreSql_ufce_connectionString": {
+			"value": ""
+		},
+		"CadenceSynapseLS_connectionString": {
+			"value": ""
+		},
+		"CosmosDbMongoDbEntityStore_connectionString": {
+			"value": ""
+		},
+		"CosmosDbMongoDbEntityStore_account": {
+			"value": "kmblewskotak"
+		},
+		"CosmosDbMongoDbFeedBackProfile_connectionString": {
+			"value": ""
+		},
+		"CosmosDbMongoDbFeedBackProfile_account": {
+			"value": "kmblewskotak"
+		},
+		"CosmosDbMongoDbLS_connectionString": {
+			"value": ""
+		},
+		"CosmosDbMongoDbLS_account": {
+			"value": "kmblewskotak"
+		},
+		"SybaseLS_password": {
+			"value": ""
+		},
+		"TestLinkedService_connectionString": {
+			"value": ""
+		},
+		"cadenceAdlsLS_accountKey": {
+			"value": ""
+		},
+		"cadenceProcessingLS_accessToken": {
+			"value": ""
+		},
+		"ewscadenceLS_functionKey": {
+			"value": ""
+		},
+		"ufce_prod_fa_functionKey": {
+			"value": ""
+		},
+		"AzureBlobStorageLS_properties_typeProperties_serviceEndpoint": {
+			"value": "https://kmblewsproddatalake.blob.core.windows.net"
+		},
+		"AzureDataLakeStorage_ufce_properties_typeProperties_url": {
+			"value": "https://dlsufceprod.dfs.core.windows.net/"
+		},
+		"CosmosDbMongoDbEntityStore_properties_typeProperties_database": {
+			"value": "entity_store"
+		},
+		"CosmosDbMongoDbFeedBackProfile_properties_typeProperties_database": {
+			"value": "profile_store"
+		},
+		"CosmosDbMongoDbLS_properties_typeProperties_database": {
+			"value": "config_store"
+		},
+		"SybaseLS_properties_typeProperties_server": {
+			"value": "10.240.55.130:2639"
+		},
+		"SybaseLS_properties_typeProperties_database": {
+			"value": "KDWPROD_R2"
+		},
+		"SybaseLS_properties_typeProperties_username": {
+			"value": "KDW_EWS"
+		},
+		"SybaseToAdls_properties_typeProperties_url": {
+			"value": "https://kmblewsproddatalake.dfs.core.windows.net/"
+		},
+		"cadenceAdlsLS_properties_typeProperties_url": {
+			"value": "https://kmblewsproddatalake.dfs.core.windows.net"
+		},
+		"ewscadenceLS_properties_typeProperties_functionAppUrl": {
+			"value": "https://kmb-ews-prod-functionapp.azurewebsites.net"
+		},
+		"ufce_prod_fa_properties_typeProperties_functionAppUrl": {
+			"value": "https://func-ufce-prod.azurewebsites.net"
+		},
+		"AzureBlobStorage868_properties_privateLinkResourceId": {
+			"value": "/subscriptions/e5dc7d76-2142-4b3a-896e-fd86f66d51d8/resourceGroups/RG-UFCE-PROD/providers/Microsoft.Storage/storageAccounts/dlsufceprod"
+		},
+		"AzureBlobStorage868_properties_groupId": {
+			"value": "blob"
+		},
+		"AzureDataLakeStorage252_properties_privateLinkResourceId": {
+			"value": "/subscriptions/e5dc7d76-2142-4b3a-896e-fd86f66d51d8/resourceGroups/RG-UFCE-PROD/providers/Microsoft.Storage/storageAccounts/dlsufceprod"
+		},
+		"AzureDataLakeStorage252_properties_groupId": {
+			"value": "dfs"
+		},
+		"AzureFunction541_properties_privateLinkResourceId": {
+			"value": "/subscriptions/e5dc7d76-2142-4b3a-896e-fd86f66d51d8/resourceGroups/RG-UFCE-PROD/providers/Microsoft.Web/sites/FUNC-UFCE-PROD"
+		},
+		"AzureFunction541_properties_groupId": {
+			"value": "sites"
+		},
+		"AzurePostgreSql860_properties_privateLinkResourceId": {
+			"value": "/subscriptions/e5dc7d76-2142-4b3a-896e-fd86f66d51d8/resourceGroups/RG-UFCE-PROD/providers/Microsoft.DBforPostgreSQL/servers/psql-ufce-prod"
+		},
+		"AzurePostgreSql860_properties_groupId": {
+			"value": "postgresqlServer"
+		}
+	}
+}

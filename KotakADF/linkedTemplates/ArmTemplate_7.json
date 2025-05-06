@@ -1,0 +1,5445 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "KotakADF"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceDataLoadMonthlyLcBg')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SourceLoadDateCheckLcBg",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(startOfMonth(pipeline().parameters.partitionValue,'yyyy-MM-dd'),pipeline().parameters.partitionValue)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecuteLcBg",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "stag2landing_LC_BG",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"partitionValue": {
+												"value": "@pipeline().parameters.partitionValue",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "stg2landingBrd2"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-08-16T10:17:57Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceDataLoadMonthlyNpa')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SourceLoadDateCheckNpa",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(startOfMonth(pipeline().parameters.partitionValue,'yyyy-MM-dd'),pipeline().parameters.partitionValue)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecuteNpa",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "stag2landing_NPA",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"partitionValue": {
+												"value": "@pipeline().parameters.partitionValue",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "stg2landingBrd2"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-07-16T08:51:00Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Stag2landing_Masterpipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Stag2landing_KRAM_FINANCIAL_RATIOS",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "stag2landing_RP_INPUT_TABLE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "stag2landing_KRAM_FINANCIAL_RATIOS",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Stag2landing_LOS_BL_FINANCIAL_RATIOS",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "stag2landing_LOS_BL_FINANCIAL_RATIOS",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "stag2landing_LOS_HL_LP_RH",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Stag2landing_LOS_BL_FINANCIAL_RATIOS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "stag2landing_LOS_HL_LP_RH",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "stag2landing_RP_INPUT_TABLE",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "stag2landing_LOS_WC_FINANCIAL_RATIOS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "stag2landing_RP_INPUT_TABLE",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "stag2landing_LOS_WC_FINANCIAL_RATIOS",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "stag2landing_LOS_HL_LP_RH",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "stag2landing_LOS_WC_FINANCIAL_RATIOS",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"folder": {
+					"name": "stag2landing_deriveddatasets"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-09-14T08:53:21Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stage2landing_KramModel')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "KRAM_BROKER_MODEL",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "stag2landing_KRAM_BROKER_MODEL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.load_date",
+									"type": "Expression"
+								},
+								"table": "KRAM_BROKER_MODEL"
+							}
+						}
+					},
+					{
+						"name": "KRAM_LARGE_CORPORATE_MODEL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "KRAM_BROKER_MODEL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "stag2landing_KRAM_LARGE_CORPORATE_MODEL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.load_date",
+									"type": "Expression"
+								},
+								"table": "KRAM_LARGE_CORPORATE_MODEL"
+							}
+						}
+					},
+					{
+						"name": "KRAM_SE_MODEL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "KRAM_REAL_ESTATE_DEVELOPER_MODEL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "stag2landing_KRAM_SE_MODEL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.load_date",
+									"type": "Expression"
+								},
+								"table": "KRAM_SE_MODEL"
+							}
+						}
+					},
+					{
+						"name": "KRAM_NBFC_MODEL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "KRAM_LARGE_CORPORATE_MODEL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "stag2landing_KRAM_NBFC_MODEL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.load_date",
+									"type": "Expression"
+								},
+								"table": "KRAM_NBFC_MODEL"
+							}
+						}
+					},
+					{
+						"name": "KRAM_REAL_ESTATE_DEVELOPER_MODEL",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "stag2landing_KRAM_REAL_ESTATE_DEVELOPER_MODEL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.load_date",
+									"type": "Expression"
+								},
+								"table": "KRAM_REAL_ESTATE_DEVELOPER_MODEL"
+							}
+						}
+					},
+					{
+						"name": "KRAM_SERVICES_MODEL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "KRAM_SE_MODEL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "stag2landing_KRAM_SERVICES_MODEL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.load_date",
+									"type": "Expression"
+								},
+								"table": "KRAM_SERVICES_MODEL"
+							}
+						}
+					},
+					{
+						"name": "KRAM_TRADER_MODEL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "KRAM_SERVICES_MODEL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "stag2landing_KRAM_TRADER_MODEL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.load_date",
+									"type": "Expression"
+								},
+								"table": "KRAM_TRADER_MODEL"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"load_date": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"folder": {
+					"name": "stag2landing_deriveddatasets"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-23T06:42:48Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/daily_trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "consumer-commercial-email-trigger1",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "consumer-commercial-email-trigger5",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2023-03-08T06:00:00",
+						"timeZone": "India Standard Time",
+						"schedule": {
+							"minutes": [
+								30
+							],
+							"hours": [
+								7
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/copy_data_from_master_for_download_file')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "AzurePostgreSql_public_get_ufce_master_for_download",
+								"type": "DatasetReference"
+							},
+							"name": "UfceMasterSource"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ufce_download",
+								"type": "DatasetReference"
+							},
+							"name": "UfceDownloaded"
+						}
+					],
+					"transformations": [
+						{
+							"name": "FilterData"
+						},
+						{
+							"name": "DeriveColumn"
+						},
+						{
+							"name": "selectColumn"
+						}
+					],
+					"scriptLines": [
+						"parameters{",
+						"     division as string,",
+						"     year as string,",
+						"     quarter as string,",
+						"     file_creation_time as string",
+						"}",
+						"source(output(",
+						"          workflow_id as long,",
+						"          crn as string,",
+						"          lob as string,",
+						"          segment as string,",
+						"          year as integer,",
+						"          quarter as string,",
+						"          yq as string,",
+						"          cp_id as string,",
+						"          borrower_name as string,",
+						"          division as string,",
+						"          location as string,",
+						"          region as string,",
+						"          zone as string,",
+						"          credit_analyst as string,",
+						"          rm as string,",
+						"          applicability_status as string,",
+						"          reason_not_appli as string,",
+						"          certificate_type as string,",
+						"          self_cert_expected as boolean,",
+						"          domestic_cert_expected as boolean,",
+						"          auditor_cert_expected as boolean,",
+						"          auditor_cert_due_date as string,",
+						"          ebid as string,",
+						"          ebid_type as string,",
+						"          total_fb_os_rel_provision as double,",
+						"          pan_india_os as double,",
+						"          total_fb_os as double,",
+						"          total_non_fb_os as double,",
+						"          data_status as string,",
+						"          currency as string,",
+						"          fx_payables_os as string,",
+						"          fx_loan_os as string,",
+						"          fx_receivables_os as string,",
+						"          hed_amt_pay_loan_liab as string,",
+						"          hed_amt_receivables as string,",
+						"          net_fce_sl_pos as double,",
+						"          net_ufce_sl_pos as double,",
+						"          ratio_net_unhed as double,",
+						"          likely_loss as double,",
+						"          ebid_considered as string,",
+						"          ebid_source as string,",
+						"          ratio_ll_ebid_con as double,",
+						"          risk_category as string,",
+						"          ufce_source as string,",
+						"          remarks as string,",
+						"          is_kmbl_lead_bk as string,",
+						"          is_limit_with_bk_sys as string,",
+						"          ufce_maturing_5yr as double,",
+						"          provision_applicable as double,",
+						"          provision_indicator as double,",
+						"          provision_amount as double,",
+						"          crilic_exp as string,",
+						"          glems_exp as string,",
+						"          kmbl_sys_fund_os as double,",
+						"          kmbl_sys_nonfund_os as double,",
+						"          final_os_for_prov as double,",
+						"          cms as double,",
+						"          mtm_os as double,",
+						"          bullion_os as double,",
+						"          lcbd as double,",
+						"          sblc as double,",
+						"          odfd as double,",
+						"          gift_city as string,",
+						"          asm as string,",
+						"          tsm as string,",
+						"          acm as string,",
+						"          is_cases_checked as boolean,",
+						"          final_provision_perct as double,",
+						"          final_provision_amt as double,",
+						"          status as string,",
+						"          assigned_to as string,",
+						"          comment as string,",
+						"          auditor_cert_period as string,",
+						"          approach as string,",
+						"          nature_of_business as string,",
+						"          approach_change_approval as string,",
+						"          ebid_date as string,",
+						"          auditor_cert_received as string,",
+						"          state as string,",
+						"          final_bk_sys_limit_gr25 as boolean,",
+						"          assigned_on as string,",
+						"          provision_applicable_self_cert as double,",
+						"          provision_applicable_bk_limit_rate as double,",
+						"          borrower_email as string,",
+						"          penalty_bucket as double,",
+						"          penalty_amount as double,",
+						"          balance_sheet_disclosure_expected as boolean,",
+						"          total_penalty as double,",
+						"          difference as double,",
+						"          srm as string,",
+						"          cm as string,",
+						"          bh as string,",
+						"          {extra-column-1} as string,",
+						"          {extra-column-2} as string,",
+						"          {extra-column-3} as string,",
+						"          ciib_comments as string,",
+						"          ca_comments as string,",
+						"          cmt_comments as string,",
+						"          is_deleted as boolean,",
+						"          cmt_checker_comments as string,",
+						"          createdAt as timestamp,",
+						"          updatedAt as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     inferDriftedColumnTypes: true,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     query: (\"SELECT * from public.ufce_master\"),",
+						"     format: 'query') ~> UfceMasterSource",
+						"UfceMasterSource filter(division == $division && toString(year) == $year && quarter == $quarter) ~> FilterData",
+						"FilterData derive(crn = toString(toDecimal(crn, 38, 0)),",
+						"          cp_id = toString(toDecimal(cp_id, 38, 0)),",
+						"          fx_payables_os = iif(fx_payables_os == '0' || fx_payables_os == '0.0' || fx_payables_os == '0.00' || fx_payables_os == '0.000', toString(fx_payables_os), iif(isDecimal(fx_payables_os) == true(), toString(toDecimal(fx_payables_os, 38, 20)), toString(fx_payables_os))),",
+						"          fx_loan_os = iif(fx_loan_os == '0' || fx_loan_os == '0.0' || fx_loan_os == '0.00' || fx_loan_os == '0.000', toString(fx_loan_os), iif(isDecimal(fx_loan_os) == true(), toString(toDecimal(fx_loan_os, 38, 20)), toString(fx_loan_os))),",
+						"          fx_receivables_os = iif(fx_receivables_os == '0'|| fx_receivables_os == '0.0' || fx_receivables_os == '0.00' || fx_receivables_os == '0.000', toString(fx_receivables_os), iif(isDecimal(fx_receivables_os) == true(), toString(toDecimal(fx_receivables_os, 38, 20)), toString(fx_receivables_os))),",
+						"          hed_amt_pay_loan_liab = iif(hed_amt_pay_loan_liab == '0' || hed_amt_pay_loan_liab == '0.0' || hed_amt_pay_loan_liab == '0.00' || hed_amt_pay_loan_liab == '0.000', toString(hed_amt_pay_loan_liab), iif(isDecimal(hed_amt_pay_loan_liab) == true(), toString(toDecimal(hed_amt_pay_loan_liab, 38, 20)), toString(hed_amt_pay_loan_liab))),",
+						"          hed_amt_receivables = iif(hed_amt_receivables == '0' || hed_amt_receivables == '0.0' || hed_amt_receivables == '0.00' || hed_amt_receivables == '0.000', toString(hed_amt_receivables), iif(isDecimal(hed_amt_receivables) == true(), toString(toDecimal(hed_amt_receivables, 38, 20)), toString(hed_amt_receivables))),",
+						"          net_fce_sl_pos = iif(net_fce_sl_pos == 0 || net_fce_sl_pos == 0.0 || net_fce_sl_pos == 0.00 || net_fce_sl_pos == 0.000, toString(net_fce_sl_pos), iif(isDouble(toString(net_fce_sl_pos)) == true(), toString(toDecimal(net_fce_sl_pos, 38, 20)), toString(net_fce_sl_pos))),",
+						"          net_ufce_sl_pos = iif(net_ufce_sl_pos == 0 || net_ufce_sl_pos == 0.0 || net_ufce_sl_pos == 0.00 || net_ufce_sl_pos == 0.000, toString(net_ufce_sl_pos), iif(isDouble(toString(net_ufce_sl_pos)) == true(), toString(toDecimal(net_ufce_sl_pos, 38, 20)), toString(net_ufce_sl_pos))),",
+						"          ratio_net_unhed = iif(ratio_net_unhed == 0 || ratio_net_unhed == 0.0 || ratio_net_unhed == 0.00 || ratio_net_unhed == 0.000, toString(ratio_net_unhed), iif(isDouble(toString(ratio_net_unhed)) == true(), toString(toDecimal(ratio_net_unhed, 38, 20)), toString(ratio_net_unhed))),",
+						"          ufce_maturing_5yr = iif(ufce_maturing_5yr == 0 || ufce_maturing_5yr == 0.0 || ufce_maturing_5yr == 0.00 || ufce_maturing_5yr == 0.000, toString(ufce_maturing_5yr), iif(isDouble(toString(ufce_maturing_5yr)) == true(), toString(toDecimal(ufce_maturing_5yr, 38, 20)), toString(ufce_maturing_5yr))),",
+						"          likely_loss = iif(likely_loss == 0 || likely_loss == 0.0 || likely_loss == 0.00 || likely_loss == 0.000, toString(likely_loss), iif(isDouble(toString(likely_loss)) == true(), toString(toDecimal(likely_loss, 38, 20)), toString(likely_loss))),",
+						"          ebid_considered = iif(ebid_considered == '0' || ebid_considered == '0.0' || ebid_considered == '0.00' || ebid_considered == '0.000', toString(ebid_considered), iif(isDecimal(ebid_considered) == true(), toString(toDecimal(ebid_considered, 38, 20)), toString(ebid_considered))),",
+						"          ratio_ll_ebid_con = iif(ratio_ll_ebid_con == 0 || ratio_ll_ebid_con == 0.0 || ratio_ll_ebid_con == 0.00 || ratio_ll_ebid_con == 0.000, toString(ratio_ll_ebid_con), iif(isDouble(toString(ratio_ll_ebid_con)) == true(), toString(toDecimal(ratio_ll_ebid_con, 38, 20)), toString(ratio_ll_ebid_con))),",
+						"          crilic_exp = iif(crilic_exp == '0' || crilic_exp == '0.0' || crilic_exp == '0.00' || crilic_exp == '0.000', toString(crilic_exp), iif(isDecimal(crilic_exp) == true(), toString(toDecimal(crilic_exp, 38, 20)), toString(crilic_exp))),",
+						"          is_limit_with_bk_sys = iif(lower(trim(is_limit_with_bk_sys)) == 'true' || lower(trim(is_limit_with_bk_sys)) == 'yes', 'Yes',iif(lower(trim(is_limit_with_bk_sys)) == 'false' || lower(trim(is_limit_with_bk_sys)) == 'no', 'No',toString(is_limit_with_bk_sys))),",
+						"          glems_exp = iif(glems_exp == '0' || glems_exp == '0.0' || glems_exp == '0.00' || glems_exp == '0.000', toString(glems_exp), iif(isDecimal(glems_exp) == true(), toString(toDecimal(glems_exp, 38, 20)), toString(glems_exp))),",
+						"          final_bk_sys_limit_gr25 = iif(final_bk_sys_limit_gr25 == true(), 'Yes', iif(final_bk_sys_limit_gr25 == false(), 'No', toString(final_bk_sys_limit_gr25))),",
+						"          provision_applicable_self_cert = iif(provision_applicable_self_cert == 0 || provision_applicable_self_cert == 0.0 || provision_applicable_self_cert == 0.00 || provision_applicable_self_cert == 0.000, toString(provision_applicable_self_cert), iif(isDouble(toString(provision_applicable_self_cert)) == true(), toString(toDecimal(provision_applicable_self_cert, 38, 20)), toString(provision_applicable_self_cert))),",
+						"          provision_indicator = iif(provision_indicator == 0 || provision_indicator == 0.0 || provision_indicator == 0.00 || provision_indicator == 0.000, toString(provision_indicator), iif(isDouble(toString(provision_indicator)) == true(), toString(toDecimal(provision_indicator, 38, 20)), toString(provision_indicator))),",
+						"          provision_applicable_bk_limit_rate = iif(provision_applicable_bk_limit_rate == 0 || provision_applicable_bk_limit_rate == 0.0 || provision_applicable_bk_limit_rate == 0.00 || provision_applicable_bk_limit_rate == 0.000, toString(provision_applicable_bk_limit_rate), iif(isDouble(toString(provision_applicable_bk_limit_rate)) == true(), toString(toDecimal(provision_applicable_bk_limit_rate, 38, 20)), toString(provision_applicable_bk_limit_rate))),",
+						"          difference = iif(difference == 0 || difference == 0.0 || difference == 0.00 || difference == 0.000, toString(difference), iif(isDouble(toString(difference)) == true(), toString(toDecimal(difference, 38, 20)), toString(difference))),",
+						"          provision_applicable = iif(provision_applicable == 0 || provision_applicable == 0.0 || provision_applicable == 0.00 || provision_applicable == 0.000, toString(provision_applicable), iif(isDouble(toString(provision_applicable)) == true(), toString(toDecimal(provision_applicable, 38, 20)), toString(provision_applicable))),",
+						"          final_os_for_prov = iif(final_os_for_prov == 0 || final_os_for_prov == 0.0 || final_os_for_prov == 0.00 || final_os_for_prov == 0.000, toString(final_os_for_prov), iif(isDouble(toString(final_os_for_prov)) == true(), toString(toDecimal(final_os_for_prov, 38, 20)), toString(final_os_for_prov))),",
+						"          provision_amount = iif(provision_amount == 0 || provision_amount == 0.0 || provision_amount == 0.00 || provision_amount == 0.000, toString(provision_amount), iif(isDouble(toString(provision_amount)) == true(), toString(toDecimal(provision_amount, 38, 20)), toString(provision_amount))),",
+						"          kmbl_sys_fund_os = iif(kmbl_sys_fund_os == 0 || kmbl_sys_fund_os == 0.0 || kmbl_sys_fund_os == 0.00 || kmbl_sys_fund_os == 0.000, toString(kmbl_sys_fund_os), iif(isDouble(toString(kmbl_sys_fund_os)) == true(), toString(toDecimal(kmbl_sys_fund_os, 38, 20)), toString(kmbl_sys_fund_os))),",
+						"          kmbl_sys_nonfund_os = iif(kmbl_sys_nonfund_os == 0 || kmbl_sys_nonfund_os == 0.0 || kmbl_sys_nonfund_os == 0.00|| kmbl_sys_nonfund_os == 0.000, toString(kmbl_sys_nonfund_os), iif(isDouble(toString(kmbl_sys_nonfund_os)) == true(), toString(toDecimal(kmbl_sys_nonfund_os, 38, 20)), toString(kmbl_sys_nonfund_os))),",
+						"          gift_city = iif(gift_city == '0' || gift_city == '0.0' || gift_city == '0.00' || gift_city == '0.000', toString(gift_city) , iif(isDecimal(gift_city) == true(), toString(toDecimal(gift_city, 38, 20)), toString(gift_city)))) ~> DeriveColumn",
+						"DeriveColumn select(mapColumn(",
+						"          {For the Year and Quarter} = yq,",
+						"          LOB = lob,",
+						"          Division = division,",
+						"          Segment = segment,",
+						"          {KMBL CRN} = crn,",
+						"          {KMBL GLEMS CP Id} = cp_id,",
+						"          {Name of Borrower} = borrower_name,",
+						"          {Nature of Business} = nature_of_business,",
+						"          {Applicability status} = applicability_status,",
+						"          {Data status} = data_status,",
+						"          {Standardized or Broad-based approach} = approach,",
+						"          {Is approval taken for change in approach} = approach_change_approval,",
+						"          {Fx payables outstanding} = fx_payables_os,",
+						"          {Fx loan outstanding} = fx_loan_os,",
+						"          {Fx receivables outstanding} = fx_receivables_os,",
+						"          {Hedged amt. payables & loan liab.} = hed_amt_pay_loan_liab,",
+						"          {Hedged amt. receivables} = hed_amt_receivables,",
+						"          {Net FCE (short) / long position} = net_fce_sl_pos,",
+						"          {Net UFCE (short) / long position} = net_ufce_sl_pos,",
+						"          {Ratio of net unhedged} = ratio_net_unhed,",
+						"          {UFCE maturing up to 5 years - positive/(negative)} = ufce_maturing_5yr,",
+						"          {Likely loss value} = likely_loss,",
+						"          {EBID (after tax)} = ebid_considered,",
+						"          {EBID Date} = ebid_date,",
+						"          {Likely loss / Considered EBID ratio} = ratio_ll_ebid_con,",
+						"          {Risk category} = risk_category,",
+						"          {Remarks (if any)} = remarks,",
+						"          {Banking System Exposure (CRILC) (in lakhs)} = crilic_exp,",
+						"          {Final Banking System Limits (>=25cr), as per CMT Team's input} = is_limit_with_bk_sys,",
+						"          {Glems Exp} = glems_exp,",
+						"          {Final Banking System Limits (>25cr)} = final_bk_sys_limit_gr25,",
+						"          {UFCE Data source(If received) whether self- certified or auditor certified} = ufce_source,",
+						"          {Auditor Certificate Received (Yes/ No/ NA)} = auditor_cert_received,",
+						"          {Auditor Certificate Due Date} = auditor_cert_due_date,",
+						"          {Period for which Auditor Certificate is received} = auditor_cert_period,",
+						"          Comments = comment,",
+						"          {Prov.% Applicable- Basis Self Certificate} = provision_applicable_self_cert,",
+						"          {Prov. Indicator } = provision_indicator,",
+						"          {Prov.% Applicable-  As per the LATEST banking limit rate (for CA Certificate)} = provision_applicable_bk_limit_rate,",
+						"          Difference = difference,",
+						"          {Final Prov %} = provision_applicable,",
+						"          {Final OS for provision computation} = final_os_for_prov,",
+						"          {Final Provision Amt} = provision_amount,",
+						"          {KMBL system fund O/s} = kmbl_sys_fund_os,",
+						"          {KMBL system Non fund O/s} = kmbl_sys_nonfund_os,",
+						"          {Gift city} = gift_city,",
+						"          Zone = zone,",
+						"          State = state,",
+						"          Location = location,",
+						"          {Credit Analyst / Credit Manager} = credit_analyst,",
+						"          ASM = asm,",
+						"          TSM = tsm,",
+						"          RM = rm,",
+						"          ACM = acm,",
+						"          {Extra Column 1} = {extra-column-1},",
+						"          {Extra Column 2} = {extra-column-2},",
+						"          {Extra Column 3} = {extra-column-3}",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectColumn",
+						"selectColumn sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     partitionFileNames:[(concat($division, '_', $year, '_', $quarter, '_', $file_creation_time, '.csv'))],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     mapColumn(",
+						"          each(match(/* All input columns */true()),",
+						"               /* Input name */$$ = $$)",
+						"     ),",
+						"     partitionBy('hash', 1)) ~> UfceDownloaded"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/copy_data_from_master_for_download_file_test')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ufce_download_intermediate",
+								"type": "DatasetReference"
+							},
+							"name": "UfceMasterSource"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ufce_download",
+								"type": "DatasetReference"
+							},
+							"name": "UfceDownloaded"
+						}
+					],
+					"transformations": [
+						{
+							"name": "FilterData"
+						},
+						{
+							"name": "DeriveColumn"
+						},
+						{
+							"name": "selectColumn"
+						}
+					],
+					"scriptLines": [
+						"parameters{",
+						"     year as string,",
+						"     quarter as string,",
+						"     file_creation_time as string,",
+						"     division as string",
+						"}",
+						"source(output(",
+						"          workflow_id as long,",
+						"          crn as string,",
+						"          lob as string,",
+						"          segment as string,",
+						"          year as integer,",
+						"          quarter as string,",
+						"          yq as string,",
+						"          cp_id as string,",
+						"          borrower_name as string,",
+						"          division as string,",
+						"          location as string,",
+						"          region as string,",
+						"          zone as string,",
+						"          credit_analyst as string,",
+						"          rm as string,",
+						"          applicability_status as string,",
+						"          reason_not_appli as string,",
+						"          certificate_type as string,",
+						"          self_cert_expected as boolean,",
+						"          domestic_cert_expected as boolean,",
+						"          auditor_cert_expected as boolean,",
+						"          auditor_cert_due_date as string,",
+						"          ebid as string,",
+						"          ebid_type as string,",
+						"          total_fb_os_rel_provision as double,",
+						"          pan_india_os as double,",
+						"          total_fb_os as double,",
+						"          total_non_fb_os as double,",
+						"          data_status as string,",
+						"          currency as string,",
+						"          fx_payables_os as string,",
+						"          fx_loan_os as string,",
+						"          fx_receivables_os as string,",
+						"          hed_amt_pay_loan_liab as string,",
+						"          hed_amt_receivables as string,",
+						"          net_fce_sl_pos as double,",
+						"          net_ufce_sl_pos as double,",
+						"          ratio_net_unhed as double,",
+						"          likely_loss as double,",
+						"          ebid_considered as string,",
+						"          ebid_source as string,",
+						"          ratio_ll_ebid_con as double,",
+						"          risk_category as string,",
+						"          ufce_source as string,",
+						"          remarks as string,",
+						"          is_kmbl_lead_bk as string,",
+						"          is_limit_with_bk_sys as string,",
+						"          ufce_maturing_5yr as double,",
+						"          provision_applicable as double,",
+						"          provision_indicator as double,",
+						"          provision_amount as double,",
+						"          crilic_exp as string,",
+						"          glems_exp as string,",
+						"          kmbl_sys_fund_os as double,",
+						"          kmbl_sys_nonfund_os as double,",
+						"          final_os_for_prov as double,",
+						"          cms as double,",
+						"          mtm_os as double,",
+						"          bullion_os as double,",
+						"          lcbd as double,",
+						"          sblc as double,",
+						"          odfd as double,",
+						"          gift_city as string,",
+						"          asm as string,",
+						"          tsm as string,",
+						"          acm as string,",
+						"          is_cases_checked as boolean,",
+						"          final_provision_perct as double,",
+						"          final_provision_amt as double,",
+						"          status as string,",
+						"          assigned_to as string,",
+						"          comment as string,",
+						"          auditor_cert_period as string,",
+						"          approach as string,",
+						"          nature_of_business as string,",
+						"          approach_change_approval as string,",
+						"          ebid_date as string,",
+						"          auditor_cert_received as string,",
+						"          state as string,",
+						"          final_bk_sys_limit_gr25 as boolean,",
+						"          assigned_on as string,",
+						"          provision_applicable_self_cert as double,",
+						"          provision_applicable_bk_limit_rate as double,",
+						"          borrower_email as string,",
+						"          penalty_bucket as double,",
+						"          penalty_amount as double,",
+						"          balance_sheet_disclosure_expected as boolean,",
+						"          total_penalty as double,",
+						"          difference as double,",
+						"          srm as string,",
+						"          cm as string,",
+						"          bh as string,",
+						"          {extra-column-1} as string,",
+						"          {extra-column-2} as string,",
+						"          {extra-column-3} as string,",
+						"          ciib_comments as string,",
+						"          ca_comments as string,",
+						"          cmt_comments as string,",
+						"          is_deleted as boolean,",
+						"          cmt_checker_comments as string,",
+						"          createdAt as timestamp,",
+						"          updatedAt as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     inferDriftedColumnTypes: true,",
+						"     ignoreNoFilesFound: false) ~> UfceMasterSource",
+						"UfceMasterSource filter(division == $division && toString(year) == $year && quarter == $quarter) ~> FilterData",
+						"FilterData derive(crn = toString(toDecimal(crn, 38, 0)),",
+						"          cp_id = toString(toDecimal(cp_id, 38, 0)),",
+						"          fx_payables_os = iif(fx_payables_os == '0' || fx_payables_os == '0.0' || fx_payables_os == '0.00' || fx_payables_os == '0.000', toString(fx_payables_os), iif(isDecimal(fx_payables_os) == true(), toString(toDecimal(fx_payables_os, 38, 20)), toString(fx_payables_os))),",
+						"          fx_loan_os = iif(fx_loan_os == '0' || fx_loan_os == '0.0' || fx_loan_os == '0.00' || fx_loan_os == '0.000', toString(fx_loan_os), iif(isDecimal(fx_loan_os) == true(), toString(toDecimal(fx_loan_os, 38, 20)), toString(fx_loan_os))),",
+						"          fx_receivables_os = iif(fx_receivables_os == '0'|| fx_receivables_os == '0.0' || fx_receivables_os == '0.00' || fx_receivables_os == '0.000', toString(fx_receivables_os), iif(isDecimal(fx_receivables_os) == true(), toString(toDecimal(fx_receivables_os, 38, 20)), toString(fx_receivables_os))),",
+						"          hed_amt_pay_loan_liab = iif(hed_amt_pay_loan_liab == '0' || hed_amt_pay_loan_liab == '0.0' || hed_amt_pay_loan_liab == '0.00' || hed_amt_pay_loan_liab == '0.000', toString(hed_amt_pay_loan_liab), iif(isDecimal(hed_amt_pay_loan_liab) == true(), toString(toDecimal(hed_amt_pay_loan_liab, 38, 20)), toString(hed_amt_pay_loan_liab))),",
+						"          hed_amt_receivables = iif(hed_amt_receivables == '0' || hed_amt_receivables == '0.0' || hed_amt_receivables == '0.00' || hed_amt_receivables == '0.000', toString(hed_amt_receivables), iif(isDecimal(hed_amt_receivables) == true(), toString(toDecimal(hed_amt_receivables, 38, 20)), toString(hed_amt_receivables))),",
+						"          net_fce_sl_pos = iif(net_fce_sl_pos == 0 || net_fce_sl_pos == 0.0 || net_fce_sl_pos == 0.00 || net_fce_sl_pos == 0.000, toString(net_fce_sl_pos), iif(isDouble(toString(net_fce_sl_pos)) == true(), toString(toDecimal(net_fce_sl_pos, 38, 20)), toString(net_fce_sl_pos))),",
+						"          net_ufce_sl_pos = iif(net_ufce_sl_pos == 0 || net_ufce_sl_pos == 0.0 || net_ufce_sl_pos == 0.00 || net_ufce_sl_pos == 0.000, toString(net_ufce_sl_pos), iif(isDouble(toString(net_ufce_sl_pos)) == true(), toString(toDecimal(net_ufce_sl_pos, 38, 20)), toString(net_ufce_sl_pos))),",
+						"          ratio_net_unhed = iif(ratio_net_unhed == 0 || ratio_net_unhed == 0.0 || ratio_net_unhed == 0.00 || ratio_net_unhed == 0.000, toString(ratio_net_unhed), iif(isDouble(toString(ratio_net_unhed)) == true(), toString(toDecimal(ratio_net_unhed, 38, 20)), toString(ratio_net_unhed))),",
+						"          ufce_maturing_5yr = iif(ufce_maturing_5yr == 0 || ufce_maturing_5yr == 0.0 || ufce_maturing_5yr == 0.00 || ufce_maturing_5yr == 0.000, toString(ufce_maturing_5yr), iif(isDouble(toString(ufce_maturing_5yr)) == true(), toString(toDecimal(ufce_maturing_5yr, 38, 20)), toString(ufce_maturing_5yr))),",
+						"          likely_loss = iif(likely_loss == 0 || likely_loss == 0.0 || likely_loss == 0.00 || likely_loss == 0.000, toString(likely_loss), iif(isDouble(toString(likely_loss)) == true(), toString(toDecimal(likely_loss, 38, 20)), toString(likely_loss))),",
+						"          ebid_considered = iif(ebid_considered == '0' || ebid_considered == '0.0' || ebid_considered == '0.00' || ebid_considered == '0.000', toString(ebid_considered), iif(isDecimal(ebid_considered) == true(), toString(toDecimal(ebid_considered, 38, 20)), toString(ebid_considered))),",
+						"          ratio_ll_ebid_con = iif(ratio_ll_ebid_con == 0 || ratio_ll_ebid_con == 0.0 || ratio_ll_ebid_con == 0.00 || ratio_ll_ebid_con == 0.000, toString(ratio_ll_ebid_con), iif(isDouble(toString(ratio_ll_ebid_con)) == true(), toString(toDecimal(ratio_ll_ebid_con, 38, 20)), toString(ratio_ll_ebid_con))),",
+						"          crilic_exp = iif(crilic_exp == '0' || crilic_exp == '0.0' || crilic_exp == '0.00' || crilic_exp == '0.000', toString(crilic_exp), iif(isDecimal(crilic_exp) == true(), toString(toDecimal(crilic_exp, 38, 20)), toString(crilic_exp))),",
+						"          is_limit_with_bk_sys = iif(lower(trim(is_limit_with_bk_sys)) == 'true' || lower(trim(is_limit_with_bk_sys)) == 'yes', 'Yes',iif(lower(trim(is_limit_with_bk_sys)) == 'false' || lower(trim(is_limit_with_bk_sys)) == 'no', 'No',toString(is_limit_with_bk_sys))),",
+						"          glems_exp = iif(glems_exp == '0' || glems_exp == '0.0' || glems_exp == '0.00' || glems_exp == '0.000', toString(glems_exp), iif(isDecimal(glems_exp) == true(), toString(toDecimal(glems_exp, 38, 20)), toString(glems_exp))),",
+						"          final_bk_sys_limit_gr25 = iif(final_bk_sys_limit_gr25 == true(), 'Yes', iif(final_bk_sys_limit_gr25 == false(), 'No', toString(final_bk_sys_limit_gr25))),",
+						"          provision_applicable_self_cert = iif(provision_applicable_self_cert == 0 || provision_applicable_self_cert == 0.0 || provision_applicable_self_cert == 0.00 || provision_applicable_self_cert == 0.000, toString(provision_applicable_self_cert), iif(isDouble(toString(provision_applicable_self_cert)) == true(), toString(toDecimal(provision_applicable_self_cert, 38, 20)), toString(provision_applicable_self_cert))),",
+						"          provision_indicator = iif(provision_indicator == 0 || provision_indicator == 0.0 || provision_indicator == 0.00 || provision_indicator == 0.000, toString(provision_indicator), iif(isDouble(toString(provision_indicator)) == true(), toString(toDecimal(provision_indicator, 38, 20)), toString(provision_indicator))),",
+						"          provision_applicable_bk_limit_rate = iif(provision_applicable_bk_limit_rate == 0 || provision_applicable_bk_limit_rate == 0.0 || provision_applicable_bk_limit_rate == 0.00 || provision_applicable_bk_limit_rate == 0.000, toString(provision_applicable_bk_limit_rate), iif(isDouble(toString(provision_applicable_bk_limit_rate)) == true(), toString(toDecimal(provision_applicable_bk_limit_rate, 38, 20)), toString(provision_applicable_bk_limit_rate))),",
+						"          difference = iif(difference == 0 || difference == 0.0 || difference == 0.00 || difference == 0.000, toString(difference), iif(isDouble(toString(difference)) == true(), toString(toDecimal(difference, 38, 20)), toString(difference))),",
+						"          provision_applicable = iif(provision_applicable == 0 || provision_applicable == 0.0 || provision_applicable == 0.00 || provision_applicable == 0.000, toString(provision_applicable), iif(isDouble(toString(provision_applicable)) == true(), toString(toDecimal(provision_applicable, 38, 20)), toString(provision_applicable))),",
+						"          final_os_for_prov = iif(final_os_for_prov == 0 || final_os_for_prov == 0.0 || final_os_for_prov == 0.00 || final_os_for_prov == 0.000, toString(final_os_for_prov), iif(isDouble(toString(final_os_for_prov)) == true(), toString(toDecimal(final_os_for_prov, 38, 20)), toString(final_os_for_prov))),",
+						"          provision_amount = iif(provision_amount == 0 || provision_amount == 0.0 || provision_amount == 0.00 || provision_amount == 0.000, toString(provision_amount), iif(isDouble(toString(provision_amount)) == true(), toString(toDecimal(provision_amount, 38, 20)), toString(provision_amount))),",
+						"          kmbl_sys_fund_os = iif(kmbl_sys_fund_os == 0 || kmbl_sys_fund_os == 0.0 || kmbl_sys_fund_os == 0.00 || kmbl_sys_fund_os == 0.000, toString(kmbl_sys_fund_os), iif(isDouble(toString(kmbl_sys_fund_os)) == true(), toString(toDecimal(kmbl_sys_fund_os, 38, 20)), toString(kmbl_sys_fund_os))),",
+						"          kmbl_sys_nonfund_os = iif(kmbl_sys_nonfund_os == 0 || kmbl_sys_nonfund_os == 0.0 || kmbl_sys_nonfund_os == 0.00|| kmbl_sys_nonfund_os == 0.000, toString(kmbl_sys_nonfund_os), iif(isDouble(toString(kmbl_sys_nonfund_os)) == true(), toString(toDecimal(kmbl_sys_nonfund_os, 38, 20)), toString(kmbl_sys_nonfund_os))),",
+						"          gift_city = iif(gift_city == '0' || gift_city == '0.0' || gift_city == '0.00' || gift_city == '0.000', toString(gift_city) , iif(isDecimal(gift_city) == true(), toString(toDecimal(gift_city, 38, 20)), toString(gift_city)))) ~> DeriveColumn",
+						"DeriveColumn select(mapColumn(",
+						"          {For the Year and Quarter} = yq,",
+						"          LOB = lob,",
+						"          Division = division,",
+						"          Segment = segment,",
+						"          {KMBL CRN} = crn,",
+						"          {KMBL GLEMS CP Id} = cp_id,",
+						"          {Name of Borrower} = borrower_name,",
+						"          {Nature of Business} = nature_of_business,",
+						"          {Applicability status} = applicability_status,",
+						"          {Data status} = data_status,",
+						"          {Standardized or Broad-based approach} = approach,",
+						"          {Is approval taken for change in approach} = approach_change_approval,",
+						"          {Fx payables outstanding} = fx_payables_os,",
+						"          {Fx loan outstanding} = fx_loan_os,",
+						"          {Fx receivables outstanding} = fx_receivables_os,",
+						"          {Hedged amt. payables & loan liab.} = hed_amt_pay_loan_liab,",
+						"          {Hedged amt. receivables} = hed_amt_receivables,",
+						"          {Net FCE (short) / long position} = net_fce_sl_pos,",
+						"          {Net UFCE (short) / long position} = net_ufce_sl_pos,",
+						"          {Ratio of net unhedged} = ratio_net_unhed,",
+						"          {UFCE maturing up to 5 years - positive/(negative)} = ufce_maturing_5yr,",
+						"          {Likely loss value} = likely_loss,",
+						"          {EBID (after tax)} = ebid_considered,",
+						"          {EBID Date} = ebid_date,",
+						"          {Likely loss / Considered EBID ratio} = ratio_ll_ebid_con,",
+						"          {Risk category} = risk_category,",
+						"          {Remarks (if any)} = remarks,",
+						"          {Banking System Exposure (CRILC) (in lakhs)} = crilic_exp,",
+						"          {Final Banking System Limits (>=25cr), as per CMT Team's input} = is_limit_with_bk_sys,",
+						"          {Glems Exp} = glems_exp,",
+						"          {Final Banking System Limits (>25cr)} = final_bk_sys_limit_gr25,",
+						"          {UFCE Data source(If received) whether self- certified or auditor certified} = ufce_source,",
+						"          {Auditor Certificate Received (Yes/ No/ NA)} = auditor_cert_received,",
+						"          {Auditor Certificate Due Date} = auditor_cert_due_date,",
+						"          {Period for which Auditor Certificate is received} = auditor_cert_period,",
+						"          Comments = comment,",
+						"          {Prov.% Applicable- Basis Self Certificate} = provision_applicable_self_cert,",
+						"          {Prov. Indicator } = provision_indicator,",
+						"          {Prov.% Applicable-  As per the LATEST banking limit rate (for CA Certificate)} = provision_applicable_bk_limit_rate,",
+						"          Difference = difference,",
+						"          {Final Prov %} = provision_applicable,",
+						"          {Final OS for provision computation} = final_os_for_prov,",
+						"          {Final Provision Amt} = provision_amount,",
+						"          {KMBL system fund O/s} = kmbl_sys_fund_os,",
+						"          {KMBL system Non fund O/s} = kmbl_sys_nonfund_os,",
+						"          {Gift city} = gift_city,",
+						"          Zone = zone,",
+						"          State = state,",
+						"          Location = location,",
+						"          {Credit Analyst / Credit Manager} = credit_analyst,",
+						"          ASM = asm,",
+						"          TSM = tsm,",
+						"          RM = rm,",
+						"          ACM = acm,",
+						"          {Extra Column 1} = {extra-column-1},",
+						"          {Extra Column 2} = {extra-column-2},",
+						"          {Extra Column 3} = {extra-column-3}",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectColumn",
+						"selectColumn sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     partitionFileNames:[(concat($division, '_', $year, '_', $quarter, '_', $file_creation_time, '.csv'))],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     mapColumn(",
+						"          each(match(/* All input columns */true()),",
+						"               /* Input name */$$ = $$)",
+						"     ),",
+						"     partitionBy('hash', 1)) ~> UfceDownloaded"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Brd2TransactionMining')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Brd2Uc2",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "SetClusterVersion",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetNodeType",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetWorker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD2/brd2_uc5",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Brd2Uc5",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Brd2Uc2",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD2/brd2_uc5",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SetWorker",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "workers",
+							"value": {
+								"value": "@{int(json(activity('GetConfig').output.config).job_capacity_details.workers)}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetConfig",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "StartMarker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "GetConfigs",
+							"headers": {
+								"config_tables": {
+									"value": "@pipeline().parameters.cosmosConfigTables",
+									"type": "Expression"
+								},
+								"job_name": {
+									"value": "@pipeline().parameters.jobSubjectArea",
+									"type": "Expression"
+								},
+								"job_type": {
+									"value": "@pipeline().parameters.jobExecutionType",
+									"type": "Expression"
+								},
+								"database_name": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							},
+							"method": "GET"
+						},
+						"linkedServiceName": {
+							"referenceName": "ewscadenceLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SetNodeType",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "nodeType",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).job_capacity_details.nodeType}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SetClusterVersion",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "clusterVersion",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).job_capacity_details.clusterVersion}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "StartMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "start",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SuccessMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "LoadToSynapse",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "success",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "FailureMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Brd2Uc5",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "Brd2Uc2",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "Brd2Uc6",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "Brd2Uc1_Uc3",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "Brd2Uc4",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "failure",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd2Uc6",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Brd2Uc5",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD2/brd2_uc6",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "LoadToSynapse",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Brd2Uc4",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "CheckBrd2EntityStore",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionDate": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@pipeline().parameters.container",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@pipeline().parameters.schema",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Brd2Uc1_Uc3",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Brd2Uc6",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD2/brd2_uc1_uc3",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Brd2Uc4",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Brd2Uc1_Uc3",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD2/brd2_uc4",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					},
+					"cosmosConfigTables": {
+						"type": "string",
+						"defaultValue": "job_capacity_details"
+					},
+					"cosmosDatabaseName": {
+						"type": "string",
+						"defaultValue": "config_store"
+					},
+					"jobSubjectArea": {
+						"type": "string",
+						"defaultValue": "brd2_mining_output"
+					},
+					"jobExecutionType": {
+						"type": "string",
+						"defaultValue": "entity"
+					},
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"schema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"container": {
+						"type": "string",
+						"defaultValue": "job-data"
+					}
+				},
+				"variables": {
+					"nodeType": {
+						"type": "String",
+						"defaultValue": "Standard_DSS_v2"
+					},
+					"workers": {
+						"type": "String",
+						"defaultValue": "3"
+					},
+					"clusterVersion": {
+						"type": "String",
+						"defaultValue": "8.1.x-scala2.12"
+					},
+					"configFile": {
+						"type": "String",
+						"defaultValue": "/dbfs/FileStore/configs/trigger_config_details.json"
+					},
+					"commonFilter": {
+						"type": "String",
+						"defaultValue": "/dbfs/FileStore/configs/global_filter_config_details.json"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow/BRD2"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-09T08:25:13Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Brd3TransactionMining')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Brd3Uc7",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "SetClusterVersion",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetNodeType",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetWorker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Shared/PROD/brd3_uc7",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Brd3Uc8",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Brd3Uc7",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Shared/PROD/brd3_uc8",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SetWorker",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "workers",
+							"value": {
+								"value": "@{int(json(activity('GetConfig').output.config).job_capacity_details.workers)}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetConfig",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "StartMarker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "GetConfigs",
+							"headers": {
+								"config_tables": {
+									"value": "@pipeline().parameters.cosmosConfigTables",
+									"type": "Expression"
+								},
+								"job_name": {
+									"value": "@pipeline().parameters.jobSubjectArea",
+									"type": "Expression"
+								},
+								"job_type": {
+									"value": "@pipeline().parameters.jobExecutionType",
+									"type": "Expression"
+								},
+								"database_name": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							},
+							"method": "GET"
+						},
+						"linkedServiceName": {
+							"referenceName": "ewscadenceLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SetNodeType",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "nodeType",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).job_capacity_details.nodeType}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SetClusterVersion",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "clusterVersion",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).job_capacity_details.clusterVersion}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "StartMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "start",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SuccessMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "LoadToSynapse",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "success",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "FailureMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Brd3Uc8",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "Brd3Uc7",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "Brd3Uc11",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "Brd3Uc1",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "Brd3Uc9",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "Brd3Uc2",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "Brd3Uc3",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "BRD3 UC4 Commercial WBG ARD",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "BRD3 UC4 Consumer",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "BRD3 UC5 Commercial WBG ARD",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "BRD3 UC5 Consumer",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "BRD3 UC6 Commercial WBG ARD",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "BRD3 UC6 Consumer",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "BRD3 UC10 Finacle",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "failure",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd3Uc11",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Brd3Uc8",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Shared/PROD/brd3_uc11",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "LoadToSynapse",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "BRD3 UC10 Finacle",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "CheckBrd3EntityStore",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionDate": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@pipeline().parameters.container",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@pipeline().parameters.schema",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Brd3Uc1",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Brd3Uc11",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Shared/PROD/brd3_uc1",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Brd3Uc9",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Brd3Uc1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Shared/PROD/brd3_uc9",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Brd3Uc2",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Brd3Uc9",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Shared/PROD/brd3_uc2",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Brd3Uc3",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Brd3Uc2",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Shared/PROD/brd3_uc3",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "BRD3 UC4 Commercial WBG ARD",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Brd3Uc3",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD3/brd3_uc4_consumer",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "BRD3 UC4 Consumer",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "BRD3 UC4 Commercial WBG ARD",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD3/brd3_uc4_consumer",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "BRD3 UC5 Commercial WBG ARD",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "BRD3 UC4 Consumer",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD3/brd3_uc5_wbg_commerial_ard",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "BRD3 UC5 Consumer",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "BRD3 UC5 Commercial WBG ARD",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD3/brd3_uc5_consumer",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "BRD3 UC6 Commercial WBG ARD",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "BRD3 UC5 Consumer",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD3/brd3_uc6_wbg_commerial_ard",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "BRD3 UC6 Consumer",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "BRD3 UC6 Commercial WBG ARD",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD3/brd3_uc6_consumer",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "BRD3 UC10 Finacle",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "BRD3 UC6 Consumer",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD3/brd3_uc10_finacle",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							},
+							"libraries": [
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/attrs-21.2.0-py2.py3-none-any.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/fuzzysearch-0.7.3-cp38-cp38-linux_x86_64.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/fuzzywuzzy-0.18.0-py2.py3-none-any.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/python_Levenshtein-0.12.2-cp38-cp38-linux_x86_64.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/rapidfuzz-1.4.1-cp38-cp38-manylinux2010_x86_64.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/setuptools-56.2.0-py3-none-any.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/fuzzyCheck-1.0-py2.py3-none-any.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/relatedPartyFuzzy-1.0-py2.py3-none-any.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/selfTransferFuzzy-1.0-py2.py3-none-any.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/bankingArrangementFuzzy-1.0-py2.py3-none-any.whl"
+								}
+							]
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					},
+					"cosmosConfigTables": {
+						"type": "string",
+						"defaultValue": "job_capacity_details"
+					},
+					"cosmosDatabaseName": {
+						"type": "string",
+						"defaultValue": "config_store"
+					},
+					"jobSubjectArea": {
+						"type": "string",
+						"defaultValue": "brd3_mining_output"
+					},
+					"jobExecutionType": {
+						"type": "string",
+						"defaultValue": "entity"
+					},
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"schema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"container": {
+						"type": "string",
+						"defaultValue": "job-data"
+					}
+				},
+				"variables": {
+					"nodeType": {
+						"type": "String",
+						"defaultValue": "Standard_DSS_v2"
+					},
+					"workers": {
+						"type": "String",
+						"defaultValue": "3"
+					},
+					"clusterVersion": {
+						"type": "String",
+						"defaultValue": "8.1.x-scala2.12"
+					},
+					"configFile": {
+						"type": "String",
+						"defaultValue": "/dbfs/FileStore/configs/trigger_config_details.json"
+					},
+					"commonFilter": {
+						"type": "String",
+						"defaultValue": "/dbfs/FileStore/configs/global_filter_config_details.json"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow/BRD3"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-11T07:12:56Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceDataLoadMonthlyKramModels')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SourceLoadDateCheckKramModels",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(startOfMonth(pipeline().parameters.partitionValue,'yyyy-MM-dd'),pipeline().parameters.partitionValue)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecuteKramModels",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "stage2landing_KramModel",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"load_date": {
+												"value": "@replace(pipeline().parameters.partitionValue,'-','')",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "stag2landing_deriveddatasets"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-23T07:05:48Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/stage2landing_KramModel')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CheckPartitionValueBRD3Trigger')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CheckStartofMonthBrd2",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(startOfMonth(pipeline().parameters.partitionValue,'yyyy-MM-dd'),pipeline().parameters.partitionValue)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecuteBrd3TransactionMining",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Brd3TransactionMining",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"partitionValue": {
+												"value": "@pipeline().parameters.partitionValue",
+												"type": "Expression"
+											},
+											"cosmosConfigTables": {
+												"value": "@pipeline().parameters.cosmosConfigTables",
+												"type": "Expression"
+											},
+											"cosmosDatabaseName": {
+												"value": "@pipeline().parameters.cosmosDatabaseName",
+												"type": "Expression"
+											},
+											"jobSubjectArea": {
+												"value": "@pipeline().parameters.jobSubjectArea",
+												"type": "Expression"
+											},
+											"jobExecutionType": {
+												"value": "@pipeline().parameters.jobExecutionType",
+												"type": "Expression"
+											},
+											"markerRootPath": {
+												"value": "@pipeline().parameters.markerRootPath",
+												"type": "Expression"
+											},
+											"schema": {
+												"value": "@pipeline().parameters.schema",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string",
+						"defaultValue": "2021-10-01"
+					},
+					"cosmosConfigTables": {
+						"type": "string",
+						"defaultValue": "job_capacity_details"
+					},
+					"cosmosDatabaseName": {
+						"type": "string",
+						"defaultValue": "config_store"
+					},
+					"jobSubjectArea": {
+						"type": "string",
+						"defaultValue": "brd3_mining_output"
+					},
+					"jobExecutionType": {
+						"type": "string",
+						"defaultValue": "entity"
+					},
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"schema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"container": {
+						"type": "string",
+						"defaultValue": "job-data"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow/BRD3"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-11-11T10:32:15Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Brd3TransactionMining')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CheckPartitionValueMonthlyTrigger')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CheckStartofMonthBrd2",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(startOfMonth(pipeline().parameters.partitionValue,'yyyy-MM-dd'),pipeline().parameters.partitionValue)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecuteBrd2TransactionMining",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Brd2TransactionMining",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"partitionValue": {
+												"value": "@pipeline().parameters.partitionValue",
+												"type": "Expression"
+											},
+											"cosmosConfigTables": {
+												"value": "@pipeline().parameters.cosmosConfigTables",
+												"type": "Expression"
+											},
+											"cosmosDatabaseName": {
+												"value": "@pipeline().parameters.cosmosDatabaseName",
+												"type": "Expression"
+											},
+											"jobSubjectArea": {
+												"value": "@pipeline().parameters.jobSubjectArea",
+												"type": "Expression"
+											},
+											"jobExecutionType": {
+												"value": "@pipeline().parameters.jobExecutionType",
+												"type": "Expression"
+											},
+											"markerRootPath": {
+												"value": "@pipeline().parameters.markerRootPath",
+												"type": "Expression"
+											},
+											"schema": {
+												"value": "@pipeline().parameters.schema",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string",
+						"defaultValue": "2021-10-01"
+					},
+					"cosmosConfigTables": {
+						"type": "string",
+						"defaultValue": "job_capacity_details"
+					},
+					"cosmosDatabaseName": {
+						"type": "string",
+						"defaultValue": "config_store"
+					},
+					"jobSubjectArea": {
+						"type": "string",
+						"defaultValue": "brd2_mining_output"
+					},
+					"jobExecutionType": {
+						"type": "string",
+						"defaultValue": "entity"
+					},
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"schema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"container": {
+						"type": "string",
+						"defaultValue": "job-data"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow/BRD2"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-11-11T10:32:15Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Brd2TransactionMining')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CadenzProfile')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "customer_base",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "prepare_jars_and_configs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "customer_base",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "master_profile",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "customer",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "facility",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "limit",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "transaction_mining_trigger_brd3",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "profile",
+								"jobSubjectArea": "master",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "customer",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "customer_base",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "crn_lob",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "derived_entity",
+								"jobSubjectArea": "customer",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "rp_ews_input_table",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "customer_base",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "derived_entity",
+								"jobSubjectArea": "rp_ews_input_table",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "transaction_mining",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "borrower_customers",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "borrower_vendors",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "trn_int_trigger",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "crn_int_trigger",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "rp_union_input_table",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "customer",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "monthly_stock_statement",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "monthly_kram_entity",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Load Self Transfer Feedback",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TransactionMining",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "txn_mining_output_table",
+								"jobExecutionType": "entity",
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "customer_and_suppliers",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "prepare_jars_and_configs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "customer_and_suppliers",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "borrower_customers",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "customer_and_suppliers",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "derived_entity",
+								"jobSubjectArea": "borrower_customers",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "borrower_vendors",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "customer_and_suppliers",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "derived_entity",
+								"jobSubjectArea": "borrower_vendors",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ews_profile",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "customer",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "transaction_mining_trigger_brd3",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "profile",
+								"jobSubjectArea": "ews",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "stg_finacle_gam",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "prepare_jars_and_configs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "stg_finacle_gam",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "crn_int_trigger",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "customer_base",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "customer",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "crn_lob",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "derived_entity",
+								"jobSubjectArea": "crn_int_trigger",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "trn_int_trigger",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "stg_finacle_gam",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "derived_entity",
+								"jobSubjectArea": "trn_int_trigger",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "rp_union_input_table",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "rp_ews_input_table",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "borrower_customers",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "borrower_vendors",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "rp_input_table_ui",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "derived_entity",
+								"jobSubjectArea": "rp_union_input_table",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "transaction_view",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "trn_int_trigger",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "transaction",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "populateSynapseTriggerName",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "populateSynapseMiningOutput",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "populateSynapseCrnOutTriggerDetail",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "populateSynapseTrnOutTrigger",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TransactionView",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "prepare_jars_and_configs",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PrepareJarsAndConfigs",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"uat_flag": "false",
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "transaction",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "stg_finacle_gam",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "derived_entity",
+								"jobSubjectArea": "transaction",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "financial_ratio",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "customer_base",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "derived_entity",
+								"jobSubjectArea": "financial_ratio",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "facility",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "stg_glems_mview_fac_dtls",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "derived_entity",
+								"jobSubjectArea": "facility",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "limit",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "stg_glems_mview_fac_dtls",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "derived_entity",
+								"jobSubjectArea": "limit",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "stg_glems_mview_fac_dtls",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "prepare_jars_and_configs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "stg_glems_mview_fac_dtls",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "populateSynapseMiningOutput",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "transaction_mining_trigger_brd3",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SynapseConsumptionLayerProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "txn_mining_output_table",
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "populateSynapseTriggerName",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "transaction_mining_trigger_brd3",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SynapseConsumptionLayerProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "trigger_name",
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "populateSynapseCrnOutTriggerDetail",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "transaction_mining_trigger_brd3",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SynapseConsumptionLayerProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "crn_out_trigger_detail",
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "crn_lob",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "customer_base",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "derived_entity",
+								"jobSubjectArea": "crn_lob",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "transaction_mining_trigger_brd2",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "transaction_mining",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "CheckPartitionValueMonthlyTrigger",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "brd2_mining_output",
+								"jobExecutionType": "entity",
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "populateSynapseTrnOutTrigger",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "transaction_mining_trigger_brd3",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SynapseConsumptionLayerProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "trn_out_trigger",
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "over_draft_account_profile",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "stg_finacle_gam",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "profile",
+								"jobSubjectArea": "over_draft_account",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "financial_info_profile",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "financial_ratio",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "profile",
+								"jobSubjectArea": "financial_info",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "fixed_deposit_profile",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "stg_finacle_gam",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "profile",
+								"jobSubjectArea": "fixed_deposit",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "term_loan_profile",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "stg_finacle_gam",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ProcessingAndPopulating",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobExecutionType": "profile",
+								"jobSubjectArea": "term_loan",
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "transaction_mining_trigger_brd3",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "transaction_mining_trigger_brd2",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "CheckPartitionValueBRD3Trigger",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "brd3_mining_output",
+								"jobExecutionType": "entity",
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "transaction_info",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "transaction_view",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "CheckMonthlyPartitionTransactionInfo",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "monthly_stock_statement",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "prepare_jars_and_configs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "MonthlyStockStatement",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"jobExecutionType": "entity",
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "rp_input_table_ui",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "prepare_jars_and_configs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "RpInputFromUI",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "monthly_kram_entity",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "prepare_jars_and_configs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "MonthlyKramExecution",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"cosmosDatabaseName": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@variables('markerRootPath')",
+									"type": "Expression"
+								},
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@variables('container')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Load Self Transfer Feedback",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "self_transfer_feedback",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"p_date": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"markerRootPath": {
+						"type": "String",
+						"defaultValue": "job-metadata/markers"
+					},
+					"cosmosDatabaseName": {
+						"type": "String",
+						"defaultValue": "config_store"
+					},
+					"schema": {
+						"type": "String",
+						"defaultValue": "dbo"
+					},
+					"container": {
+						"type": "String",
+						"defaultValue": "job-data"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-10-24T10:12:46Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/CheckPartitionValueMonthlyTrigger')]",
+				"[concat(variables('factoryId'), '/pipelines/CheckPartitionValueBRD3Trigger')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CadenzWithLOS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Cadenz",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Load Consumer BL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "CadenzProfile",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute Derived",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute HTD",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Stag2landing_Masterpipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@replace(adddays(pipeline().parameters.partitionValue, 1, 'yyyy-MM-dd'), '-', '')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute LOS",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "stag2landing_LOS_Commercial_Financial",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@replace(adddays(pipeline().parameters.partitionValue, 1, 'yyyy-MM-dd'), '-', '')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute HTD",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute LOS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "stag2landing_Finacle1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@replace(adddays(pipeline().parameters.partitionValue, 1, 'yyyy-MM-dd'), '-', '')",
+									"type": "Expression"
+								},
+								"delta": {
+									"value": "@replace(pipeline().parameters.partitionValue, '-', '')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute ReportsRefresh",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Cadenz",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ReportsRefresh",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute Inward Cheque Return",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Load NPA",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SourceDataLoadDateCheckBrd2",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "OpenTriggers",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute ReportsRefresh",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "CheckEwsProfilePartitionDateExist",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionDate": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "ews",
+								"container": "job-data"
+							}
+						}
+					},
+					{
+						"name": "Execute Load NPA",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Derived",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SourceDataLoadMonthlyNpa",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute Load LC BG",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Inward Cheque Return",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SourceDataLoadMonthlyLcBg",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute Load Neft Rtgs",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Load LC BG",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExecuteNeftRtgs",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"loadDate": {
+									"value": "@adddays(pipeline().parameters.partitionValue, 1, 'yyyy-MM-dd')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute Load KRAM Models",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Load Neft Rtgs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SourceDataLoadMonthlyKramModels",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute Load Consumer BL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Load KRAM Models",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SourceDataLoadMonthlyConsumerBl",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "HistoricalRun"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-10-23T07:36:03Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/CadenzProfile')]",
+				"[concat(variables('factoryId'), '/pipelines/Stag2landing_Masterpipeline')]",
+				"[concat(variables('factoryId'), '/pipelines/SourceDataLoadMonthlyNpa')]",
+				"[concat(variables('factoryId'), '/pipelines/SourceDataLoadMonthlyLcBg')]",
+				"[concat(variables('factoryId'), '/pipelines/SourceDataLoadMonthlyKramModels')]"
+			]
+		}
+	]
+}

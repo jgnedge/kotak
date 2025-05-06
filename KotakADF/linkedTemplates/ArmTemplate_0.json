@@ -1,0 +1,3075 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "KotakADF"
+		},
+		"CadenceSynapseLS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'CadenceSynapseLS'"
+		},
+		"CosmosDbMongoDbEntityStore_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'CosmosDbMongoDbEntityStore'"
+		},
+		"CosmosDbMongoDbEntityStore_account": {
+			"type": "secureString",
+			"metadata": "Secure string for 'account' of 'CosmosDbMongoDbEntityStore'",
+			"defaultValue": "kmblewskotak"
+		},
+		"CosmosDbMongoDbFeedBackProfile_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'CosmosDbMongoDbFeedBackProfile'"
+		},
+		"CosmosDbMongoDbFeedBackProfile_account": {
+			"type": "secureString",
+			"metadata": "Secure string for 'account' of 'CosmosDbMongoDbFeedBackProfile'",
+			"defaultValue": "kmblewskotak"
+		},
+		"CosmosDbMongoDbLS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'CosmosDbMongoDbLS'"
+		},
+		"CosmosDbMongoDbLS_account": {
+			"type": "secureString",
+			"metadata": "Secure string for 'account' of 'CosmosDbMongoDbLS'",
+			"defaultValue": "kmblewskotak"
+		},
+		"SybaseLS_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'SybaseLS'"
+		},
+		"cadenceAdlsLS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'cadenceAdlsLS'"
+		},
+		"cadenceProcessingLS_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'cadenceProcessingLS'"
+		},
+		"ewscadenceLS_functionKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'functionKey' of 'ewscadenceLS'"
+		},
+		"AzureBlobStorageLS_properties_typeProperties_serviceEndpoint": {
+			"type": "string",
+			"defaultValue": "https://kmblewsproddatalake.blob.core.windows.net"
+		},
+		"CosmosDbMongoDbEntityStore_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "entity_store"
+		},
+		"CosmosDbMongoDbFeedBackProfile_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "profile_store"
+		},
+		"CosmosDbMongoDbLS_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "config_store"
+		},
+		"SybaseLS_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "10.240.55.130:2639"
+		},
+		"SybaseLS_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "KDWPROD_R2"
+		},
+		"SybaseLS_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "KDW_EWS"
+		},
+		"SybaseToAdls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://kmblewsproddatalake.dfs.core.windows.net/"
+		},
+		"cadenceAdlsLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://kmblewsproddatalake.dfs.core.windows.net"
+		},
+		"ewscadenceLS_properties_typeProperties_functionAppUrl": {
+			"type": "string",
+			"defaultValue": "https://kmb-ews-prod-functionapp.azurewebsites.net"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobStorageLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"serviceEndpoint": "[parameters('AzureBlobStorageLS_properties_typeProperties_serviceEndpoint')]",
+					"accountKind": "StorageV2"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CadenceSynapseLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('CadenceSynapseLS_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CosmosDbMongoDbEntityStore')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "CosmosDbMongoDbApi",
+				"typeProperties": {
+					"connectionString": "[parameters('CosmosDbMongoDbEntityStore_connectionString')]",
+					"account": {
+						"type": "SecureString",
+						"value": "[parameters('CosmosDbMongoDbEntityStore_account')]"
+					},
+					"database": "[parameters('CosmosDbMongoDbEntityStore_properties_typeProperties_database')]",
+					"isServerVersionAbove32": true
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CosmosDbMongoDbFeedBackProfile')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "CosmosDbMongoDbApi",
+				"typeProperties": {
+					"connectionString": "[parameters('CosmosDbMongoDbFeedBackProfile_connectionString')]",
+					"account": {
+						"type": "SecureString",
+						"value": "[parameters('CosmosDbMongoDbFeedBackProfile_account')]"
+					},
+					"database": "[parameters('CosmosDbMongoDbFeedBackProfile_properties_typeProperties_database')]",
+					"isServerVersionAbove32": true
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CosmosDbMongoDbLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "CosmosDbMongoDbApi",
+				"typeProperties": {
+					"connectionString": "[parameters('CosmosDbMongoDbLS_connectionString')]",
+					"account": {
+						"type": "SecureString",
+						"value": "[parameters('CosmosDbMongoDbLS_account')]"
+					},
+					"database": "[parameters('CosmosDbMongoDbLS_properties_typeProperties_database')]",
+					"isServerVersionAbove32": true
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SybaseLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Sybase",
+				"typeProperties": {
+					"server": "[parameters('SybaseLS_properties_typeProperties_server')]",
+					"database": "[parameters('SybaseLS_properties_typeProperties_database')]",
+					"authenticationType": "Basic",
+					"username": "[parameters('SybaseLS_properties_typeProperties_username')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('SybaseLS_password')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SybaseToAdls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('SybaseToAdls_properties_typeProperties_url')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/cadenceAdlsLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('cadenceAdlsLS_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('cadenceAdlsLS_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/cadenceProcessingLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"nodeType": {
+						"type": "string"
+					},
+					"workers": {
+						"type": "string"
+					},
+					"clusterVersion": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-2060517074572725.5.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('cadenceProcessingLS_accessToken')]"
+					},
+					"newClusterNodeType": "@linkedService().nodeType",
+					"newClusterNumOfWorker": "@linkedService().workers",
+					"newClusterSparkConf": {
+						"spark.hadoop.fs.azure.account.key.kmblewsproddatalake.blob.core.windows.net": "cpIvm6ShLnWXMp5jGrKXEQefZihzUxxtLT1TRSXndEfQxbKhNxTvJsM22g18XmDeEz11QQMNuh+q+AStRMQ2xA==",
+						"spark.hadoop.fs.azure.account.key.kmblewsproddatalake.dfs.core.windows.net": "cpIvm6ShLnWXMp5jGrKXEQefZihzUxxtLT1TRSXndEfQxbKhNxTvJsM22g18XmDeEz11QQMNuh+q+AStRMQ2xA=="
+					},
+					"newClusterSparkEnvVars": {
+						"PYSPARK_PYTHON": "/databricks/python3/bin/python3"
+					},
+					"newClusterVersion": "@linkedService().clusterVersion",
+					"clusterOption": "Fixed",
+					"newClusterInitScripts": []
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ewscadenceLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureFunction",
+				"typeProperties": {
+					"functionAppUrl": "[parameters('ewscadenceLS_properties_typeProperties_functionAppUrl')]",
+					"authentication": "Anonymous",
+					"functionKey": {
+						"type": "SecureString",
+						"value": "[parameters('ewscadenceLS_functionKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/integrationRuntime1')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/integrationRuntime2')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {
+					"selfContainedInteractiveAuthoringEnabled": false
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/default')]",
+			"type": "Microsoft.DataFactory/factories/managedVirtualNetworks",
+			"apiVersion": "2018-06-01",
+			"properties": {},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CheckMonthlyPartitionTransactionInfo')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CheckStartofMonthTransactionInfo",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(startOfMonth(pipeline().parameters.partitionValue,'yyyy-MM-dd'),pipeline().parameters.partitionValue)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "TransactionInfo",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.02:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": {
+											"value": "@concat('[', pipeline().parameters.schema, '].[TRANSACTIONAL_INFO_REFRESH]')",
+											"type": "Expression"
+										},
+										"storedProcedureParameters": {
+											"partition_value": {
+												"value": {
+													"value": "@pipeline().parameters.partitionValue",
+													"type": "Expression"
+												},
+												"type": "String"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "CadenceSynapseLS",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string",
+						"defaultValue": "2021-10-01"
+					},
+					"schema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-11-11T10:31:37Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/CadenceSynapseLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CosmosDBConsumptionLayerProcessing')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SetWorker",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "workers",
+							"value": {
+								"value": "@{int(json(activity('GetConfig').output.config).job_capacity_details.workers)}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetConfig",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "StartMarker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:01:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "GetConfigs",
+							"headers": {
+								"config_tables": {
+									"value": "@pipeline().parameters.cosmosConfigTables",
+									"type": "Expression"
+								},
+								"job_name": {
+									"value": "@pipeline().parameters.jobSubjectArea",
+									"type": "Expression"
+								},
+								"job_type": {
+									"value": "@pipeline().parameters.jobExecutionType",
+									"type": "Expression"
+								},
+								"database_name": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							},
+							"method": "GET"
+						},
+						"linkedServiceName": {
+							"referenceName": "ewscadenceLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SetNodeType",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "nodeType",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).job_capacity_details.nodeType}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SetClusterVersion",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "clusterVersion",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).job_capacity_details.clusterVersion}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CosmosDBLoading",
+						"type": "DatabricksSparkJar",
+						"dependsOn": [
+							{
+								"activity": "SetWorker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetNodeType",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetClusterVersion",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetConfigPath",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetRerunFlag",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.14:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"mainClassName": "com.thedatateam.cadenz.comet.BatchJob",
+							"parameters": [
+								"--eventType",
+								"entity",
+								"--configPath",
+								"@variables('configPath')",
+								"--batchDate",
+								"@pipeline().parameters.partitionValue",
+								"--rerunFlag",
+								"@variables('rerunFlag')"
+							],
+							"libraries": [
+								{
+									"jar": "@variables('assemblyJar')"
+								},
+								{
+									"jar": "@variables('assemblyAllDependencyJar')"
+								}
+							]
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SetConfigPath",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "configPath",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).extract_run_details.configPath}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SetRerunFlag",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "rerunFlag",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).extract_run_details.rerunFlag}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "StartMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "start",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SuccessMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "CosmosDBLoading",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "success",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "FailureMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "CosmosDBLoading",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "failure",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"jobExecutionType": {
+						"type": "string",
+						"defaultValue": "cosmosdb"
+					},
+					"partitionValue": {
+						"type": "string",
+						"defaultValue": "2021-04-12"
+					},
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"jobSubjectArea": {
+						"type": "string",
+						"defaultValue": "master"
+					},
+					"cosmosConfigTables": {
+						"type": "string",
+						"defaultValue": "job_capacity_details,extract_run_details"
+					},
+					"cosmosDatabaseName": {
+						"type": "string",
+						"defaultValue": "config_store"
+					}
+				},
+				"variables": {
+					"runStatus": {
+						"type": "String",
+						"defaultValue": "success"
+					},
+					"nodeType": {
+						"type": "String",
+						"defaultValue": "Standard_DSS_v2"
+					},
+					"workers": {
+						"type": "String",
+						"defaultValue": "3"
+					},
+					"clusterVersion": {
+						"type": "String",
+						"defaultValue": "5.5.x-scala2.11"
+					},
+					"configPath": {
+						"type": "String"
+					},
+					"rerunFlag": {
+						"type": "String"
+					},
+					"eventType": {
+						"type": "String"
+					},
+					"assemblyJar": {
+						"type": "String",
+						"defaultValue": "dbfs:/FileStore/jars/cadenz_lib/Comet-assembly-1.0.jar"
+					},
+					"assemblyAllDependencyJar": {
+						"type": "String",
+						"defaultValue": "dbfs:/FileStore/jars/cadenz_lib/Comet-assembly-1.0-deps.jar"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-12-04T05:18:49Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ewscadenceLS')]",
+				"[concat(variables('factoryId'), '/linkedServices/cadenceProcessingLS')]",
+				"[concat(variables('factoryId'), '/linkedServices/CadenceSynapseLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/EntityProcessing')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SetWorker",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "workers",
+							"value": {
+								"value": "@{int(json(activity('GetConfig').output.config).job_capacity_details.workers)}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetConfig",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "StartMarker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:01:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "GetConfigs",
+							"headers": {
+								"config_tables": {
+									"value": "@pipeline().parameters.cosmosConfigTables",
+									"type": "Expression"
+								},
+								"job_name": {
+									"value": "@pipeline().parameters.jobSubjectArea",
+									"type": "Expression"
+								},
+								"job_type": {
+									"value": "@pipeline().parameters.jobExecutionType",
+									"type": "Expression"
+								},
+								"database_name": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							},
+							"method": "GET"
+						},
+						"linkedServiceName": {
+							"referenceName": "ewscadenceLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SetNodeType",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "nodeType",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).job_capacity_details.nodeType}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SetClusterVersion",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "clusterVersion",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).job_capacity_details.clusterVersion}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "EntityProcessing",
+						"type": "DatabricksSparkJar",
+						"dependsOn": [
+							{
+								"activity": "EventTypeChoice",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"mainClassName": "com.thedatateam.cadenz.comet.BatchJob",
+							"parameters": [
+								"--eventType",
+								"@variables('eventType')",
+								"--configPath",
+								"@variables('configPath')",
+								"--batchDate",
+								"@pipeline().parameters.partitionValue",
+								"--rerunFlag",
+								"@variables('rerunFlag')"
+							],
+							"libraries": [
+								{
+									"jar": "@variables('assemblyJar')"
+								},
+								{
+									"jar": "@variables('assemblyAllDependencyJar')"
+								}
+							]
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SetConfigPath",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "configPath",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).entity_run_details.configPath}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SetRerunFlag",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "rerunFlag",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).entity_run_details.rerunFlag}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "EventTypeChoice",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "SetNodeType",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetClusterVersion",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetConfigPath",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetRerunFlag",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetWorker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.jobExecutionType,'entity')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "SetEventTypeDerivedEntity",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "eventType",
+										"value": "profile"
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "SetEventTypeEntity",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "eventType",
+										"value": "entity"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "StartMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "start",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SuccessMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "EntityProcessing",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "success",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "FailureMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "EntityProcessing",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "failure",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"jobExecutionType": {
+						"type": "string",
+						"defaultValue": "derived_entity"
+					},
+					"partitionValue": {
+						"type": "string",
+						"defaultValue": "2021-04-08"
+					},
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"jobSubjectArea": {
+						"type": "string",
+						"defaultValue": "trn_int_trigger"
+					},
+					"cosmosConfigTables": {
+						"type": "string",
+						"defaultValue": "job_capacity_details,entity_run_details"
+					},
+					"cosmosDatabaseName": {
+						"type": "string",
+						"defaultValue": "config_store"
+					}
+				},
+				"variables": {
+					"runStatus": {
+						"type": "String",
+						"defaultValue": "success"
+					},
+					"nodeType": {
+						"type": "String",
+						"defaultValue": "Standard_DSS_v2"
+					},
+					"workers": {
+						"type": "String",
+						"defaultValue": "3"
+					},
+					"clusterVersion": {
+						"type": "String",
+						"defaultValue": "5.5.x-scala2.11"
+					},
+					"configPath": {
+						"type": "String"
+					},
+					"rerunFlag": {
+						"type": "String"
+					},
+					"eventType": {
+						"type": "String"
+					},
+					"assemblyJar": {
+						"type": "String",
+						"defaultValue": "dbfs:/FileStore/jars/cadenz_lib/Comet-assembly-1.0.jar"
+					},
+					"assemblyAllDependencyJar": {
+						"type": "String",
+						"defaultValue": "dbfs:/FileStore/jars/cadenz_lib/Comet-assembly-1.0-deps.jar"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-10-08T12:42:55Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ewscadenceLS')]",
+				"[concat(variables('factoryId'), '/linkedServices/cadenceProcessingLS')]",
+				"[concat(variables('factoryId'), '/linkedServices/CadenceSynapseLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ProfileProcessing')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SetWorker",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "workers",
+							"value": {
+								"value": "@{int(json(activity('GetConfig').output.config).job_capacity_details.workers)}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetConfig",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "StartMarker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:01:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "GetConfigs",
+							"headers": {
+								"config_tables": {
+									"value": "@pipeline().parameters.cosmosConfigTables",
+									"type": "Expression"
+								},
+								"job_name": {
+									"value": "@pipeline().parameters.jobSubjectArea",
+									"type": "Expression"
+								},
+								"job_type": {
+									"value": "@pipeline().parameters.jobExecutionType",
+									"type": "Expression"
+								},
+								"database_name": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							},
+							"method": "GET"
+						},
+						"linkedServiceName": {
+							"referenceName": "ewscadenceLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SetNodeType",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "nodeType",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).job_capacity_details.nodeType}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SetClusterVersion",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "clusterVersion",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).job_capacity_details.clusterVersion}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "ProfileProcessing",
+						"type": "DatabricksSparkJar",
+						"dependsOn": [
+							{
+								"activity": "SetWorker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetNodeType",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetClusterVersion",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetConfigPath",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetRerunFlag",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"mainClassName": "com.thedatateam.cadenz.comet.BatchJob",
+							"parameters": [
+								"--eventType",
+								"@pipeline().parameters.jobExecutionType",
+								"--configPath",
+								"@variables('configPath')",
+								"--batchDate",
+								"@pipeline().parameters.partitionValue",
+								"--rerunFlag",
+								"@variables('rerunFlag')"
+							],
+							"libraries": [
+								{
+									"jar": "@variables('assemblyJar')"
+								},
+								{
+									"jar": "@variables('assemblyAllDependencyJar')"
+								}
+							]
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SetConfigPath",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "configPath",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).profile_run_details.configPath}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SetRerunFlag",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "rerunFlag",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).profile_run_details.rerunFlag}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "StartMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "start",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SuccessMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "ProfileProcessing",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "success",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "FailureMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "ProfileProcessing",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "failure",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"jobExecutionType": {
+						"type": "string",
+						"defaultValue": "profile"
+					},
+					"partitionValue": {
+						"type": "string",
+						"defaultValue": "2021-04-12"
+					},
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"jobSubjectArea": {
+						"type": "string",
+						"defaultValue": "ews"
+					},
+					"cosmosConfigTables": {
+						"type": "string",
+						"defaultValue": "job_capacity_details,profile_run_details"
+					},
+					"cosmosDatabaseName": {
+						"type": "string",
+						"defaultValue": "config_store"
+					}
+				},
+				"variables": {
+					"runStatus": {
+						"type": "String",
+						"defaultValue": "success"
+					},
+					"nodeType": {
+						"type": "String",
+						"defaultValue": "Standard_DSS_v2"
+					},
+					"workers": {
+						"type": "String",
+						"defaultValue": "3"
+					},
+					"clusterVersion": {
+						"type": "String",
+						"defaultValue": "5.5.x-scala2.11"
+					},
+					"configPath": {
+						"type": "String"
+					},
+					"rerunFlag": {
+						"type": "String"
+					},
+					"eventType": {
+						"type": "String"
+					},
+					"assemblyJar": {
+						"type": "String",
+						"defaultValue": "dbfs:/FileStore/jars/cadenz_lib/Comet-assembly-1.0.jar"
+					},
+					"assemblyAllDependencyJar": {
+						"type": "String",
+						"defaultValue": "dbfs:/FileStore/jars/cadenz_lib/Comet-assembly-1.0-deps.jar"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-11-20T06:10:13Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ewscadenceLS')]",
+				"[concat(variables('factoryId'), '/linkedServices/cadenceProcessingLS')]",
+				"[concat(variables('factoryId'), '/linkedServices/CadenceSynapseLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ReportsRefresh')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "EWS_CONSOLIDATED_REPORT_REFRESH",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[EWS_CONSOLIDATED_REPORT_REFRESH]",
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Reports"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-12-06T07:43:53Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/CadenceSynapseLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TransactionMining')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DataProcessingNotebook",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "SetClusterVersion",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetNodeType",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "SetWorker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.10:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/utils/crn_lob_validations",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								},
+								"commonFilter": {
+									"value": "@variables('commonFilter')",
+									"type": "Expression"
+								}
+							},
+							"libraries": [
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/attrs-21.2.0-py2.py3-none-any.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/fuzzysearch-0.7.3-cp38-cp38-linux_x86_64.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/fuzzywuzzy-0.18.0-py2.py3-none-any.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/python_Levenshtein-0.12.2-cp38-cp38-linux_x86_64.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/rapidfuzz-1.4.1-cp38-cp38-manylinux2010_x86_64.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/setuptools-56.2.0-py3-none-any.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/fuzzyCheck-1.0-py2.py3-none-any.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/relatedPartyFuzzy-1.0-py2.py3-none-any.whl"
+								},
+								{
+									"whl": "dbfs:/FileStore/wheels/cadenz_lib/selfTransferFuzzy-1.0-py2.py3-none-any.whl"
+								}
+							]
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "RuleEngineNotebook",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "DataProcessingNotebook",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.03:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Shared/PROD/rule_engine",
+							"baseParameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"configFile": {
+									"value": "@variables('configFile')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": {
+									"value": "@variables('nodeType')",
+									"type": "Expression"
+								},
+								"workers": {
+									"value": "@variables('workers')",
+									"type": "Expression"
+								},
+								"clusterVersion": {
+									"value": "@variables('clusterVersion')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SetWorker",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "workers",
+							"value": {
+								"value": "@{int(json(activity('GetConfig').output.config).job_capacity_details.workers)}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetConfig",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "StartMarker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "GetConfigs",
+							"headers": {
+								"config_tables": {
+									"value": "@pipeline().parameters.cosmosConfigTables",
+									"type": "Expression"
+								},
+								"job_name": {
+									"value": "@pipeline().parameters.jobSubjectArea",
+									"type": "Expression"
+								},
+								"job_type": {
+									"value": "@pipeline().parameters.jobExecutionType",
+									"type": "Expression"
+								},
+								"database_name": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							},
+							"method": "GET"
+						},
+						"linkedServiceName": {
+							"referenceName": "ewscadenceLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SetNodeType",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "nodeType",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).job_capacity_details.nodeType}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SetClusterVersion",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "clusterVersion",
+							"value": {
+								"value": "@{json(activity('GetConfig').output.config).job_capacity_details.clusterVersion}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "StartMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "start",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SuccessMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "RuleEngineNotebook",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "success",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "FailureMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "RuleEngineNotebook",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "DataProcessingNotebook",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "failure",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string",
+						"defaultValue": "2021-04-12"
+					},
+					"cosmosConfigTables": {
+						"type": "string",
+						"defaultValue": "job_capacity_details"
+					},
+					"cosmosDatabaseName": {
+						"type": "string",
+						"defaultValue": "config_store"
+					},
+					"jobSubjectArea": {
+						"type": "string",
+						"defaultValue": "txn_mining_output_table"
+					},
+					"jobExecutionType": {
+						"type": "string",
+						"defaultValue": "entity"
+					},
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"schema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"container": {
+						"type": "string",
+						"defaultValue": "job-data"
+					}
+				},
+				"variables": {
+					"nodeType": {
+						"type": "String",
+						"defaultValue": "Standard_DSS_v2"
+					},
+					"workers": {
+						"type": "String",
+						"defaultValue": "3"
+					},
+					"clusterVersion": {
+						"type": "String",
+						"defaultValue": "8.1.x-scala2.12"
+					},
+					"configFile": {
+						"type": "String",
+						"defaultValue": "/dbfs/FileStore/configs/trigger_config_details.json"
+					},
+					"commonFilter": {
+						"type": "String",
+						"defaultValue": "/dbfs/FileStore/configs/global_filter_config_details.json"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-10-24T10:12:46Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/cadenceProcessingLS')]",
+				"[concat(variables('factoryId'), '/linkedServices/ewscadenceLS')]",
+				"[concat(variables('factoryId'), '/linkedServices/CadenceSynapseLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TransactionView')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "TransactionView",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd2Uc2",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD2_UC2_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd2Uc5",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD2_UC5_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd2Uc6",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD2_UC6_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd3Uc7",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD3_UC7_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd3Uc8",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD3_UC8_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd3Uc11",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD3_UC11_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd2Uc1",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD2_UC1_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd2Uc3",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD2_UC3_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd3Uc1",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD3_UC1_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd3Uc9",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD3_UC9_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd2Uc4",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD2_UC4_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd3Uc2",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD3_UC2_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd3Uc3",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD3_UC3_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd3Uc4",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD3_UC4_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd3Uc5",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD3_UC5_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd3Uc6",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD3_UC6_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Brd3Uc10",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": {
+								"value": "@concat('[', pipeline().parameters.schema, '].[OPERATIONAL_TRANSACTIONS_BRD3_UC10_REFRESH]')",
+								"type": "Expression"
+							},
+							"storedProcedureParameters": {
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"schema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"partitionValue": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-07T17:41:18Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/CadenceSynapseLS')]"
+			]
+		}
+	]
+}

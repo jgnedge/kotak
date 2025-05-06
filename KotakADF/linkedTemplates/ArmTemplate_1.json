@@ -1,0 +1,809 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "KotakADF"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/UpdateCrnStatus')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Update Status Master Feedback Profile",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "AlertWorkflow",
+							"headers": {
+								"database_name": {
+									"value": "@variables('cosmosDatabaseName')",
+									"type": "Expression"
+								},
+								"partition_date": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							},
+							"method": "GET"
+						},
+						"linkedServiceName": {
+							"referenceName": "ewscadenceLS",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"cosmosDatabaseName": {
+						"type": "String",
+						"defaultValue": "profile_store"
+					}
+				},
+				"folder": {
+					"name": "PROD/alert_workflow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-05-06T12:00:49Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Check_Blob_Load_date_wise_Delete_source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "cadenceAdlsLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string"
+					},
+					"Load_date_blob_path": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat(dataset().Load_date_blob_path,dataset().date2run)",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "PARTY_ID",
+						"type": "String"
+					},
+					{
+						"name": "SEARCH_KEY",
+						"type": "String"
+					},
+					{
+						"name": "PARTY_TYPE_LU",
+						"type": "String"
+					},
+					{
+						"name": "PARTY_TYPE_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "SHORT_NAME",
+						"type": "String"
+					},
+					{
+						"name": "FIRST_NAME",
+						"type": "String"
+					},
+					{
+						"name": "MIDDLE_NAME",
+						"type": "String"
+					},
+					{
+						"name": "LAST_NAME",
+						"type": "String"
+					},
+					{
+						"name": "TITLE_LU",
+						"type": "String"
+					},
+					{
+						"name": "TITLE_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "SHAREHOLDER_FLAG",
+						"type": "String"
+					},
+					{
+						"name": "ACTIVE_YN",
+						"type": "String"
+					},
+					{
+						"name": "GROUP_ID",
+						"type": "String"
+					},
+					{
+						"name": "EMPLOYEE_FLAG",
+						"type": "String"
+					},
+					{
+						"name": "BLACK_LISTED_FLAG",
+						"type": "String"
+					},
+					{
+						"name": "DEDUP_KEY",
+						"type": "String"
+					},
+					{
+						"name": "CLASSIFICATION_CAT_LU",
+						"type": "String"
+					},
+					{
+						"name": "CLASSIFICATION_CAT_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "PARTY_IC",
+						"type": "String"
+					},
+					{
+						"name": "PREF_INTERACT_LANG_LU",
+						"type": "String"
+					},
+					{
+						"name": "PREF_INTERACT_LANG_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "HOME_BRANCH_LU",
+						"type": "String"
+					},
+					{
+						"name": "HOME_BRANCH_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "AUTHZ_BY",
+						"type": "String"
+					},
+					{
+						"name": "AUTHZ_DT",
+						"type": "String"
+					},
+					{
+						"name": "CREATED_BY",
+						"type": "String"
+					},
+					{
+						"name": "CREATED_DATE",
+						"type": "String"
+					},
+					{
+						"name": "MODIFIED_BY",
+						"type": "String"
+					},
+					{
+						"name": "MODIFIED_DATE",
+						"type": "String"
+					},
+					{
+						"name": "ACCESS_LEVEL",
+						"type": "String"
+					},
+					{
+						"name": "EMPLOYEE_CODE",
+						"type": "String"
+					},
+					{
+						"name": "COMPANY_LU",
+						"type": "String"
+					},
+					{
+						"name": "COMPANY_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "FAMILY_ID",
+						"type": "String"
+					},
+					{
+						"name": "SUB_CLASSIFICATION_CAT_LU_CODE",
+						"type": "String"
+					},
+					{
+						"name": "HOME_BRANCH_EFF_DATE",
+						"type": "String"
+					},
+					{
+						"name": "SUB_CLASSIFICATION_CAT_LU",
+						"type": "String"
+					},
+					{
+						"name": "CLASSIFICATION_EFF_DATE",
+						"type": "String"
+					},
+					{
+						"name": "UIN_STATUS_LU",
+						"type": "String"
+					},
+					{
+						"name": "UIN_STATUS_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "PRIMARY_SEGMENT",
+						"type": "String"
+					},
+					{
+						"name": "UIN_NO",
+						"type": "String"
+					},
+					{
+						"name": "RISK_PROFILE_LU",
+						"type": "String"
+					},
+					{
+						"name": "RISK_PROFILE_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "RISK_PROFILE_EFF_DATE",
+						"type": "String"
+					},
+					{
+						"name": "ETL_CREATED_BY",
+						"type": "String"
+					},
+					{
+						"name": "ETL_CREATED_TIME",
+						"type": "String"
+					},
+					{
+						"name": "ETL_LAST_UPDATED_BY",
+						"type": "String"
+					},
+					{
+						"name": "ETL_LAST_UPDATED_TIME",
+						"type": "String"
+					},
+					{
+						"name": "ETL_CHANGE_FLAG",
+						"type": "String"
+					},
+					{
+						"name": "WF_AUDIT_ID",
+						"type": "String"
+					},
+					{
+						"name": "load_date",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/JsonGeneralized')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "cadenceAdlsLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"container": {
+						"type": "string"
+					},
+					"path": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@dataset().path",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Blob_Adjusted_Tangible_Net_Worth_ATNW_Query_Destination')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseToAdls",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"load_date": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Adjusted_Tangible_Net_Worth_ATNW.csv",
+						"folderPath": {
+							"value": "@concat('DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_ADJUSTED_TANGIBLE_NET_WORTH_ATNM/load_date=',dataset().load_date)",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Blob_Creditors_Query_Destination')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseToAdls",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"load_date": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Creditors.csv",
+						"folderPath": {
+							"value": "@concat('DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_CREDITORS/load_date=',dataset().load_date)",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Blob_Debtors_For_Current_Receivables_Query_Destination')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseToAdls",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"load_date": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Debtors_For_Current_Receivables.csv",
+						"folderPath": {
+							"value": "@concat('DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_DEBTORS_FOR_CURRENT_RECEIVABLES/load_date=',dataset().load_date)",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Blob_Debtors_For_Receivables_More_Than_6M_Query_Destination')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseToAdls",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"load_date": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "DEBTORS_FOR_RECEIVABLES_MORE_THAN_6M.csv",
+						"folderPath": {
+							"value": "@concat('DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_DEBTORS_FOR_RECEIVABLES_MORE_THAN_6M/load_date=',dataset().load_date)",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Blob_Group_BY_Companies_Query_Destination')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseToAdls",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"load_date": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Group_by_companies.csv",
+						"folderPath": {
+							"value": "@concat('DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_GROUP_BY_COMPANIES/load_date=',dataset().load_date)",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Blob_Investment_And_Advances_To_Group_Companies_Query_Destination')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseToAdls",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"load_date": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "INVESTMENT_AND_ADVANCES_TO_GROUP_COMPANIES.csv",
+						"folderPath": {
+							"value": "@concat('DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_INVESTMENT_AND_ADVANCES_TO_GROUP_COMPANIES/load_date=',dataset().load_date)",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Blob_Networth_Query_Destination')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseToAdls",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"load_date": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Networth.csv",
+						"folderPath": {
+							"value": "@concat('DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_NETWORTH/load_date=',dataset().load_date)",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Blob_Turnover_Query_Destination')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseToAdls",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"load_date": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Turnover.csv",
+						"folderPath": {
+							"value": "@concat('DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_TURNOVER/load_date=',dataset().load_date)",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Sybase_Adjusted_Tangible_Net_Worth_ATNW_Query_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": "\"STG\".\"STG_BCIF_PARTY_IT\""
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Sybase_Creditors_Query_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": "\"STG\".\"STG_BCIF_PARTY_IT\""
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Sybase_Debtors_For_Current_Receivables_Query_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": "\"STG\".\"STG_BCIF_PARTY_IT\""
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Sybase_Debtors_For_Receivables_More_Than_6M_Query_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": "\"STG\".\"STG_BCIF_PARTY_IT\""
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Sybase_Group_By_Companies_Query_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": "\"STG\".\"STG_BCIF_PARTY_IT\""
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Sybase_Investment_And_Advances_To_Group_Companies_Query_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": "\"STG\".\"STG_BCIF_PARTY_IT\""
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Sybase_Networth_Query_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": "\"STG\".\"STG_BCIF_PARTY_IT\""
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LOS_Commercial_Financial_Sybase_Turnover_Query_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": "\"STG\".\"STG_BCIF_PARTY_IT\""
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SybaseDataset_INWARD_CHEQUE_RETURN_REPORT')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "sybase"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		}
+	]
+}

@@ -1,0 +1,2939 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "KotakADF"
+		},
+		"AzureDataLakeStorage_ufce_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage_ufce'"
+		},
+		"AzurePostgreSql_ufce_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzurePostgreSql_ufce'"
+		},
+		"ufce_prod_fa_functionKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'functionKey' of 'ufce_prod_fa'"
+		},
+		"AzureBlobStorage868_properties_privateLinkResourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/e5dc7d76-2142-4b3a-896e-fd86f66d51d8/resourceGroups/RG-UFCE-PROD/providers/Microsoft.Storage/storageAccounts/dlsufceprod"
+		},
+		"AzureBlobStorage868_properties_groupId": {
+			"type": "string",
+			"defaultValue": "blob"
+		},
+		"AzureDataLakeStorage252_properties_privateLinkResourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/e5dc7d76-2142-4b3a-896e-fd86f66d51d8/resourceGroups/RG-UFCE-PROD/providers/Microsoft.Storage/storageAccounts/dlsufceprod"
+		},
+		"AzureDataLakeStorage252_properties_groupId": {
+			"type": "string",
+			"defaultValue": "dfs"
+		},
+		"AzureFunction541_properties_privateLinkResourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/e5dc7d76-2142-4b3a-896e-fd86f66d51d8/resourceGroups/RG-UFCE-PROD/providers/Microsoft.Web/sites/FUNC-UFCE-PROD"
+		},
+		"AzureFunction541_properties_groupId": {
+			"type": "string",
+			"defaultValue": "sites"
+		},
+		"AzurePostgreSql860_properties_privateLinkResourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/e5dc7d76-2142-4b3a-896e-fd86f66d51d8/resourceGroups/RG-UFCE-PROD/providers/Microsoft.DBforPostgreSQL/servers/psql-ufce-prod"
+		},
+		"AzurePostgreSql860_properties_groupId": {
+			"type": "string",
+			"defaultValue": "postgresqlServer"
+		},
+		"AzureDataLakeStorage_ufce_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://dlsufceprod.dfs.core.windows.net/"
+		},
+		"ufce_prod_fa_properties_typeProperties_functionAppUrl": {
+			"type": "string",
+			"defaultValue": "https://func-ufce-prod.azurewebsites.net"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/integrationRuntime')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 10,
+							"cleanup": false,
+							"customProperties": []
+						},
+						"pipelineExternalComputeScaleProperties": {
+							"timeToLive": 60,
+							"numberOfPipelineNodes": 1,
+							"numberOfExternalNodes": 1
+						}
+					}
+				},
+				"managedVirtualNetwork": {
+					"type": "ManagedVirtualNetworkReference",
+					"referenceName": "default"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/default/AzureBlobStorage868')]",
+			"type": "Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"privateLinkResourceId": "[parameters('AzureBlobStorage868_properties_privateLinkResourceId')]",
+				"groupId": "[parameters('AzureBlobStorage868_properties_groupId')]"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/default/AzureDataLakeStorage252')]",
+			"type": "Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"privateLinkResourceId": "[parameters('AzureDataLakeStorage252_properties_privateLinkResourceId')]",
+				"groupId": "[parameters('AzureDataLakeStorage252_properties_groupId')]"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/default/AzureFunction541')]",
+			"type": "Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"privateLinkResourceId": "[parameters('AzureFunction541_properties_privateLinkResourceId')]",
+				"groupId": "[parameters('AzureFunction541_properties_groupId')]"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/default/AzurePostgreSql860')]",
+			"type": "Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"privateLinkResourceId": "[parameters('AzurePostgreSql860_properties_privateLinkResourceId')]",
+				"groupId": "[parameters('AzurePostgreSql860_properties_groupId')]"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Check_Blob_Load_date_wise_Delete_Activity_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Check_Blob_Load_date_Exists",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_source",
+								"type": "DatasetReference",
+								"parameters": {
+									"date2run": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									},
+									"Load_date_blob_path": {
+										"value": "@pipeline().parameters.Blob_File_Path_Location",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"exists"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "IF_Load_date_Exist_Return_True_or_False",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Check_Blob_Load_date_Exists",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "Load_date_Exists",
+							"value": {
+								"value": "@activity('Check_Blob_Load_date_Exists').output.exists",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "IF_Load_date_Exists_Delete_Else_Execute_Copy_pipeline",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "IF_Load_date_Exist_Return_True_or_False",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@variables('Load_date_Exists')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Check_Blob_Load_date_False_Activity",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "Load_date_Not_Found",
+										"value": "'Load_date is Not Found'"
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Blob_Load_date_Delete_Activity",
+									"type": "Delete",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "Check_Blob_Load_date_wise_Delete_source",
+											"type": "DatasetReference",
+											"parameters": {
+												"date2run": {
+													"value": "@pipeline().parameters.date2run",
+													"type": "Expression"
+												},
+												"Load_date_blob_path": {
+													"value": "@pipeline().parameters.Blob_File_Path_Location",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobFSReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					},
+					"Blob_File_Path_Location": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"Load_date_Exists": {
+						"type": "Boolean"
+					},
+					"Load_date_Not_Found": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "misc"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-05-06T12:00:49Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Check_Blob_Partition_Exists_Delete_Activity_Pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Check_Blob_Files_Exits",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "check_blob_files_source",
+								"type": "DatasetReference",
+								"parameters": {
+									"date2run": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									},
+									"date2runm1": {
+										"value": "@pipeline().parameters.date2runm1",
+										"type": "Expression"
+									},
+									"Blob_File_path": {
+										"value": "@pipeline().parameters.Blob_File_path",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"exists"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "IF_Files_Exists_Return_True_or_False",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Check_Blob_Files_Exits",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "FileExists",
+							"value": {
+								"value": "@activity('Check_Blob_Files_Exits').output.exists",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "IF_Condition_True_Delete_Exists_partitions",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "IF_Files_Exists_Return_True_or_False",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@variables('FileExists')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Partition_Not_Found",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FileNotThere",
+										"value": "'There is no Load_date or Partition_date Folder'"
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Delete_partitions",
+									"type": "Delete",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "check_blob_files_source",
+											"type": "DatasetReference",
+											"parameters": {
+												"date2run": {
+													"value": "@pipeline().parameters.date2run",
+													"type": "Expression"
+												},
+												"date2runm1": {
+													"value": "@pipeline().parameters.date2runm1",
+													"type": "Expression"
+												},
+												"Blob_File_path": {
+													"value": "@pipeline().parameters.Blob_File_path",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobFSReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					},
+					"date2runm1": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					},
+					"Blob_File_path": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"FileExists": {
+						"type": "Boolean"
+					},
+					"Fileisthere": {
+						"type": "String"
+					},
+					"FileNotThere": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "misc"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-05-06T12:00:49Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExecuteKramEntites')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "kram_broker_entity_model",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_broker_entity_model",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "kram_broker_model",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "kram_broker_entity_model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "derived_entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_broker_model",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "kram_corporate_entity_model",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "kram_broker_model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_corporate_entity_model",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "kram_corporate_model",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "kram_corporate_entity_model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "derived_entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_corporate_model",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "kram_nbfc_entity_model",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "kram_corporate_model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_nbfc_entity_model",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "kram_nbfc_model",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "kram_nbfc_entity_model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "derived_entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_nbfc_model",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "kram_real_estate_entity_model",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "kram_nbfc_model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_real_estate_entity_model",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "kram_real_estate_model",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "kram_real_estate_entity_model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "derived_entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_real_estate_model",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "kram_se_entity_model",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "kram_real_estate_model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_se_entity_model",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "kram_se_model",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "kram_se_entity_model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "derived_entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_se_model",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "kram_services_entity_model",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "kram_se_model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_services_entity_model",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "kram_services_model",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "kram_services_entity_model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "derived_entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_services_model",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "kram_trader_entity_model",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "kram_services_model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_trader_entity_model",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "kram_trader_model",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "kram_trader_entity_model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "derived_entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_trader_model",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "kram_union_table",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "kram_trader_model",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "derived_entity",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "kram_union_table",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"jobExecutionType": {
+						"type": "string"
+					},
+					"cosmosConfigTables": {
+						"type": "string",
+						"defaultValue": "job_capacity_details,entity_run_details"
+					},
+					"cosmosDatabaseName": {
+						"type": "string",
+						"defaultValue": "config_store"
+					},
+					"partitionValue": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow/BRD3"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-21T08:14:25Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExecuteStockStatements')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "commercial_agri_monthly_stock_statement",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": {
+									"value": "@pipeline().parameters.jobExecutionType",
+									"type": "Expression"
+								},
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "commercial_agri_monthly_stock_statement",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "consumer_monthly_stock_statement",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": {
+									"value": "@pipeline().parameters.jobExecutionType",
+									"type": "Expression"
+								},
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "consumer_monthly_stock_statement",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "wbg_monthly_stock_statement",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": {
+									"value": "@pipeline().parameters.jobExecutionType",
+									"type": "Expression"
+								},
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "wbg_monthly_stock_statement",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ard_monthly_stock_statement",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EntityProcessing",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": {
+									"value": "@pipeline().parameters.jobExecutionType",
+									"type": "Expression"
+								},
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"markerRootPath": {
+									"value": "@pipeline().parameters.markerRootPath",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "ard_monthly_stock_statement",
+								"cosmosDatabaseName": {
+									"value": "@pipeline().parameters.cosmosDatabaseName",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"jobExecutionType": {
+						"type": "string",
+						"defaultValue": "entity"
+					},
+					"cosmosConfigTables": {
+						"type": "string",
+						"defaultValue": "job_capacity_details,entity_run_details"
+					},
+					"cosmosDatabaseName": {
+						"type": "string",
+						"defaultValue": "config_store"
+					},
+					"partitionValue": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow/BRD3"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-03-30T07:13:08Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PrepareJarsAndConfigs')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "copy_trigger_config",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.01:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "CosmosDbMongoDbApiSource",
+								"batchSize": 100
+							},
+							"sink": {
+								"type": "JsonSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "JsonWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "cosmos_db_trigger_config",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "blob_json",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().parameters.container",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "UpdateJars",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "copy_global_filter_config",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.01:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Shared/PROD/UpdateJars",
+							"baseParameters": {
+								"uat_flag": {
+									"value": "@pipeline().parameters.uat_flag",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"nodeType": "Standard_E4as_v4",
+								"workers": "1",
+								"clusterVersion": "9.1.x-scala2.12"
+							}
+						}
+					},
+					{
+						"name": "copy_global_filter_config",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "copy_trigger_config",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.01:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "CosmosDbMongoDbApiSource",
+								"batchSize": 100
+							},
+							"sink": {
+								"type": "JsonSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "JsonWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "cosmos_db_global_filter_config",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "blob_json_exp_filter",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().parameters.container",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"uat_flag": {
+						"type": "string",
+						"defaultValue": "false"
+					},
+					"container": {
+						"type": "string",
+						"defaultValue": "job-data"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-06-05T06:23:07Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/RpInputFromUI')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Rp_input_from_ui",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "CosmosDbMongoDbApiSource",
+								"batchSize": 100
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"path": "$['CRN']"
+										},
+										"sink": {
+											"name": "CRN",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['RELATED_ENTITY_NAME']"
+										},
+										"sink": {
+											"name": "RELATED_ENTITY_NAME",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['RELATIONSHIP']"
+										},
+										"sink": {
+											"name": "RELATIONSHIP",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "cosmos_db_entity_store",
+								"type": "DatasetReference",
+								"parameters": {
+									"tableName": "rp_union_input_table"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "adls_entity_store",
+								"type": "DatasetReference",
+								"parameters": {
+									"partitionValue": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"entityName": {
+										"value": "@variables('entity')",
+										"type": "Expression"
+									},
+									"container": {
+										"value": "@variables('container')",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"container": {
+						"type": "String",
+						"defaultValue": "job-data"
+					},
+					"entity": {
+						"type": "String",
+						"defaultValue": "rp_input_table_ui"
+					}
+				},
+				"folder": {
+					"name": "cosmos2entity"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-12-13T07:42:10Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SynapseConsumptionLayerProcessing')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "entity_synapse_loading",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "StartMarker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.04:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"additionalColumns": [
+									{
+										"name": "p_date",
+										"value": {
+											"value": "@pipeline().parameters.partitionValue",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": {
+										"value": "@concat('entity_store/', pipeline().parameters.jobSubjectArea, '/p_date=', pipeline().parameters.partitionValue)",
+										"type": "Expression"
+									},
+									"wildcardFileName": "*.parquet",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"preCopyScript": {
+									"value": "@{concat('IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ''', pipeline().parameters.schema, ''' AND  TABLE_NAME = ''' , pipeline().parameters.jobSubjectArea, ''')) BEGIN DELETE FROM [', pipeline().parameters.schema, '].[',pipeline().parameters.jobSubjectArea, '] WHERE p_date=''', pipeline().parameters.partitionValue, ''' END')}",
+									"type": "Expression"
+								},
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"validateDataConsistency": false,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "cadenceAdlsLS",
+										"type": "LinkedServiceReference"
+									},
+									"path": "job-metadata/adf_logs"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "adls_entity_store",
+								"type": "DatasetReference",
+								"parameters": {
+									"partitionValue": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"entityName": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"container": {
+										"value": "@pipeline().parameters.container",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "synapse_store",
+								"type": "DatasetReference",
+								"parameters": {
+									"entityName": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"schema": {
+										"value": "@pipeline().parameters.schema",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "StartMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "start",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SuccessMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "entity_synapse_loading",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "success",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "FailureMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "entity_synapse_loading",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "failure",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"jobExecutionType": {
+						"type": "string",
+						"defaultValue": "synapse"
+					},
+					"partitionValue": {
+						"type": "string",
+						"defaultValue": "2024-11-15"
+					},
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"jobSubjectArea": {
+						"type": "string",
+						"defaultValue": "customer"
+					},
+					"schema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"container": {
+						"type": "string",
+						"defaultValue": "job-data"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-11-15T05:34:16Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SynapseConsumptionLayerProcessingLanding')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "landing_synapse_loading",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "StartMarker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "p_date",
+										"value": {
+											"value": "@pipeline().parameters.partitionValue",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": {
+										"value": "@concat(pipeline().parameters.jobSubjectArea,'/load_date=',replace(pipeline().parameters.partitionValue, '-', ''))",
+										"type": "Expression"
+									},
+									"wildcardFileName": "*.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"preCopyScript": {
+									"value": "@{concat('IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ''', pipeline().parameters.schema, ''' AND  TABLE_NAME = ''' , pipeline().parameters.jobSubjectArea, ''')) BEGIN DELETE FROM [', pipeline().parameters.schema, '].[',pipeline().parameters.jobSubjectArea, '] WHERE p_date=''', pipeline().parameters.partitionValue, ''' END')}",
+									"type": "Expression"
+								},
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"validateDataConsistency": false,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "cadenceAdlsLS",
+										"type": "LinkedServiceReference"
+									},
+									"path": "job-metadata/adf_logs"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "adls_landing_csv",
+								"type": "DatasetReference",
+								"parameters": {
+									"load_date": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"jobSubjectArea": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "synapse_store",
+								"type": "DatasetReference",
+								"parameters": {
+									"entityName": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"schema": {
+										"value": "@pipeline().parameters.schema",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "StartMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "start",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SuccessMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "landing_synapse_loading",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "success",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "FailureMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "landing_synapse_loading",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "failure",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"jobExecutionType": {
+						"type": "string",
+						"defaultValue": "synapse"
+					},
+					"partitionValue": {
+						"type": "string"
+					},
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"jobSubjectArea": {
+						"type": "string"
+					},
+					"schema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-11-11T10:31:37Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SynapseConsumptionLayerProcessingProfile')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "entity_synapse_loading",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "StartMarker",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.02:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"additionalColumns": [
+									{
+										"name": "p_date",
+										"value": {
+											"value": "@pipeline().parameters.partitionValue",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": {
+										"value": "@concat('profiles/', pipeline().parameters.jobSubjectArea,'/', pipeline().parameters.jobSubjectArea, '_profile', '/p_date=', pipeline().parameters.partitionValue)",
+										"type": "Expression"
+									},
+									"wildcardFileName": "*.parquet",
+									"enablePartitionDiscovery": false
+								}
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"preCopyScript": {
+									"value": "@{concat('IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ''', pipeline().parameters.schema, ''' AND  TABLE_NAME = ''' , pipeline().parameters.jobSubjectArea, ''')) BEGIN DELETE FROM [', pipeline().parameters.schema, '].[',pipeline().parameters.jobSubjectArea, '] WHERE p_date=''', pipeline().parameters.partitionValue, ''' END')}",
+									"type": "Expression"
+								},
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"validateDataConsistency": false,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "cadenceAdlsLS",
+										"type": "LinkedServiceReference"
+									},
+									"path": "job-metadata/adf_logs"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "adls_profile_store",
+								"type": "DatasetReference",
+								"parameters": {
+									"partitionValue": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"subjectArea": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"container": "job-data"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "synapse_store",
+								"type": "DatasetReference",
+								"parameters": {
+									"entityName": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"schema": {
+										"value": "@pipeline().parameters.schema",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "StartMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "start",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SuccessMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "entity_synapse_loading",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "success",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "FailureMarker",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "entity_synapse_loading",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:05:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[ONEVIEW_JOB_METADATA]",
+							"storedProcedureParameters": {
+								"job_name": {
+									"value": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"job_type": {
+									"value": {
+										"value": "@pipeline().parameters.jobExecutionType",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"partition_value": {
+									"value": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"status": {
+									"value": "failure",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CadenceSynapseLS",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"jobExecutionType": {
+						"type": "string",
+						"defaultValue": "synapse"
+					},
+					"partitionValue": {
+						"type": "string",
+						"defaultValue": "2021-04-12"
+					},
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"jobSubjectArea": {
+						"type": "string",
+						"defaultValue": "customer"
+					},
+					"schema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"container": {
+						"type": "string",
+						"defaultValue": "job-data"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-11-11T10:31:37Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/self_transfer_feedback')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Load Self Transfer",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "CosmosDbMongoDbApiSource",
+								"batchSize": 100
+							},
+							"sink": {
+								"type": "JsonSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "JsonWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "cosmos_db_entity_store",
+								"type": "DatasetReference",
+								"parameters": {
+									"tableName": "self_transfer_feedback"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "JsonGeneralized",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": "landing",
+									"path": {
+										"value": "@concat('cosmos_db/self_transfer_feedback/load_date=',replace(pipeline().parameters.p_date, '-','' ))",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Covnert Json to Parquet",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Load Self Transfer",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/utils/Convert_JSON_2_PARQUET",
+							"baseParameters": {
+								"SRC": {
+									"value": "@concat('abfss://landing@kmblewsproddatalake.dfs.core.windows.net/cosmos_db/self_transfer_feedback/load_date=',replace(pipeline().parameters.p_date, '-','' ))",
+									"type": "Expression"
+								},
+								"DEST": {
+									"value": "@concat('abfss://job-data@kmblewsproddatalake.dfs.core.windows.net/entity_store/self_transfer_feedback/p_date=',pipeline().parameters.p_date)",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "cadenceProcessingLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"workers": "1"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"p_date": {
+						"type": "string",
+						"defaultValue": "2023-06-19"
+					}
+				},
+				"folder": {
+					"name": "PROD/Loaders/Cosmos to Landing"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-06-19T12:36:28Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeStorage_ufce')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('AzureDataLakeStorage_ufce_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDataLakeStorage_ufce_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzurePostgreSql_ufce')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzurePostgreSql",
+				"typeProperties": {
+					"connectionString": "[parameters('AzurePostgreSql_ufce_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ufce_prod_fa')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureFunction",
+				"typeProperties": {
+					"functionAppUrl": "[parameters('ufce_prod_fa_properties_typeProperties_functionAppUrl')]",
+					"authentication": "Anonymous",
+					"functionKey": {
+						"type": "SecureString",
+						"value": "[parameters('ufce_prod_fa_functionKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OpenTriggerFlow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "adls_profile_store",
+								"type": "DatasetReference"
+							},
+							"name": "ewsTrigger",
+							"description": "Import data from adls_profile_store_uat"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "feedback_state_store",
+								"type": "DatasetReference"
+							},
+							"name": "loadAdls",
+							"description": "Export data to feedback_state_store"
+						}
+					],
+					"transformations": [
+						{
+							"name": "deriveStatus",
+							"description": "Creating/updating the columns 'TRIGGER_UNIQUE_ID, ROW_ID, CRN_ID, CP_ID, LOB, CUSTOMER_NAME, INDUSTRY, ADDRESS, CITY, STATE, CM_NAME, RM_NAME, TRIGGER_DATE, TRIGGER_USECASE, TRIGGER_NAME, TRIGGER_ID, TRIGGER_COUNT, VERTICAL, CRN_LOB_KEY, _created_ts, _state, _created_by, _feedback_id, _p_date'"
+						}
+					],
+					"scriptLines": [
+						"parameters{",
+						"     partitionValue as string",
+						"}",
+						"source(output(",
+						"          TRIGGER_UNIQUE_ID as string,",
+						"          ROW_ID as string,",
+						"          CRN_ID as string,",
+						"          CP_ID as string,",
+						"          LOB as string,",
+						"          CUSTOMER_NAME as string,",
+						"          INDUSTRY as string,",
+						"          ADDRESS as string,",
+						"          CITY as string,",
+						"          STATE as string,",
+						"          CM_NAME as string,",
+						"          RM_NAME as string,",
+						"          TRIGGER_DATE as timestamp,",
+						"          TRIGGER_USECASE as string,",
+						"          TRIGGER_NAME as string,",
+						"          TRIGGER_ID as string,",
+						"          TRIGGER_COUNT as integer,",
+						"          VERTICAL as string,",
+						"          CRN_LOB_KEY as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> ewsTrigger",
+						"ewsTrigger derive({_created_ts} = fromUTC(currentUTC(), 'IST'),",
+						"          {_state} = iif( VERTICAL === 'WBG','Non Suspicious','Open'),",
+						"          {_created_by} = 'EWS',",
+						"          {_feedback_id} = uuid(),",
+						"          {_p_date} = $partitionValue) ~> deriveStatus",
+						"deriveStatus sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     mapColumn(",
+						"          trigger_unique_id = TRIGGER_UNIQUE_ID,",
+						"          created_by = {_created_by},",
+						"          feedback_id = {_feedback_id},",
+						"          state = {_state},",
+						"          created_ts = {_created_ts},",
+						"          crn = CRN_ID,",
+						"          p_date = {_p_date},",
+						"          row_id = ROW_ID,",
+						"          vertical = VERTICAL",
+						"     )) ~> loadAdls"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CheckEntityStorePartitionDateExistSynapseLoad')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "check_partion_date_exists",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "adls_entity_store",
+								"type": "DatasetReference",
+								"parameters": {
+									"partitionValue": {
+										"value": "@pipeline().parameters.partitionDate",
+										"type": "Expression"
+									},
+									"entityName": {
+										"value": "@pipeline().parameters.jobSubjectArea",
+										"type": "Expression"
+									},
+									"container": {
+										"value": "@pipeline().parameters.container",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"exists"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							}
+						}
+					},
+					{
+						"name": "IF_Partition_Date_Exist_Return_True_or_False",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "check_partion_date_exists",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "partitionDateExists",
+							"value": {
+								"value": "@activity('check_partion_date_exists').output.exists",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "if_partition_date_exists_load_synapse",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "IF_Partition_Date_Exist_Return_True_or_False",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@variables('partitionDateExists')",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecuteSynapse",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "SynapseConsumptionLayerProcessing",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"partitionValue": {
+												"value": "@pipeline().parameters.partitionDate",
+												"type": "Expression"
+											},
+											"jobSubjectArea": {
+												"value": "@pipeline().parameters.jobSubjectArea",
+												"type": "Expression"
+											},
+											"schema": {
+												"value": "@pipeline().parameters.schema",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionDate": {
+						"type": "string",
+						"defaultValue": "yyyy-MM-dd"
+					},
+					"jobSubjectArea": {
+						"type": "string"
+					},
+					"schema": {
+						"type": "string"
+					},
+					"container": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"partitionDateExists": {
+						"type": "Boolean"
+					},
+					"partitionDateNotFound": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-11-11T10:31:38Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/SynapseConsumptionLayerProcessing')]"
+			]
+		}
+	]
+}

@@ -1,0 +1,756 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "KotakADF"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/SybaseDataset_KRAM_FINANCIAL_RATIOS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "sybase"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SybaseDataset_LOS_BL_FINANCIAL_RATIOS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "sybase"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SybaseDataset_LOS_HL_LP_RH')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "sybase"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SybaseDataset_LOS_WC_FINANCIAL_RATIOS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "sybase"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SybaseDataset_NeftRtgs')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "sybase"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SybaseDataset_RP_INPUT_TABLE')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "sybase"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SybaseDataset_STG_FINACLE_HTD')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "sybase"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": "\"STG\".\"STG_FINACLE_HTD\""
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SybaseDataset_STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "sybase"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": "\"STG\".\"STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS\""
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SybaseDataset_STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "sybase"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": "\"STG\".\"STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT\""
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SybaseDataset_STG_IDB_VW_DIM_ACCTS_ARCHIVE')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SybaseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "sybase"
+				},
+				"annotations": [],
+				"type": "SybaseTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": "\"STG\".\"STG_IDB_VW_DIM_ACCTS_ARCHIVE\""
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_entity_store')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "cadenceAdlsLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					},
+					"entityName": {
+						"type": "string"
+					},
+					"container": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "cadence_datasets/PROD"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat('entity_store/', dataset().entityName, '/p_date=', dataset().partitionValue)",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_landing_csv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "cadenceAdlsLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"load_date": {
+						"type": "string"
+					},
+					"jobSubjectArea": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "cadence_datasets/PROD"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat(dataset().jobSubjectArea,'/load_date=',replace(dataset().load_date, '-', ''))",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_profile_store')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "cadenceAdlsLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					},
+					"subjectArea": {
+						"type": "string"
+					},
+					"container": {
+						"type": "string",
+						"defaultValue": "job-data"
+					}
+				},
+				"folder": {
+					"name": "cadence_datasets/PROD"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat('profiles/', dataset().subjectArea,'/', dataset().subjectArea, '_profile', '/p_date=', dataset().partitionValue)",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/blob_json')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"container": {
+						"type": "string",
+						"defaultValue": "job-data"
+					}
+				},
+				"folder": {
+					"name": "cadence_datasets/PROD"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "may_15",
+						"container": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					},
+					"encodingName": "UTF-8"
+				},
+				"schema": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/blob_json_exp_filter')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"container": {
+						"type": "string",
+						"defaultValue": "job-data"
+					}
+				},
+				"folder": {
+					"name": "cadence_datasets/PROD"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "global_filter_config_details.json",
+						"folderPath": "source_data/global_filter_config_details",
+						"container": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					},
+					"encodingName": "UTF-8"
+				},
+				"schema": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/check_blob_files_source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "cadenceAdlsLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					},
+					"date2runm1": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					},
+					"Blob_File_path": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat(dataset().Blob_File_path,dataset().date2run,'/partition_date=',dataset().date2runm1)",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "PARTY_ID",
+						"type": "String"
+					},
+					{
+						"name": "SEARCH_KEY",
+						"type": "String"
+					},
+					{
+						"name": "PARTY_TYPE_LU",
+						"type": "String"
+					},
+					{
+						"name": "PARTY_TYPE_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "SHORT_NAME",
+						"type": "String"
+					},
+					{
+						"name": "FIRST_NAME",
+						"type": "String"
+					},
+					{
+						"name": "MIDDLE_NAME",
+						"type": "String"
+					},
+					{
+						"name": "LAST_NAME",
+						"type": "String"
+					},
+					{
+						"name": "TITLE_LU",
+						"type": "String"
+					},
+					{
+						"name": "TITLE_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "SHAREHOLDER_FLAG",
+						"type": "String"
+					},
+					{
+						"name": "ACTIVE_YN",
+						"type": "String"
+					},
+					{
+						"name": "GROUP_ID",
+						"type": "String"
+					},
+					{
+						"name": "EMPLOYEE_FLAG",
+						"type": "String"
+					},
+					{
+						"name": "BLACK_LISTED_FLAG",
+						"type": "String"
+					},
+					{
+						"name": "DEDUP_KEY",
+						"type": "String"
+					},
+					{
+						"name": "CLASSIFICATION_CAT_LU",
+						"type": "String"
+					},
+					{
+						"name": "CLASSIFICATION_CAT_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "PARTY_IC",
+						"type": "String"
+					},
+					{
+						"name": "PREF_INTERACT_LANG_LU",
+						"type": "String"
+					},
+					{
+						"name": "PREF_INTERACT_LANG_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "HOME_BRANCH_LU",
+						"type": "String"
+					},
+					{
+						"name": "HOME_BRANCH_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "AUTHZ_BY",
+						"type": "String"
+					},
+					{
+						"name": "AUTHZ_DT",
+						"type": "String"
+					},
+					{
+						"name": "CREATED_BY",
+						"type": "String"
+					},
+					{
+						"name": "CREATED_DATE",
+						"type": "String"
+					},
+					{
+						"name": "MODIFIED_BY",
+						"type": "String"
+					},
+					{
+						"name": "MODIFIED_DATE",
+						"type": "String"
+					},
+					{
+						"name": "ACCESS_LEVEL",
+						"type": "String"
+					},
+					{
+						"name": "EMPLOYEE_CODE",
+						"type": "String"
+					},
+					{
+						"name": "COMPANY_LU",
+						"type": "String"
+					},
+					{
+						"name": "COMPANY_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "FAMILY_ID",
+						"type": "String"
+					},
+					{
+						"name": "SUB_CLASSIFICATION_CAT_LU_CODE",
+						"type": "String"
+					},
+					{
+						"name": "HOME_BRANCH_EFF_DATE",
+						"type": "String"
+					},
+					{
+						"name": "SUB_CLASSIFICATION_CAT_LU",
+						"type": "String"
+					},
+					{
+						"name": "CLASSIFICATION_EFF_DATE",
+						"type": "String"
+					},
+					{
+						"name": "UIN_STATUS_LU",
+						"type": "String"
+					},
+					{
+						"name": "UIN_STATUS_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "PRIMARY_SEGMENT",
+						"type": "String"
+					},
+					{
+						"name": "UIN_NO",
+						"type": "String"
+					},
+					{
+						"name": "RISK_PROFILE_LU",
+						"type": "String"
+					},
+					{
+						"name": "RISK_PROFILE_LU_CODE1",
+						"type": "String"
+					},
+					{
+						"name": "RISK_PROFILE_EFF_DATE",
+						"type": "String"
+					},
+					{
+						"name": "ETL_CREATED_BY",
+						"type": "String"
+					},
+					{
+						"name": "ETL_CREATED_TIME",
+						"type": "String"
+					},
+					{
+						"name": "ETL_LAST_UPDATED_BY",
+						"type": "String"
+					},
+					{
+						"name": "ETL_LAST_UPDATED_TIME",
+						"type": "String"
+					},
+					{
+						"name": "ETL_CHANGE_FLAG",
+						"type": "String"
+					},
+					{
+						"name": "WF_AUDIT_ID",
+						"type": "String"
+					},
+					{
+						"name": "load_date",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/cosmos_db_entity_store')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "CosmosDbMongoDbEntityStore",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"tableName": {
+						"type": "string",
+						"defaultValue": "crn_rm_cm_cmt_mapping_table"
+					}
+				},
+				"folder": {
+					"name": "cadence_datasets/PROD/AlertWorkflow"
+				},
+				"annotations": [],
+				"type": "CosmosDbMongoDbApiCollection",
+				"schema": [],
+				"typeProperties": {
+					"collection": {
+						"value": "@dataset().tableName",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/cosmos_db_feedback_profile')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "CosmosDbMongoDbFeedBackProfile",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "cadence_datasets/PROD/AlertWorkflow"
+				},
+				"annotations": [],
+				"type": "CosmosDbMongoDbApiCollection",
+				"schema": [],
+				"typeProperties": {
+					"collection": "ews_feedback_profile"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/cosmos_db_global_filter_config')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "CosmosDbMongoDbLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "cadence_datasets/PROD"
+				},
+				"annotations": [],
+				"type": "CosmosDbMongoDbApiCollection",
+				"schema": [],
+				"typeProperties": {
+					"collection": "global_filter_config_details"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/cosmos_db_trigger_config')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "CosmosDbMongoDbLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "cadence_datasets/PROD"
+				},
+				"annotations": [],
+				"type": "CosmosDbMongoDbApiCollection",
+				"schema": [],
+				"typeProperties": {
+					"collection": "trigger_config_details"
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

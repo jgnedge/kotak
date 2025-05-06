@@ -1,0 +1,444 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "KotakADF"
+		},
+		"AzureBlobStorage_ufce_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage_ufce'"
+		},
+		"AzureBlobStoragenew111_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStoragenew111'"
+		},
+		"AzureDataLakeStorage_ufce_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage_ufce'"
+		},
+		"AzurePostgreSql_ufce_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzurePostgreSql_ufce'"
+		},
+		"CadenceSynapseLS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'CadenceSynapseLS'"
+		},
+		"CosmosDbMongoDbEntityStore_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'CosmosDbMongoDbEntityStore'"
+		},
+		"CosmosDbMongoDbEntityStore_account": {
+			"type": "secureString",
+			"metadata": "Secure string for 'account' of 'CosmosDbMongoDbEntityStore'",
+			"defaultValue": "kmblewskotak"
+		},
+		"CosmosDbMongoDbFeedBackProfile_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'CosmosDbMongoDbFeedBackProfile'"
+		},
+		"CosmosDbMongoDbFeedBackProfile_account": {
+			"type": "secureString",
+			"metadata": "Secure string for 'account' of 'CosmosDbMongoDbFeedBackProfile'",
+			"defaultValue": "kmblewskotak"
+		},
+		"CosmosDbMongoDbLS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'CosmosDbMongoDbLS'"
+		},
+		"CosmosDbMongoDbLS_account": {
+			"type": "secureString",
+			"metadata": "Secure string for 'account' of 'CosmosDbMongoDbLS'",
+			"defaultValue": "kmblewskotak"
+		},
+		"SybaseLS_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'SybaseLS'"
+		},
+		"TestLinkedService_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'TestLinkedService'"
+		},
+		"cadenceAdlsLS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'cadenceAdlsLS'"
+		},
+		"cadenceProcessingLS_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'cadenceProcessingLS'"
+		},
+		"ewscadenceLS_functionKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'functionKey' of 'ewscadenceLS'"
+		},
+		"ufce_prod_fa_functionKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'functionKey' of 'ufce_prod_fa'"
+		},
+		"AzureBlobStorageLS_properties_typeProperties_serviceEndpoint": {
+			"type": "string",
+			"defaultValue": "https://kmblewsproddatalake.blob.core.windows.net"
+		},
+		"AzureDataLakeStorage_ufce_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://dlsufceprod.dfs.core.windows.net/"
+		},
+		"CosmosDbMongoDbEntityStore_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "entity_store"
+		},
+		"CosmosDbMongoDbFeedBackProfile_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "profile_store"
+		},
+		"CosmosDbMongoDbLS_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "config_store"
+		},
+		"SybaseLS_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "10.240.55.130:2639"
+		},
+		"SybaseLS_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "KDWPROD_R2"
+		},
+		"SybaseLS_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "KDW_EWS"
+		},
+		"SybaseToAdls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://kmblewsproddatalake.dfs.core.windows.net/"
+		},
+		"cadenceAdlsLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://kmblewsproddatalake.dfs.core.windows.net"
+		},
+		"ewscadenceLS_properties_typeProperties_functionAppUrl": {
+			"type": "string",
+			"defaultValue": "https://kmb-ews-prod-functionapp.azurewebsites.net"
+		},
+		"ufce_prod_fa_properties_typeProperties_functionAppUrl": {
+			"type": "string",
+			"defaultValue": "https://func-ufce-prod.azurewebsites.net"
+		},
+		"AzureBlobStorage868_properties_privateLinkResourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/e5dc7d76-2142-4b3a-896e-fd86f66d51d8/resourceGroups/RG-UFCE-PROD/providers/Microsoft.Storage/storageAccounts/dlsufceprod"
+		},
+		"AzureBlobStorage868_properties_groupId": {
+			"type": "string",
+			"defaultValue": "blob"
+		},
+		"AzureDataLakeStorage252_properties_privateLinkResourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/e5dc7d76-2142-4b3a-896e-fd86f66d51d8/resourceGroups/RG-UFCE-PROD/providers/Microsoft.Storage/storageAccounts/dlsufceprod"
+		},
+		"AzureDataLakeStorage252_properties_groupId": {
+			"type": "string",
+			"defaultValue": "dfs"
+		},
+		"AzureFunction541_properties_privateLinkResourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/e5dc7d76-2142-4b3a-896e-fd86f66d51d8/resourceGroups/RG-UFCE-PROD/providers/Microsoft.Web/sites/FUNC-UFCE-PROD"
+		},
+		"AzureFunction541_properties_groupId": {
+			"type": "string",
+			"defaultValue": "sites"
+		},
+		"AzurePostgreSql860_properties_privateLinkResourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/e5dc7d76-2142-4b3a-896e-fd86f66d51d8/resourceGroups/RG-UFCE-PROD/providers/Microsoft.DBforPostgreSQL/servers/psql-ufce-prod"
+		},
+		"AzurePostgreSql860_properties_groupId": {
+			"type": "string",
+			"defaultValue": "postgresqlServer"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "KotakADF_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"CadenceSynapseLS_connectionString": {
+						"value": "[parameters('CadenceSynapseLS_connectionString')]"
+					},
+					"CosmosDbMongoDbEntityStore_connectionString": {
+						"value": "[parameters('CosmosDbMongoDbEntityStore_connectionString')]"
+					},
+					"CosmosDbMongoDbEntityStore_account": {
+						"value": "[parameters('CosmosDbMongoDbEntityStore_account')]"
+					},
+					"CosmosDbMongoDbFeedBackProfile_connectionString": {
+						"value": "[parameters('CosmosDbMongoDbFeedBackProfile_connectionString')]"
+					},
+					"CosmosDbMongoDbFeedBackProfile_account": {
+						"value": "[parameters('CosmosDbMongoDbFeedBackProfile_account')]"
+					},
+					"CosmosDbMongoDbLS_connectionString": {
+						"value": "[parameters('CosmosDbMongoDbLS_connectionString')]"
+					},
+					"CosmosDbMongoDbLS_account": {
+						"value": "[parameters('CosmosDbMongoDbLS_account')]"
+					},
+					"SybaseLS_password": {
+						"value": "[parameters('SybaseLS_password')]"
+					},
+					"cadenceAdlsLS_accountKey": {
+						"value": "[parameters('cadenceAdlsLS_accountKey')]"
+					},
+					"cadenceProcessingLS_accessToken": {
+						"value": "[parameters('cadenceProcessingLS_accessToken')]"
+					},
+					"ewscadenceLS_functionKey": {
+						"value": "[parameters('ewscadenceLS_functionKey')]"
+					},
+					"AzureBlobStorageLS_properties_typeProperties_serviceEndpoint": {
+						"value": "[parameters('AzureBlobStorageLS_properties_typeProperties_serviceEndpoint')]"
+					},
+					"CosmosDbMongoDbEntityStore_properties_typeProperties_database": {
+						"value": "[parameters('CosmosDbMongoDbEntityStore_properties_typeProperties_database')]"
+					},
+					"CosmosDbMongoDbFeedBackProfile_properties_typeProperties_database": {
+						"value": "[parameters('CosmosDbMongoDbFeedBackProfile_properties_typeProperties_database')]"
+					},
+					"CosmosDbMongoDbLS_properties_typeProperties_database": {
+						"value": "[parameters('CosmosDbMongoDbLS_properties_typeProperties_database')]"
+					},
+					"SybaseLS_properties_typeProperties_server": {
+						"value": "[parameters('SybaseLS_properties_typeProperties_server')]"
+					},
+					"SybaseLS_properties_typeProperties_database": {
+						"value": "[parameters('SybaseLS_properties_typeProperties_database')]"
+					},
+					"SybaseLS_properties_typeProperties_username": {
+						"value": "[parameters('SybaseLS_properties_typeProperties_username')]"
+					},
+					"SybaseToAdls_properties_typeProperties_url": {
+						"value": "[parameters('SybaseToAdls_properties_typeProperties_url')]"
+					},
+					"cadenceAdlsLS_properties_typeProperties_url": {
+						"value": "[parameters('cadenceAdlsLS_properties_typeProperties_url')]"
+					},
+					"ewscadenceLS_properties_typeProperties_functionAppUrl": {
+						"value": "[parameters('ewscadenceLS_properties_typeProperties_functionAppUrl')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "KotakADF_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'KotakADF_ArmTemplate_0')]"
+			]
+		},
+		{
+			"name": "KotakADF_ArmTemplate_2",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'KotakADF_ArmTemplate_1')]"
+			]
+		},
+		{
+			"name": "KotakADF_ArmTemplate_3",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureBlobStorage_ufce_connectionString": {
+						"value": "[parameters('AzureBlobStorage_ufce_connectionString')]"
+					},
+					"AzureBlobStoragenew111_connectionString": {
+						"value": "[parameters('AzureBlobStoragenew111_connectionString')]"
+					},
+					"TestLinkedService_connectionString": {
+						"value": "[parameters('TestLinkedService_connectionString')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'KotakADF_ArmTemplate_2')]"
+			]
+		},
+		{
+			"name": "KotakADF_ArmTemplate_4",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_4.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureDataLakeStorage_ufce_accountKey": {
+						"value": "[parameters('AzureDataLakeStorage_ufce_accountKey')]"
+					},
+					"AzurePostgreSql_ufce_connectionString": {
+						"value": "[parameters('AzurePostgreSql_ufce_connectionString')]"
+					},
+					"ufce_prod_fa_functionKey": {
+						"value": "[parameters('ufce_prod_fa_functionKey')]"
+					},
+					"AzureBlobStorage868_properties_privateLinkResourceId": {
+						"value": "[parameters('AzureBlobStorage868_properties_privateLinkResourceId')]"
+					},
+					"AzureBlobStorage868_properties_groupId": {
+						"value": "[parameters('AzureBlobStorage868_properties_groupId')]"
+					},
+					"AzureDataLakeStorage252_properties_privateLinkResourceId": {
+						"value": "[parameters('AzureDataLakeStorage252_properties_privateLinkResourceId')]"
+					},
+					"AzureDataLakeStorage252_properties_groupId": {
+						"value": "[parameters('AzureDataLakeStorage252_properties_groupId')]"
+					},
+					"AzureFunction541_properties_privateLinkResourceId": {
+						"value": "[parameters('AzureFunction541_properties_privateLinkResourceId')]"
+					},
+					"AzureFunction541_properties_groupId": {
+						"value": "[parameters('AzureFunction541_properties_groupId')]"
+					},
+					"AzurePostgreSql860_properties_privateLinkResourceId": {
+						"value": "[parameters('AzurePostgreSql860_properties_privateLinkResourceId')]"
+					},
+					"AzurePostgreSql860_properties_groupId": {
+						"value": "[parameters('AzurePostgreSql860_properties_groupId')]"
+					},
+					"AzureDataLakeStorage_ufce_properties_typeProperties_url": {
+						"value": "[parameters('AzureDataLakeStorage_ufce_properties_typeProperties_url')]"
+					},
+					"ufce_prod_fa_properties_typeProperties_functionAppUrl": {
+						"value": "[parameters('ufce_prod_fa_properties_typeProperties_functionAppUrl')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'KotakADF_ArmTemplate_3')]"
+			]
+		},
+		{
+			"name": "KotakADF_ArmTemplate_5",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_5.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'KotakADF_ArmTemplate_4')]"
+			]
+		},
+		{
+			"name": "KotakADF_ArmTemplate_6",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_6.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'KotakADF_ArmTemplate_5')]"
+			]
+		},
+		{
+			"name": "KotakADF_ArmTemplate_7",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_7.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'KotakADF_ArmTemplate_6')]"
+			]
+		}
+	]
+}

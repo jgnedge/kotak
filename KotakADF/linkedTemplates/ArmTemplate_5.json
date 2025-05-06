@@ -1,0 +1,3420 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "KotakADF"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/MonthlyKramExecution')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "check_trigger_date",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(startOfMonth(pipeline().parameters.partitionValue,'yyyy-MM-dd'),pipeline().parameters.partitionValue)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecuteKramEntityfor-1st-day-of-month",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "ExecuteKramEntites",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"markerRootPath": {
+												"value": "@pipeline().parameters.markerRootPath",
+												"type": "Expression"
+											},
+											"cosmosDatabaseName": {
+												"value": "@pipeline().parameters.cosmosDatabaseName",
+												"type": "Expression"
+											},
+											"partitionValue": {
+												"value": "@pipeline().parameters.partitionValue",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string",
+						"defaultValue": "2021-10-01"
+					},
+					"cosmosConfigTables": {
+						"type": "string"
+					},
+					"cosmosDatabaseName": {
+						"type": "string",
+						"defaultValue": "config_store"
+					},
+					"jobSubjectArea": {
+						"type": "string"
+					},
+					"jobExecutionType": {
+						"type": "string"
+					},
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"schema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"container": {
+						"type": "string",
+						"defaultValue": "job-data"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow/BRD3"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-23T07:15:34Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MonthlyStockStatement')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "M-3",
+				"activities": [
+					{
+						"name": "check_trigger_date",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(startOfMonth(pipeline().parameters.partitionValue,'yyyy-MM-dd'),pipeline().parameters.partitionValue)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExecuteStocksStementMonth-4",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "ExecuteStockStatements",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"markerRootPath": {
+												"value": "@pipeline().parameters.markerRootPath",
+												"type": "Expression"
+											},
+											"jobExecutionType": {
+												"value": "@pipeline().parameters.jobExecutionType",
+												"type": "Expression"
+											},
+											"cosmosDatabaseName": {
+												"value": "@pipeline().parameters.cosmosDatabaseName",
+												"type": "Expression"
+											},
+											"partitionValue": {
+												"value": "@startOfMonth(subtractFromTime(pipeline().parameters.partitionValue, 4, 'MONTH'),'yyyy-MM-dd')",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string",
+						"defaultValue": "2021-10-01"
+					},
+					"cosmosConfigTables": {
+						"type": "string",
+						"defaultValue": "job_capacity_details"
+					},
+					"cosmosDatabaseName": {
+						"type": "string",
+						"defaultValue": "config_store"
+					},
+					"jobSubjectArea": {
+						"type": "string"
+					},
+					"jobExecutionType": {
+						"type": "string",
+						"defaultValue": "entity"
+					},
+					"markerRootPath": {
+						"type": "string",
+						"defaultValue": "job-metadata/markers"
+					},
+					"schema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"container": {
+						"type": "string",
+						"defaultValue": "job-data"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow/BRD3"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-11-13T16:15:44Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OpenTriggers')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Open Triggers",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Derive Status",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "comment",
+										"value": ""
+									},
+									{
+										"name": "feedback",
+										"value": ""
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": {
+										"value": "@concat('alert_workflow/feedback_status_stage_one','/p_date=', pipeline().parameters.partitionValue)",
+										"type": "Expression"
+									},
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "CosmosDbMongoDbApiSink",
+								"writeBatchTimeout": "02:30:00",
+								"writeBehavior": "upsert"
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "feedback",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['feedback']"
+										}
+									},
+									{
+										"source": {
+											"name": "comment",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['comment']"
+										}
+									},
+									{
+										"source": {
+											"name": "trigger_unique_id",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['trigger_unique_id']"
+										}
+									},
+									{
+										"source": {
+											"name": "created_by",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['created_by']"
+										}
+									},
+									{
+										"source": {
+											"name": "feedback_id",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['feedback_id']"
+										}
+									},
+									{
+										"source": {
+											"name": "state",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['state']"
+										}
+									},
+									{
+										"source": {
+											"name": "created_ts",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['created_ts']"
+										}
+									},
+									{
+										"source": {
+											"name": "crn",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['crn']"
+										}
+									},
+									{
+										"source": {
+											"name": "p_date",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['p_date']"
+										}
+									},
+									{
+										"source": {
+											"name": "row_id",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['row_id']"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "feedback_state_store",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@variables('container')",
+										"type": "Expression"
+									},
+									"partitionValue": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "cosmos_db_feedback_profile",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Update Master Feedback Profile",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Open Triggers",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "UpdateCrnStatus",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Derive Status",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "OpenTriggerFlow",
+								"type": "DataFlowReference",
+								"parameters": {
+									"partitionValue": {
+										"value": "'@{pipeline().parameters.partitionValue}'",
+										"type": "Expression"
+									}
+								},
+								"datasetParameters": {
+									"ewsTrigger": {
+										"partitionValue": {
+											"value": "@pipeline().parameters.partitionValue",
+											"type": "Expression"
+										},
+										"subjectArea": "ews",
+										"container": {
+											"value": "@variables('container')",
+											"type": "Expression"
+										}
+									},
+									"loadAdls": {
+										"container": {
+											"value": "@variables('container')",
+											"type": "Expression"
+										},
+										"partitionValue": {
+											"value": "@pipeline().parameters.partitionValue",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"container": {
+						"type": "String",
+						"defaultValue": "job-data"
+					}
+				},
+				"folder": {
+					"name": "PROD/alert_workflow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-11-14T09:28:30Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SynapseConditionProfileEntity')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CheckProfileEntity",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.jobExecutionType,'profile')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "synapse_consumption_population_entity",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "SynapseConsumptionLayerProcessing",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"partitionValue": {
+												"value": "@pipeline().parameters.partitionValue",
+												"type": "Expression"
+											},
+											"markerRootPath": {
+												"value": "@pipeline().parameters.markerRootPath",
+												"type": "Expression"
+											},
+											"jobSubjectArea": {
+												"value": "@pipeline().parameters.jobSubjectArea",
+												"type": "Expression"
+											},
+											"schema": {
+												"value": "@pipeline().parameters.schema",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "synapse_consumption_population_profile",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "SynapseConsumptionLayerProcessingProfile",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"partitionValue": {
+												"value": "@pipeline().parameters.partitionValue",
+												"type": "Expression"
+											},
+											"markerRootPath": {
+												"value": "@pipeline().parameters.markerRootPath",
+												"type": "Expression"
+											},
+											"jobSubjectArea": {
+												"value": "@pipeline().parameters.jobSubjectArea",
+												"type": "Expression"
+											},
+											"schema": {
+												"value": "@pipeline().parameters.schema",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"jobExecutionType": {
+						"type": "string"
+					},
+					"partitionValue": {
+						"type": "string"
+					},
+					"jobSubjectArea": {
+						"type": "string"
+					},
+					"markerRootPath": {
+						"type": "string"
+					},
+					"schema": {
+						"type": "string"
+					},
+					"container": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "PROD/CadenzFlow"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-11-11T10:31:38Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/consumer-commercial-email-trigger1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "consumer-email-trigger1",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "consumer-commercial-email-trigger1",
+							"body": {
+								"division": "consumer"
+							},
+							"headers": {},
+							"method": "POST"
+						},
+						"linkedServiceName": {
+							"referenceName": "ufce_prod_fa",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "commercial-email-trigger1",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "consumer-commercial-email-trigger1",
+							"body": {
+								"division": "commercial"
+							},
+							"headers": {},
+							"method": "POST"
+						},
+						"linkedServiceName": {
+							"referenceName": "ufce_prod_fa",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "DEV/Alerts-UFCE"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-05-06T12:00:49Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/consumer-commercial-email-trigger5')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "consumer-email-trigger5",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "consumer-commercial-email-trigger5",
+							"body": {
+								"division": "consumer"
+							},
+							"headers": {},
+							"method": "POST"
+						},
+						"linkedServiceName": {
+							"referenceName": "ufce_prod_fa",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "commercial-email-trigger5",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "consumer-commercial-email-trigger5",
+							"body": {
+								"division": "commercial"
+							},
+							"headers": {},
+							"method": "POST"
+						},
+						"linkedServiceName": {
+							"referenceName": "ufce_prod_fa",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "DEV/Alerts-UFCE"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-05-06T12:00:49Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stag2landing_Finacle1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "STG-STG_FINACLE_HTD",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CHECK_BLOB_PARTITION_EXISTS_STG_FINACLE_HTD",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": {
+									"value": "@concat('select * into #derivedhtd from (\nselect *, DERIVED_TRANS_ID = (LEFT(CONVERT(VARCHAR(30),TRAN_DATE),10)+ TRAN_ID + ''_'' + PART_TRAN_SRL_NUM), ROW_NUMBER() over (PARTITION BY TRAN_ID, PART_TRAN_SRL_NUM order by PSTD_DATE desc) as RNK  from \"STG\".\"STG_FINACLE_HTD\" where ACID in (select distinct ACID from \"STG\".\"STG_FINACLE_GAM\" where \n\"SCHM_TYPE\" in (''CA'',''CCA'',''ODA'') and \nCUST_ID in (select distinct \"BCIF_BANK Id\" from \"STG\".\"STG_GLEMS_MVIEW_FAC_DTLS\" where \"Limit Suffix\" in (''AJANT'',''ALKEM'',''BAIR'',''BANF'',''BC'',''BCCAP'',''BCCPX'',''BCCXP'',''BCD'',''BCL'',''BCLM'',''BCTL'',''BCWC'',''BG1'',''BG2'',''BG3'',''BG4'',''BGADH'',''BGBBD'',''BGFIN'',''BGLIM'',''BGPER'',''BGR2'',''BILLL'',''BLUEC'',''BUCR'',''BURCR'',''BUYCD'',''BUYCR'',''BUYER'',''BUYRC'',''BYCR'',''CADIL'',''CAPEX'',''CAPLC'',''CBDST'',''CC'',''CCOD'',''CHAN'',''CLNBI'',''CLNBL'',''CVVJK'',''DBAC1'',''DBAC2'',''DBAC5'',''DBDAC'',''DBDDW'',''DOMBD'',''DRWR'',''EBDMM'',''EBDTA'',''EBDTM'',''EBDTT'',''EBDVE'',''EPC'',''EPC1'',''EPC2'',''EPCCR'',''EPCFC'',''FACTO'',''FBD'',''FBN'',''FBP'',''FBP2'',''FBPAD'',''FDCLT'',''FLCIN'',''FRGNA'',''FRGNB'',''IDEA'',''ILCFL'',''IMCLR'',''IMSTR'',''INBAL'',''INDIS'',''INHHM'',''INMNM'',''INMUL'',''INOT1'',''INOT2'',''INOT3'',''INOT4'',''INOT6'',''INTAF'',''INTAS'',''INVAD'',''INVDF'',''INVDI'',''INVFI'',''INVO'',''INVPU'',''KCCL'',''LALOU'',''LC'',''LCBD'',''LCBDC'',''LCBDL'',''LCBDS'',''LCBL'',''LCCAP'',''LCCP1'',''LCCP2'',''LCCPX'',''LCFBL'',''LCIBL'',''LCIMP'',''LCIND'',''LCLIM'',''LCNPB'',''LCNSB'',''LCPBD'',''LCPXF'',''LCPXI'',''LCSBD'',''LCWC'',''LCWCF'',''LCWCI'',''LOTML'',''LOU'',''MEDLE'',''MICRO'',''MULDI'',''NICHO'',''OD'',''ODFD'',''ODHAN'',''PBD1'',''PBD2'',''PBUY1'',''PBUY2'',''PBUY3'',''PBUY4'',''PC'',''PCFC1'',''PCFC2'',''PCFCI'',''PCFCL'',''PCFCN'',''PCFCR'',''PCFCY'',''PCFRN'',''PCINR'',''PCLI'',''PCLIM'',''PCRUP'',''PCWC'',''PION'',''POBAL'',''POFUN'',''POHOS'',''POMNM'',''POMUL'',''POONA'',''POTML'',''PSC'',''PSCFC'',''PSCIN'',''PUR'',''PURC1'',''RECEV'',''RFACT'',''SBD1'',''SBD11'',''SBD2'',''SBD3'',''SBD4'',''SBD5'',''SBD6'',''SBDAL'',''SBDB'',''SBDCE'',''SBDGB'',''SBDMM'',''SBDS'',''SBDTM'',''SBLC'',''SBLCB'',''SBLCI'',''SBLCM'',''SBLCY'',''SIF'',''SPENG'',''STL'',''STLAD'',''STLCP'',''STLFC'',''STLL'',''STLLI'',''STLWD'',''SUNPH'',''SUPL'',''SUPP'',''TATA'',''TCD'',''TREDS'',''VAPIP'',''WCCLI'',''WCDL'',''WCDL2'',''WCDLA'',''WCDLD'',''WCDLM''))) and DATEFORMAT(LCHG_TIME, ''yyyymmdd'') = ''',pipeline().parameters.delta,''' ','\n)a\n\nselect * from #derivedhtd where RNK=1 ')",
+									"type": "Expression"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"maxRowsPerFile": 100000,
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SybaseDataset_STG_FINACLE_HTD",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_STG_FINACLE_HTD1",
+								"type": "DatasetReference",
+								"parameters": {
+									"date2run": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									},
+									"date2runm1": {
+										"value": "@pipeline().parameters.delta",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "CHECK_BLOB_PARTITION_EXISTS_STG_FINACLE_HTD",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Partition_Exists_Delete_Activity_Pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"date2runm1": {
+									"value": "@pipeline().parameters.delta",
+									"type": "Expression"
+								},
+								"Blob_File_path": {
+									"value": "@variables('Blob_File_Path_STG_FINACLE_HTD')",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					},
+					"delta": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"variables": {
+					"Blob_File_Path_STG_FINACLE_HTD": {
+						"type": "String",
+						"defaultValue": "FINACLE/STG.STG_FINACLE_HTD/load_date="
+					}
+				},
+				"folder": {
+					"name": "HistoricalRun"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-04-11T12:58:00Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stag2landing_INWARD_CHEQUE_RETURN_REPORT')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CHECK_BLOB_LOAD_DATE_EXISTS_INWARD_CHEQUE_RETURN_REPORT",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@replace(pipeline().parameters.partitionValue,'-','')",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Blob_File_Path_INWARD_CHEQUE_RETURN_REPORT')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "INWARD_CHEQUE_RETURN_REPORT",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CHECK_BLOB_LOAD_DATE_EXISTS_INWARD_CHEQUE_RETURN_REPORT",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": {
+									"value": "@concat('SELECT\n  ICI.ACCT_SOL_ID AS \"ACCT_SOL_ID\",\n  GAC.SECTOR_CODE ,\n  (\n    CASE\n      WHEN ICI.ACID = GAM.ACID\n      THEN GAM.FORACID\n      ELSE ''''\n    END) AS \"ACCT_NUMBER\",\n  (\n    CASE\n      WHEN ICI.ACID = GAM.ACID\n      THEN GAM.ACCT_NAME\n      ELSE ''''\n    END) AS \"ACCT_NAME\",\n  (\n    CASE\n      WHEN GAM.ACID=ICI.ACID\n      THEN GAM.SCHM_CODE\n      ELSE ''''\n    END)AS \"SCHEME_CODE\" ,\n  (\n    CASE\n      WHEN GAM.ACID=ICI.ACID\n      THEN GAM.SCHM_TYPE\n      ELSE ''''\n    END)AS SCHM_TYPE ,\n  (\n    CASE\n      WHEN GAM.ACID=ICI.ACID\n      THEN CONVERT(VARCHAR,GAM.ACCT_OPN_DATE)\n      ELSE ''''\n    END)       AS ACCT_OPN_DATE ,\n  ICI.INST_NUM AS \"INSTR_NO\",\n  ICI.INST_AMT AS \"AMOUNT\",\n  ICI.VALUE_DATE ,\n  ICI.ZONE_CODE AS \"ZONE_CODE\",\n  ICI.SOL_ID    AS \"ZONE_SOL\",\n  (\n    CASE\n      WHEN GAM.FREZ_CODE <> ''''\n      THEN ''FREEZED''\n      ELSE (\n          CASE GAM.SCHM_TYPE\n            WHEN ''SBA''\n            THEN SMT.ACCT_STATUS\n            WHEN ''CAA''\n            THEN SMT.ACCT_STATUS\n            WHEN ''ODA''\n            THEN CAM.ACCT_STATUS\n            WHEN ''CCA''\n            THEN CAM.ACCT_STATUS\n          END)\n    END) AS \"CASA_ACCOUNT_STATUS\",\n  CASE\n    WHEN ICI.REJ_CODE_1 IS NOT NULL\n    THEN ISNULL(ICI.REJ_CODE_1,'''') +'' - ''+ CRC.CLG_REJ_DESC\n  END AS \"RETN_CODE_1\",\n  CASE\n    WHEN ICI.REJ_CODE_2 IS NOT NULL\n    THEN ISNULL(ICI.REJ_CODE_2,'''') +'' - ''+ CRC.CLG_REJ_DESC\n  END AS \"RETN_CODE_2\",\n  CASE\n    WHEN ICI.REJ_CODE_3 IS NOT NULL\n    THEN ISNULL(ICI.REJ_CODE_3,'''') +'' - ''+ CRC.CLG_REJ_DESC\n  END AS \"RETN_CODE_3\",\n  CASE\n    WHEN ICI.REJ_CODE_4 IS NOT NULL\n    THEN ISNULL(ICI.REJ_CODE_4,'''') +'' - ''+ CRC.CLG_REJ_DESC\n  END AS \"RETN_CODE_4\",\n  CASE\n    WHEN ICI.REJ_CODE_5 IS NOT NULL\n    THEN ISNULL(ICI.REJ_CODE_5,'''') +'' - ''+ CRC.CLG_REJ_DESC\n  END AS \"RETN_CODE_5\",\n  ICI.PRES_SORT_CODE ,\n  (\n    CASE\n      WHEN CMG.CIF_ID = GAM.CIF_ID\n      THEN CMG.CUST_TYPE_CODE\n      ELSE ''''\n    END)        AS \"CUST_TYPE\",\n  ICI.ZONE_DATE AS \"ZONE_DATE\",\n  CUSTTYPE.CUST_TYPE_DESC,\n  GAM.CIF_ID\nFROM\n  STG.STG_FINACLE_ICI ICI\nINNER JOIN STG.STG_FINACLE_GAM GAM\nON\n  ICI.ACID      = GAM.ACID\nAND ICI.BANK_ID = GAM.BANK_ID\nINNER JOIN STG.STG_FINACLE_CMG CMG\nON\n  GAM.CIF_ID    = CMG.CIF_ID\nAND CMG.BANK_ID = GAM.BANK_ID\nINNER JOIN STG.STG_FINACLE_CRC CRC\nON\n  ICI.REJ_CODE_1 = CRC.CLG_REJ_CODE\nLEFT JOIN STG.STG_FINACLE_SMT SMT\nON\n  GAM.ACID      = SMT.ACID\nAND GAM.BANK_ID = SMT.BANK_ID\nLEFT JOIN STG.STG_FINACLE_CAM CAM\nON\n  GAM.ACID      = CAM.ACID\nAND GAM.BANK_ID = CAM.BANK_ID\nINNER JOIN STG.STG_FINACLE_GAC GAC\nON\n  GAC.ACID=ICI.ACID\nINNER JOIN\n  (\n    SELECT\n      A.VALUE,\n      A.CATEGORYID,\n      B.LOCALETEXT AS CUST_TYPE_DESC\n    FROM\n      STG.STG_FINACLE_CATEGORIES A\n    INNER JOIN STG.STG_FINACLE_CATEGORY_LANG B\n    ON\n      A.CATEGORYID = B.CATEGORYID\n    WHERE\n      CATEGORYTYPE = ''ACCOUNT_TYPE''\n  )\n  CUSTTYPE ON CMG.CUST_TYPE_CODE = CUSTTYPE.VALUE\nWHERE\n  GAM.ENTITY_CRE_FLG   =''Y''\nAND GAM.DEL_FLG        = ''N''\nAND GAM.CIF_ID in (select DISTINCT `BCIF_BANK Id` FROM STG.STG_GLEMS_MVIEW_FAC_DTLS\nWHERE \n`Limit Suffix` IN (''AJANT'',''ALKEM'',''BAIR'',''BANF'',''BC'',''BCCAP'',''BCCPX'',''BCCXP'',''BCD'',''BCL'',''BCLM'',''BCTL'',\n''BCWC'',''BG1'',''BG2'',''BG3'',''BG4'',''BGADH'',''BGBBD'',''BGFIN'',''BGLIM'',''BGPER'',''BGR2'',''BILLL'',\n''BLUEC'',''BUCR'',''BURCR'',''BUYCD'',''BUYCR'',''BUYER'',''BUYRC'',''BYCR'',''CADIL'',''CAPEX'',''CAPLC'',\n''CBDST'',''CC'',''CCOD'',''CHAN'',''CLNBI'',''CLNBL'',''CVVJK'',''DBAC1'',''DBAC2'',''DBAC5'',''DBDAC'',\n''DBDDW'',''DOMBD'',''DRWR'',''EBDMM'',''EBDTA'',''EBDTM'',''EBDTT'',''EBDVE'',''EPC'',''EPC1'',''EPC2'',\n''EPCCR'',''EPCFC'',''FACTO'',''FBD'',''FBN'',''FBP'',''FBP2'',''FBPAD'',''FDCLT'',''FLCIN'',''FRGNA'',\n''FRGNB'',''IDEA'',''ILCFL'',''IMCLR'',''IMSTR'',''INBAL'',''INDIS'',''INHHM'',''INMNM'',''INMUL'',\n''INOT1'',''INOT2'',''INOT3'',''INOT4'',''INOT6'',''INTAF'',''INTAS'',''INVAD'',''INVDF'',''INVDI'',\n''INVFI'',''INVO'',''INVPU'',''KCCL'',''LALOU'',''LC'',''LCBD'',''LCBDC'',''LCBDL'',''LCBDS'',''LCBL'',\n''LCCAP'',''LCCP1'',''LCCP2'',''LCCPX'',''LCFBL'',''LCIBL'',''LCIMP'',''LCIND'',''LCLIM'',''LCNPB'',\n''LCNSB'',''LCPBD'',''LCPXF'',''LCPXI'',''LCSBD'',''LCWC'',''LCWCF'',''LCWCI'',''LOTML'',''LOU'',\n''MEDLE'',''MICRO'',''MULDI'',''NICHO'',''OD'',''ODFD'',''ODHAN'',''PBD1'',''PBD2'',''PBUY1'',''PBUY2'',\n''PBUY3'',''PBUY4'',''PC'',''PCFC1'',''PCFC2'',''PCFCI'',''PCFCL'',''PCFCN'',''PCFCR'',''PCFCY'',''PCFRN'',\n''PCINR'',''PCLI'',''PCLIM'',''PCRUP'',''PCWC'',''PION'',''POBAL'',''POFUN'',''POHOS'',''POMNM'',''POMUL'',\n''POONA'',''POTML'',''PSC'',''PSCFC'',''PSCIN'',''PUR'',''PURC1'',''RECEV'',''RFACT'',''SBD1'',''SBD11'',\n''SBD2'',''SBD3'',''SBD4'',''SBD5'',''SBD6'',''SBDAL'',''SBDB'',''SBDCE'',''SBDGB'',''SBDMM'',''SBDS'',''SBDTM'',\n''SBLC'',''SBLCB'',''SBLCI'',''SBLCM'',''SBLCY'',''SIF'',''SPENG'',''STL'',''STLAD'',''STLCP'',''STLFC'',''STLL'',\n''STLLI'',''STLWD'',''SUNPH'',''SUPL'',''SUPP'',''TATA'',''TCD'',''TREDS'',''VAPIP'',''WCCLI'',''WCDL'',''WCDL2'',\n''WCDLA'',''WCDLD'',''WCDLM'')\n)\nAND CMG.ENTITY_CRE_FLG =''Y''\nAND CMG.DEL_FLG        =''N''\nand REJ_TYPE = ''I''\nAND ICI.ZONE_DATE BETWEEN ''',  startOfMonth(subtractFromTime(pipeline().parameters.partitionValue, 1, 'MONTH'),'yyyy-MM-dd'),''' AND ''', subtractFromTime(pipeline().parameters.partitionValue, 1, 'DAY','yyyy-MM-dd'), '''')",
+									"type": "Expression"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SybaseDataset_INWARD_CHEQUE_RETURN_REPORT",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_INWARD_CHEQUE_RETURN_REPORT",
+								"type": "DatasetReference",
+								"parameters": {
+									"partitionValue": {
+										"value": "@pipeline().parameters.partitionValue",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "synapse_consumption",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "INWARD_CHEQUE_RETURN_REPORT",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SynapseConsumptionLayerProcessingLanding",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"jobExecutionType": "synapse",
+								"partitionValue": {
+									"value": "@pipeline().parameters.partitionValue",
+									"type": "Expression"
+								},
+								"jobSubjectArea": "INWARD_CHEQUE_RETURN_REPORT",
+								"schema": "dbo"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"Blob_File_Path_INWARD_CHEQUE_RETURN_REPORT": {
+						"type": "String",
+						"defaultValue": "INWARD_CHEQUE_RETURN_REPORT/load_date="
+					}
+				},
+				"folder": {
+					"name": "stg2landingBrd2"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-04-11T12:58:00Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stag2landing_KRAM_BROKER_MODEL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Blob_File_Path_Location')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "KRAM_BROKER_MODEL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": {
+									"value": "@concat('select\n  mc.company_code as ''COMPANY CODE'',\n  mc.company_name as ''COMPANY NAME'',\n  mc.company_bankcode as ''CUSTOMER ID'',\n  mc.bcif as ''BCIF'',\n  mm.m_name as ''MODEL NAME'',\n  DATEFORMAT(ch.comp_inidate , ''yyyy-MM-dd'') as ''INITATION DATE'',\n  DATEFORMAT(ch.comp_datefinal, ''yyyy-MM-dd'') as ''FINALISATION DATE'',\n  ch.comp_baseyear as ''BASE YEAR'',\n  ch.rating_year as ''RATING YEAR'',\n  mf.comp_findesc as ''LINEITEM'',\n  df.data2_year as ''FINANCIAL YEAR'',\n  df.data2_value as ''VALUE'',\n  ch.comp_overallgrade as ''LATEST OBLIGOR RATING'',\n  df.data2_year as ''LAST AUDITED YEAR''\nfrom\n  STG.STG_KRAM_MST_COMPANY mc,\n  STG.STG_KRAM_COMP_HEADER ch,\n  STG.STG_KRAM_MST_MODEL mm,\n  STG.STG_KRAM_MST_COMPFIN mf,\n  STG.STG_KRAM_DATA_COMPFIN1 df\nwhere\n  mc.company_code = ch.comp_compcode\n  and ch.comp_model = mm.m_code\n  and df.data2_assesscode = ch.comp_assesscode\n  and mf.comp_fincode = df.data2_compfincode\n  and df.data2_year = ch.comp_baseyear\n  and ch.comp_casefinal = ''Y''\n  and mm.m_code = ''M12''\n  and mf.comp_mcode = ch.comp_model\n  and ch.comp_baseyear > ',substring(pipeline().parameters.date2run,0 ,4 ),'-3\n  and ch.comp_baseyear <= ',substring(pipeline().parameters.date2run,0 ,4 ))",
+									"type": "Expression"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SybaseDataset_KRAM_FINANCIAL_RATIOS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_Derived_KRAM_Models",
+								"type": "DatasetReference",
+								"parameters": {
+									"date2run": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									},
+									"table": {
+										"value": "@pipeline().parameters.table",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					},
+					"table": {
+						"type": "string",
+						"defaultValue": "KRAM_BROKER_MODEL"
+					}
+				},
+				"variables": {
+					"Blob_File_Path_Location": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/KRAM_BROKER_MODEL/load_date="
+					}
+				},
+				"folder": {
+					"name": "stag2landing_deriveddatasets"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-21T13:10:02Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stag2landing_KRAM_FINANCIAL_RATIOS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "KRAM_FINANCIAL_RATIOS",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CHECK_BLOB_PARTITION_EXISTS_DELETE_AND_RECREATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": "select * into #kramdata from (\nselect mc.company_code as \"COMPANY CODE\",\n       mc.company_name as \"COMPANY NAME\",\n        --mc.company_bankcode as \"CUSTOMER ID\",\n        mc.BCIF as \"CUSTOMER ID\",\n        --mm.m_name as \"MODEL NAME\",\n       ch.comp_inidate as \"INITATION DATE\",\n       ch.comp_datefinal as \"FINALISATION DATE\",dense_rank() over (PARTITION BY mc.company_code,mf.comp_findesc order by ch.comp_datefinal desc ) as RNK,\n       ch.comp_baseyear as \"BASE YEAR\",\n       ch.rating_year as \"RATING YEAR\",\n       mf.comp_findesc as \"LINEITEM\",\n       df.data2_year as \"FINACIAL YEAR\",\n       df.data2_value as \"VALUE\",\n       mf.comp_fincode as \"COMPANY FINCODE\",\nch.comp_casefinal as \"COMPANY CASE FINAL\",\nch.comp_model AS \"COMPANY MODEL\",\nch.comp_assesscode AS \"COMPANY ASSES CODE\"\n  from STG.STG_KRAM_MST_COMPANY   mc,\n       STG.STG_KRAM_COMP_HEADER   ch,\n       --STG.STG_KRAM_MST_MODEL     mm,\n       STG.STG_KRAM_MST_COMPFIN   mf,\n       STG.STG_KRAM_DATA_COMPFIN1 df\nwhere mc.company_code = ch.comp_compcode\n   and ch.comp_casefinal = 'Y'\n   and ch.comp_model = mc.company_mcode\n   --and mm.m_code='M10'\n--   and mc.company_mcode=mm.m_code\n   and df.data2_assesscode = ch.comp_assesscode\n   and df.data2_year = ch.comp_baseyear\n   and mf.comp_fincode = df.data2_compfincode\n   and mf.comp_mcode = ch.comp_model\n   and ch.comp_baseyear = 2020\n   and mc.BCIF in (select distinct \"BCIF_BANK Id\" from \"STG\".\"STG_GLEMS_MVIEW_FAC_DTLS\" where \"Limit Suffix\" in ('AJANT','ALKEM','BAIR','BANF','BC','BCCAP','BCCPX','BCCXP','BCD','BCL','BCLM','BCTL','BCWC','BG1','BG2','BG3','BG4','BGADH','BGBBD','BGFIN','BGLIM','BGPER','BGR2','BILLL','BLUEC','BUCR','BURCR','BUYCD','BUYCR','BUYER','BUYRC','BYCR','CADIL','CAPEX','CAPLC','CBDST','CC','CCOD','CHAN','CLNBI','CLNBL','CVVJK','DBAC1','DBAC2','DBAC5','DBDAC','DBDDW','DOMBD','DRWR','EBDMM','EBDTA','EBDTM','EBDTT','EBDVE','EPC','EPC1','EPC2','EPCCR','EPCFC','FACTO','FBD','FBN','FBP','FBP2','FBPAD','FDCLT','FLCIN','FRGNA','FRGNB','IDEA','ILCFL','IMCLR','IMSTR','INBAL','INDIS','INHHM','INMNM','INMUL','INOT1','INOT2','INOT3','INOT4','INOT6','INTAF','INTAS','INVAD','INVDF','INVDI','INVFI','INVO','INVPU','KCCL','LALOU','LC','LCBD','LCBDC','LCBDL','LCBDS','LCBL','LCCAP','LCCP1','LCCP2','LCCPX','LCFBL','LCIBL','LCIMP','LCIND','LCLIM','LCNPB','LCNSB','LCPBD','LCPXF','LCPXI','LCSBD','LCWC','LCWCF','LCWCI','LOTML','LOU','MEDLE','MICRO','MULDI','NICHO','OD','ODFD','ODHAN','PBD1','PBD2','PBUY1','PBUY2','PBUY3','PBUY4','PC','PCFC1','PCFC2','PCFCI','PCFCL','PCFCN','PCFCR','PCFCY','PCFRN','PCINR','PCLI','PCLIM','PCRUP','PCWC','PION','POBAL','POFUN','POHOS','POMNM','POMUL','POONA','POTML','PSC','PSCFC','PSCIN','PUR','PURC1','RECEV','RFACT','SBD1','SBD11','SBD2','SBD3','SBD4','SBD5','SBD6','SBDAL','SBDB','SBDCE','SBDGB','SBDMM','SBDS','SBDTM','SBLC','SBLCB','SBLCI','SBLCM','SBLCY','SIF','SPENG','STL','STLAD','STLCP','STLFC','STLL','STLLI','STLWD','SUNPH','SUPL','SUPP','TATA','TCD','TREDS','VAPIP','WCCLI','WCDL','WCDL2','WCDLA','WCDLD','WCDLM')) \n-- and LINEITEM in ('Net Sales','(I) Investments in Subsidiary companies/ affiliate','Total Networth','Sundry Creditors (Trade)','TANGIBLE NETWORTH', 'RECEIVABLES other than deferred & exports (Incl. b','Export Receivables (including bill purchased and d','Retention Money / Security Deposit')\n)a\n\nselect * from #kramdata where RNK=1"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"maxRowsPerFile": 300000,
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SybaseDataset_KRAM_FINANCIAL_RATIOS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_Derived_KRAM",
+								"type": "DatasetReference",
+								"parameters": {
+									"date2run": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "CHECK_BLOB_PARTITION_EXISTS_DELETE_AND_RECREATE",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Blob_File_Path_Location')",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"variables": {
+					"Blob_File_Path_Location": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/KRAM_FINANCIAL_RATIOS/load_date="
+					}
+				},
+				"folder": {
+					"name": "stag2landing_deriveddatasets"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-04-11T12:58:00Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stag2landing_KRAM_LARGE_CORPORATE_MODEL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Blob_File_Path_Location')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "KRAM_LARGE_CORPORATE_MODEL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": {
+									"value": "@concat('select\n  mc.company_code as ''COMPANY CODE'',\n  mc.company_name as ''COMPANY NAME'',\n  mc.company_bankcode as ''CUSTOMER ID'',\n  mc.bcif as ''BCIF'',\n  mm.m_name as ''MODEL NAME'',\n  DATEFORMAT(ch.comp_inidate , ''yyyy-MM-dd'') as ''INITATION DATE'',\n  DATEFORMAT(ch.comp_datefinal, ''yyyy-MM-dd'') as ''FINALISATION DATE'',\n  ch.comp_baseyear as ''BASE YEAR'',\n  ch.rating_year as ''RATING YEAR'',\n  mf.comp_findesc as ''LINEITEM'',\n  df.data2_year as ''FINANCIAL YEAR'',\n  df.data2_value as ''VALUE'',\n  ch.comp_overallgrade as ''LATEST OBLIGOR RATING''\nfrom\n  STG.STG_KRAM_MST_COMPANY mc,\n  STG.STG_KRAM_COMP_HEADER ch,\n  STG.STG_KRAM_MST_MODEL mm,\n  STG.STG_KRAM_MST_COMPFIN mf,\n  STG.STG_KRAM_DATA_COMPFIN1 df\nwhere\n  mc.company_code = ch.comp_compcode\n  and ch.comp_casefinal = ''Y''\n  and ch.comp_model = mm.m_code\n  and mm.m_code = ''M03''\n  and df.data2_assesscode = ch.comp_assesscode\n  and df.data2_year = ch.comp_baseyear\n  and mf.comp_fincode = df.data2_compfincode\n  and mf.comp_mcode = ch.comp_model\n  and ch.comp_baseyear > ',substring(pipeline().parameters.date2run,0 ,4 ),'-3\n  and ch.comp_baseyear <= ',substring(pipeline().parameters.date2run,0 ,4 ))",
+									"type": "Expression"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SybaseDataset_KRAM_FINANCIAL_RATIOS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_Derived_KRAM_Models",
+								"type": "DatasetReference",
+								"parameters": {
+									"date2run": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									},
+									"table": {
+										"value": "@pipeline().parameters.table",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					},
+					"table": {
+						"type": "string",
+						"defaultValue": "KRAM_LARGE_CORPORATE_MODEL"
+					}
+				},
+				"variables": {
+					"Blob_File_Path_Location": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/KRAM_LARGE_CORPORATE_MODEL/load_date="
+					}
+				},
+				"folder": {
+					"name": "stag2landing_deriveddatasets"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-21T13:13:28Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stag2landing_KRAM_NBFC_MODEL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Blob_File_Path_Location')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "KRAM_NBFC_MODEL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": {
+									"value": "@concat('select\n    mc.company_code as ''COMPANY CODE'',\n    mc.company_name as ''COMPANY NAME'',\n    mc.company_bankcode as ''CUSTOMER ID'',\n    mc.bcif as ''BCIF'',\n    mm.m_name as ''MODEL NAME'',\n    DATEFORMAT(ch.comp_inidate , ''yyyy-MM-dd'') as ''INITATION DATE'',\n    DATEFORMAT(ch.comp_datefinal, ''yyyy-MM-dd'') as ''FINALISATION DATE'',\n    ch.comp_baseyear as ''BASE YEAR'',\n    ch.rating_year as ''RATING YEAR'',\n    mf.comp_findesc as ''LINEITEM'',\n    df.data2_year as ''FINANCIAL YEAR'',\n    df.data2_value as ''VALUE'',\n    ch.comp_overallgrade as ''LATEST OBLIGOR RATING'',\n    df.data2_year as ''LAST AUDITED YEAR''\nfrom\n    STG.STG_KRAM_MST_COMPANY mc,\n    STG.STG_KRAM_COMP_HEADER ch,\n    STG.STG_KRAM_MST_MODEL mm,\n    STG.STG_KRAM_MST_COMPFIN mf,\n    STG.STG_KRAM_DATA_COMPFIN1 df\nwhere\n    mc.company_code = ch.comp_compcode\n    and ch.comp_casefinal = ''Y''\n    and ch.comp_model = mm.m_code\n    and mm.m_code = ''M20''\n    and df.data2_assesscode = ch.comp_assesscode\n    and df.data2_year = ch.comp_baseyear\n    and mf.comp_fincode = df.data2_compfincode\n    and mf.comp_mcode = ch.comp_model\n    and ch.comp_baseyear > ',substring(pipeline().parameters.date2run,0 ,4 ),'-3\n    and ch.comp_baseyear <= ',substring(pipeline().parameters.date2run,0 ,4 ))\n",
+									"type": "Expression"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SybaseDataset_KRAM_FINANCIAL_RATIOS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_Derived_KRAM_Models",
+								"type": "DatasetReference",
+								"parameters": {
+									"date2run": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									},
+									"table": {
+										"value": "@pipeline().parameters.table",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					},
+					"table": {
+						"type": "string",
+						"defaultValue": "KRAM_NBFC_MODEL"
+					}
+				},
+				"variables": {
+					"Blob_File_Path_Location": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/KRAM_NBFC_MODEL/load_date="
+					}
+				},
+				"folder": {
+					"name": "stag2landing_deriveddatasets"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-21T13:13:28Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stag2landing_KRAM_REAL_ESTATE_DEVELOPER_MODEL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Blob_File_Path_Location')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "KRAM_REAL_ESTATE_DEVELOPER_MODEL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": {
+									"value": "@concat('select\n    mc.company_code as ''COMPANY CODE'',\n    mc.company_name as ''COMPANY NAME'',\n    mc.company_bankcode as ''CUSTOMER ID'',\n    mc.bcif as ''BCIF'',\n    mm.m_name as ''MODEL NAME'',\n    DATEFORMAT(ch.comp_inidate , ''yyyy-MM-dd'') as ''INITATION DATE'',\n    DATEFORMAT(ch.comp_datefinal, ''yyyy-MM-dd'') as ''FINALISATION DATE'',\n    ch.comp_baseyear as ''BASE YEAR'',\n    ch.rating_year as ''RATING YEAR'',\n    mf.comp_findesc as ''LINEITEM'',\n    df.data2_year as ''FINANCIAL YEAR'',\n    df.data2_value as ''VALUE'',\n    ch.comp_overallgrade as ''LATEST OBLIGOR RATING'',\n    df.data2_year as ''LAST AUDITED YEAR''\nfrom\n    STG.STG_KRAM_MST_COMPANY mc,\n    STG.STG_KRAM_COMP_HEADER ch,\n    STG.STG_KRAM_MST_MODEL mm,\n    STG.STG_KRAM_MST_COMPFIN mf,\n    STG.STG_KRAM_DATA_COMPFIN1 df\nwhere\n    mc.company_code = ch.comp_compcode\n    and ch.comp_casefinal = ''Y''\n    and ch.comp_model = mm.m_code\n    and mm.m_code = ''M17''\n    and df.data2_assesscode = ch.comp_assesscode\n    and df.data2_year = ch.comp_baseyear\n    and mf.comp_fincode = df.data2_compfincode\n    and mf.comp_mcode = ch.comp_model\n    and ch.comp_baseyear > ',substring(pipeline().parameters.date2run,0 ,4 ),'-3\n    and ch.comp_baseyear <= ',substring(pipeline().parameters.date2run,0 ,4 ))\n",
+									"type": "Expression"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SybaseDataset_KRAM_FINANCIAL_RATIOS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_Derived_KRAM_Models",
+								"type": "DatasetReference",
+								"parameters": {
+									"date2run": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									},
+									"table": {
+										"value": "@pipeline().parameters.table",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					},
+					"table": {
+						"type": "string",
+						"defaultValue": "KRAM_REAL_ESTATE_DEVELOPER_MODEL"
+					}
+				},
+				"variables": {
+					"Blob_File_Path_Location": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/KRAM_REAL_ESTATE_DEVELOPER_MODEL/load_date="
+					}
+				},
+				"folder": {
+					"name": "stag2landing_deriveddatasets"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-21T13:13:28Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stag2landing_KRAM_SERVICES_MODEL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Blob_File_Path_Location')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "KRAM_SERVICES_MODEL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": {
+									"value": "@concat('select\n    mc.company_code as ''COMPANY CODE'',\n    mc.company_name as ''COMPANY NAME'',\n    mc.company_bankcode as ''CUSTOMER ID'',\n    mc.bcif as ''BCIF'',\n    mm.m_name as ''MODEL NAME'',\n    DATEFORMAT(ch.comp_inidate , ''yyyy-MM-dd'') as ''INITATION DATE'',\n    DATEFORMAT(ch.comp_datefinal, ''yyyy-MM-dd'') as ''FINALISATION DATE'',\n    ch.comp_baseyear as ''BASE YEAR'',\n    ch.rating_year as ''RATING YEAR'',\n    mf.comp_findesc as ''LINEITEM'',\n    df.data2_year as ''FINANCIAL YEAR'',\n    df.data2_value as ''VALUE'',\n    ch.comp_overallgrade as ''LATEST OBLIGOR RATING'',\n    df.data2_year as ''LAST AUDITED YEAR''\nfrom\n    STG.STG_KRAM_MST_COMPANY mc,\n    STG.STG_KRAM_COMP_HEADER ch,\n    STG.STG_KRAM_MST_MODEL mm,\n    STG.STG_KRAM_MST_COMPFIN mf,\n    STG.STG_KRAM_DATA_COMPFIN1 df\nwhere\n    mc.company_code = ch.comp_compcode\n    and ch.comp_casefinal = ''Y''\n    and ch.comp_model = mm.m_code\n    and mm.m_code = ''M10''\n    and df.data2_assesscode = ch.comp_assesscode\n    and df.data2_year = ch.comp_baseyear\n    and mf.comp_fincode = df.data2_compfincode\n    and mf.comp_mcode = ch.comp_model\n    and ch.comp_baseyear > ',substring(pipeline().parameters.date2run,0 ,4 ),'-3\n    and ch.comp_baseyear <= ',substring(pipeline().parameters.date2run,0 ,4 ))\n",
+									"type": "Expression"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SybaseDataset_KRAM_FINANCIAL_RATIOS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_Derived_KRAM_Models",
+								"type": "DatasetReference",
+								"parameters": {
+									"date2run": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									},
+									"table": {
+										"value": "@pipeline().parameters.table",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					},
+					"table": {
+						"type": "string",
+						"defaultValue": "KRAM_SERVICES_MODEL"
+					}
+				},
+				"variables": {
+					"Blob_File_Path_Location": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/KRAM_SERVICES_MODEL/load_date="
+					}
+				},
+				"folder": {
+					"name": "stag2landing_deriveddatasets"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-21T13:13:28Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stag2landing_KRAM_SE_MODEL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Blob_File_Path_Location')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "KRAM_SE_MODEL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": {
+									"value": "@concat('select\n    mc.company_code as ''COMPANY CODE'',\n    mc.company_name as ''COMPANY NAME'',\n    mc.company_bankcode as ''CUSTOMER ID'',\n    mc.bcif as ''BCIF'',\n    mm.m_name as ''MODEL NAME'',\n    DATEFORMAT(ch.comp_inidate , ''yyyy-MM-dd'') as ''INITATION DATE'',\n    DATEFORMAT(ch.comp_datefinal, ''yyyy-MM-dd'') as ''FINALISATION DATE'',\n    ch.comp_baseyear as ''BASE YEAR'',\n    ch.rating_year as ''RATING YEAR'',\n    mf.comp_findesc as ''LINEITEM'',\n    df.data2_year as ''FINANCIAL YEAR'',\n    df.data2_value as ''VALUE'',\n    ch.comp_overallgrade as ''LATEST OBLIGOR RATING'',\n    df.data2_year ''LAST AUDITED YEAR''\nfrom\n    STG.STG_KRAM_MST_COMPANY mc,\n    STG.STG_KRAM_COMP_HEADER ch,\n    STG.STG_KRAM_MST_MODEL mm,\n    STG.STG_KRAM_MST_COMPFIN mf,\n    STG.STG_KRAM_DATA_COMPFIN1 df\nwhere\n    mc.company_code = ch.comp_compcode\n    and ch.comp_casefinal = ''Y''\n    and ch.comp_model = mm.m_code\n    and mm.m_code = ''M04''\n    and df.data2_assesscode = ch.comp_assesscode\n    and df.data2_year = ch.comp_baseyear\n    and mf.comp_fincode = df.data2_compfincode\n    and mf.comp_mcode = ch.comp_model\n    and ch.comp_baseyear > ',substring(pipeline().parameters.date2run,0 ,4 ),'-3\n    and ch.comp_baseyear <= ',substring(pipeline().parameters.date2run,0 ,4 ))\n",
+									"type": "Expression"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SybaseDataset_KRAM_FINANCIAL_RATIOS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_Derived_KRAM_Models",
+								"type": "DatasetReference",
+								"parameters": {
+									"date2run": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									},
+									"table": {
+										"value": "@pipeline().parameters.table",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					},
+					"table": {
+						"type": "string",
+						"defaultValue": "KRAM_SE_MODEL"
+					}
+				},
+				"variables": {
+					"Blob_File_Path_Location": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/KRAM_SE_MODEL/load_date="
+					}
+				},
+				"folder": {
+					"name": "stag2landing_deriveddatasets"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-21T13:13:28Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stag2landing_KRAM_TRADER_MODEL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Blob_File_Path_Location')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "KRAM_TRADER_MODEL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": {
+									"value": "@concat('select\n    mc.company_code as ''COMPANY CODE'',\n    mc.company_name as ''COMPANY NAME'',\n    mc.company_bankcode as ''CUSTOMER ID'',\n    mc.bcif as ''BCIF'',\n    mm.m_name as ''MODEL NAME'',\n    DATEFORMAT(ch.comp_inidate , ''yyyy-MM-dd'') as ''INITATION DATE'',\n    DATEFORMAT(ch.comp_datefinal, ''yyyy-MM-dd'') as ''FINALISATION DATE'',\n    ch.comp_baseyear as ''BASE YEAR'',\n    ch.rating_year as ''RATING YEAR'',\n    mf.comp_findesc as ''LINEITEM'',\n    df.data2_year as ''FINANCIAL YEAR'',\n    df.data2_value as ''VALUE'',\n    ch.comp_overallgrade as ''LATEST OBLIGOR RATING'',\n    df.data2_year as ''LAST AUDITED YEAR''\nfrom\n    STG.STG_KRAM_MST_COMPANY mc,\n    STG.STG_KRAM_COMP_HEADER ch,\n    STG.STG_KRAM_MST_MODEL mm,\n    STG.STG_KRAM_MST_COMPFIN mf,\n    STG.STG_KRAM_DATA_COMPFIN1 df\nwhere\n    mc.company_code = ch.comp_compcode\n    and ch.comp_casefinal = ''Y''\n    and ch.comp_model = mm.m_code\n    and mm.m_code = ''M13''\n    and df.data2_assesscode = ch.comp_assesscode\n    and df.data2_year = ch.comp_baseyear\n    and mf.comp_fincode = df.data2_compfincode\n    and mf.comp_mcode = ch.comp_model\n    and ch.comp_baseyear > ',substring(pipeline().parameters.date2run,0 ,4 ),'-3\n    and ch.comp_baseyear <= ',substring(pipeline().parameters.date2run,0 ,4 ))",
+									"type": "Expression"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SybaseDataset_KRAM_FINANCIAL_RATIOS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_Derived_KRAM_Models",
+								"type": "DatasetReference",
+								"parameters": {
+									"date2run": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									},
+									"table": {
+										"value": "@pipeline().parameters.table",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					},
+					"table": {
+						"type": "string",
+						"defaultValue": "KRAM_TRADER_MODEL"
+					}
+				},
+				"variables": {
+					"Blob_File_Path_Location": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/KRAM_TRADER_MODEL/load_date="
+					}
+				},
+				"folder": {
+					"name": "stag2landing_deriveddatasets"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-21T13:13:28Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stag2landing_LC_BG')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CHECK_BLOB_LOAD_DATE_EXISTS_STG_VIEW_KMB_BG_INVOK_OS",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@replace(pipeline().parameters.partitionValue,'-','')",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Blob_File_Path_STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CHECK_BLOB_LOAD_DATE_EXISTS_STG_VIEW_KMB_BG_INVOK_OS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": {
+									"value": "@concat('select * from \"STG\".\"STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS\" where DATEFORMAT(AS_ON_DATE, ''yyyymmdd'') = ''',replace(pipeline().parameters.partitionValue,'-',''),'''')",
+									"type": "Expression"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SybaseDataset_STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS",
+								"type": "DatasetReference",
+								"parameters": {
+									"partitionValue": {
+										"value": "@replace(pipeline().parameters.partitionValue,'-','')",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "CHECK_BLOB_LOAD_DATE_EXISTS_LC_DEVELOP_REPORT",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@replace(pipeline().parameters.partitionValue,'-','')",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Blob_File_Path_STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CHECK_BLOB_LOAD_DATE_EXISTS_LC_DEVELOP_REPORT",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": {
+									"value": "@concat('select * from \"STG\".\"STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT\" where DATEFORMAT(AS_ON_DATE, ''yyyymmdd'') = ''',replace(pipeline().parameters.partitionValue,'-',''),'''')",
+									"type": "Expression"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SybaseDataset_STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT",
+								"type": "DatasetReference",
+								"parameters": {
+									"partitionValue": {
+										"value": "@replace(pipeline().parameters.partitionValue,'-','')",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"partitionValue": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"Blob_File_Path_STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS": {
+						"type": "String",
+						"defaultValue": "MISYS/STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS/load_date="
+					},
+					"Blob_File_Path_STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT": {
+						"type": "String",
+						"defaultValue": "MISYS/STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT/load_date="
+					}
+				},
+				"folder": {
+					"name": "stg2landingBrd2"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-08-16T10:16:12Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stag2landing_LOS_BL_CONSUMER')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LOS_BL_CONSUMER",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CHECK_BLOB_PARTITION_EXISTS_DELETE_AND_RECREATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": "select LOAN_NUM,CRN,INCOME_HEADCODE,ISRLNO,Total_Income AS Turnover,Sources_of_Working_capital AS Working_Capital_Borrowings_Short_Term_Borrowing,\nClosing_stock AS Inventory,Debtors AS Receivables,Cash_bank_Balances AS Cash_Cash_equivalent,\nLong_term_Debts_Secured+Long_term_Debts_Unsecured+Sources_of_Working_capital AS Total_borrowings,\nLoans_Advances+Advance_tax_Tax_deducted_at_source  AS Other_Current_Assets,\nLong_term_Debts_Secured_1,Long_term_Debts_Unsecured_1,Debtors_1 AS Receivables_1,Cash_bank_Balances_1 AS Cash_Cash_equivalent_1,\nAdvance_tax_Tax_deducted_at_source_1,\nTotal_Income_1 AS Turnover_1\nfrom (\nselect DISTINCT T1.SZLOANAPPLNNO AS LOAN_NUM,T2.SZREFERENCENO as CRN,T1.SZINCOMEHEADCODE AS INCOME_HEADCODE,T1.ISRLNO,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('DLB34','DLB35','DLB36') THEN T1.FVALUE END) AS Total_Income,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('DLU34','DLU35','DLU36') THEN T1.FVALUE END) AS Long_term_Debts_Secured,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('DLU37','DLU38','DLU39') THEN T1.FVALUE END) AS Long_term_Debts_Unsecured,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('DLU61','DLU62','DLU63') THEN T1.FVALUE END) AS Closing_stock,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('DLU64','DLU65','DLU66') THEN T1.FVALUE END) AS Debtors,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('DLU67','DLU68','DLU69') THEN T1.FVALUE END) AS Loans_Advances,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('DLU70','DLU71','DLU72') THEN T1.FVALUE END) AS Cash_bank_Balances,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('DLU73','DLU74','DLU75') THEN T1.FVALUE END) AS Advance_tax_Tax_deducted_at_source,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('DLU94','DLU95','DLU96') THEN T1.FVALUE END) AS Sources_of_Working_capital,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('U34','U35','U36') THEN T1.FVALUE END) AS Long_term_Debts_Secured_1,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('U37','U38','U39') THEN T1.FVALUE END) AS Long_term_Debts_Unsecured_1,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('U64','U65','U66') THEN T1.FVALUE END) AS Debtors_1,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('U67','U68','U69') THEN T1.FVALUE END) AS Loans_Advances_1,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('U70','U71','U72') THEN T1.FVALUE END) AS Cash_bank_Balances_1,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('U73','U74','U75') THEN T1.FVALUE END) AS Advance_tax_Tax_deducted_at_source_1,\n(CASE WHEN T1.SZINCOMEHEADCODE IN ('WC6A13','WC6A14','WC6A15') THEN T1.FVALUE END) AS Total_Income_1\n\nfrom STG.STG_LOS_TR_ELG_APPLICANTINCOMEHEADER T1 LEFT JOIN STG.STG_LOS_TR_APPLICATIONWORKDETAILS T2 ON T1.SZLOANAPPLNNO=T2.SZLOANAPPLNNO\nwhere T1.ETL_CHANGE_FLAG<>'D' and T2.ETL_CHANGE_FLAG<>'D' AND T1.SZLOANAPPLNNO LIKE 'BL%'\nand T1.SZINCOMEHEADCODE IN ('DLB34','DLB35','DLB36','DLU34','DLU35','DLU36','DLU37','DLU38','DLU39','DLU61','DLU62','DLU63','DLU64','DLU65','DLU66',\n'DLU67','DLU68','DLU69','DLU70','DLU71','DLU72','DLU73','DLU74','DLU75','DLU94','DLU95','DLU96','U34','U35','U36','U37','U38','U39','U64','U65','U66',\n'U67','U68','U69','U70','U71','U72','U73','U74','U75','WC6A13','WC6A14','WC6A15')\nAND T2.SZPARTYTYPE='BORROWER')A"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"maxRowsPerFile": 300000,
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SybaseDataset_LOS_BL_FINANCIAL_RATIOS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_Derived_LOS_BL_CONSUMER",
+								"type": "DatasetReference",
+								"parameters": {
+									"date2run": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "CHECK_BLOB_PARTITION_EXISTS_DELETE_AND_RECREATE",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Blob_File_Path_Location')",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"variables": {
+					"Blob_File_Path_Location": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/LOS_BL_CONSUMER/load_date="
+					}
+				},
+				"folder": {
+					"name": "stag2landing_deriveddatasets"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-21T13:09:33Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stag2landing_LOS_BL_FINANCIAL_RATIOS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LOS_BL_FINANCIAL_RATIOS",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "CHECK_BLOB_PARTITION_EXISTS_DELETE_AND_RECREATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": "select DISTINCT * into #aa from (\nselect  T1.SZLOANAPPLNNO as LOAN_NUMBER,T1.SZRM AS RM_CODE,T2.SZREFERENCENO AS PARTY_ID,T1.FTOTLOANAMT AS OFFER_LOAN_AMOUNT,\n--T4.FAGREEMENTVALUE AS AGREEMENTVALUE,\n--T5.FSANCTION_LTV_1 AS LTV1,T5.FSANCTION_LTV_2 as LTV2,\nT2.CINDCOMP AS INDIVIDUAL_ORGANISATION,\nT2.SZFNAME AS FIRST_NAME,T2.SZMNAME AS MIDDLE_NAME,T2.SZLNAME as LAST_NAME,T2.SZPARTYTYPE AS PARTY_TYPE,\nT1.ETL_LAST_UPDATED_TIME AS LOAN_NUMBER_ETL_LAST_UPDATED_TIME,\nT1.ETL_LAST_UPDATED_TIME AS RM_CODE_ETL_LAST_UPDATED_TIME,\nT2.ETL_LAST_UPDATED_TIME AS PARTY_ID_ETL_LAST_UPDATED_TIME,\nT1.ETL_LAST_UPDATED_TIME AS OFFER_LOAN_AMOUNT_ETL_LAST_UPDATED_TIME,\n--T4.ETL_LAST_UPDATED_TIME AS AGREEMENTVALUE_ETL_LAST_UPDATED_TIME,\n--T5.ETL_LAST_UPDATED_TIME AS LTV1_ETL_LAST_UPDATED_TIME,\n--T5.ETL_LAST_UPDATED_TIME AS LTV2_ETL_LAST_UPDATED_TIME,\nT2.ETL_LAST_UPDATED_TIME AS INDIVIDUAL_ORGANISATION_ETL_LAST_UPDATED_TIME,\nT2.ETL_LAST_UPDATED_TIME AS FIRST_NAME_ETL_LAST_UPDATED_TIME,   \nT2.ETL_LAST_UPDATED_TIME AS MIDDLE_NAME_ETL_LAST_UPDATED_TIME,\nT2.ETL_LAST_UPDATED_TIME AS LAST_NAME_ETL_LAST_UPDATED_TIME,\nT2.ETL_LAST_UPDATED_TIME AS PARTY_TYPE_ETL_LAST_UPDATED_TIME\nfrom STG.STG_LOS_TR_LOANAPPLICATIONDETAILS T1\nLEFT JOIN STG.STG_LOS_TR_APPLICATIONWORKDETAILS T2 ON T1.SZLOANAPPLNNO=T2.SZLOANAPPLNNO\nLEFT JOIN STG.STG_BCIF_PARTY_FINANCIALS T3 ON T2.SZREFERENCENO=T3.PARTY_ID\n--LEFT JOIN STG.STG_LOS_TR_REQUEST T4 ON T1.SZLOANAPPLNNO=T4.SZLOANAPPLNNO\n--LEFT JOIN STG.STG_LOS_TR_CASE_BOUNDARIES T5 ON T1.SZLOANAPPLNNO=T5.SZLOANAPPLNNO \nwhere (PARTY_ID is not null or PARTY_ID!='')  and --(AGREEMENTVALUE is not null or AGREEMENTVALUE is null) and \nRM_CODE!='' and T1.ETL_CHANGE_FLAG <> 'D' and T2.ETL_CHANGE_FLAG <> 'D' and T3.ETL_CHANGE_FLAG <> 'D' and --T4.ETL_CHANGE_FLAG <> 'D' and\n--T5.ETL_CHANGE_FLAG <> 'D' and \nT2.SZPARTYTYPE in ('BORROWER','COBORROWER','GUARANTOR','SRL') \n--and T1.SZLOANAPPLNNO in ('BL14783790','BL19163469','BL18320355','BL19450793')\n)a\n\n--NETWORTH\nselect * into #bb from (\nselect T1.*,T2.FVALUE AS NETWORTH,T2.ETL_LAST_UPDATED_TIME AS NETWORTH_ETL_LAST_UPDATED_TIME \nfrom #aa T1 LEFT JOIN STG.STG_LOS_TR_ELG_APPLICANTINCOMEHEADER T2 ON T1.LOAN_NUMBER=T2.SZLOANAPPLNNO\nand T2.SZINCOMEHEADCODE in ('U22'))a\n\n--DEBTORS\nselect * into #cc from (\nselect T1.*,T2.FVALUE AS DEBTORS,T2.ETL_LAST_UPDATED_TIME AS DEBTORS_ETL_LAST_UPDATED_TIME \nfrom #bb T1 LEFT JOIN STG.STG_LOS_TR_ELG_APPLICANTINCOMEHEADER T2 ON T1.LOAN_NUMBER=T2.SZLOANAPPLNNO\nand T2.SZINCOMEHEADCODE in ('U64'))a\n\n--CREDITORS\nselect * into #dd from (\nselect T1.*,T2.FVALUE AS CREDITORS,T2.ETL_LAST_UPDATED_TIME AS CREDITORS_ETL_LAST_UPDATED_TIME \nfrom #cc T1 LEFT JOIN STG.STG_LOS_TR_ELG_APPLICANTINCOMEHEADER T2 ON T1.LOAN_NUMBER=T2.SZLOANAPPLNNO\nand T2.SZINCOMEHEADCODE in ('U79'))a\n\n--LOANS_ADVANCES\nselect * into #ee from (\nselect T1.*,T2.FVALUE AS LOANS_ADVANCES,T2.ETL_LAST_UPDATED_TIME AS LOANS_ADVANCES_ETL_LAST_UPDATED_TIME \nfrom #dd T1 LEFT JOIN STG.STG_LOS_TR_ELG_APPLICANTINCOMEHEADER T2 ON T1.LOAN_NUMBER=T2.SZLOANAPPLNNO\nand T2.SZINCOMEHEADCODE in ('U67'))a\n\n--INVESTMENTS_DEPOSITS\nselect * into #ff from (\nselect T1.*,T2.FVALUE AS INVESTMENTS_DEPOSITS,T2.ETL_LAST_UPDATED_TIME AS INVESTMENTS_DEPOSITS_ETL_LAST_UPDATED_TIME from #ee T1 \nLEFT JOIN STG.STG_LOS_TR_ELG_APPLICANTINCOMEHEADER T2 ON T1.LOAN_NUMBER=T2.SZLOANAPPLNNO\nand T2.SZINCOMEHEADCODE in ('U55'))a\n\n--TOTAL_INCOME\nselect * into #gg from (\nselect T1.*,T2.FVALUE AS TOTAL_INCOME,T2.ETL_LAST_UPDATED_TIME AS TOTAL_INCOME_ETL_LAST_UPDATED_TIME \nfrom #ff T1 LEFT JOIN STG.STG_LOS_TR_ELG_APPLICANTINCOMEHEADER T2 ON T1.LOAN_NUMBER=T2.SZLOANAPPLNNO\nand T2.SZINCOMEHEADCODE in ('B34'))a\n\nselect distinct * from #gg\n\n"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"maxRowsPerFile": 300000,
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SybaseDataset_LOS_BL_FINANCIAL_RATIOS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_Derived_LOS_BL_FR",
+								"type": "DatasetReference",
+								"parameters": {
+									"date2run": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "CHECK_BLOB_PARTITION_EXISTS_DELETE_AND_RECREATE",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Blob_File_Path_Location')",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"variables": {
+					"Blob_File_Path_Location": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/LOS_BL_FINANCIAL_RATIOS/load_date="
+					}
+				},
+				"folder": {
+					"name": "stag2landing_deriveddatasets"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-10-22T11:33:30Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stag2landing_LOS_Commercial_Financial')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "LOS commerical financial:\nList out parameter:\n--Turnover\n--Debtors_For_Current_Receivables\n--Debtors_For_Receivables_More_Than_6M\n--Creditors\n--Networth\n--LTV\n--Investment_And_Advances_To_Group_Companies\n--Group Companies\n--Adjusted_Tangible_Net_Worth_ATNW\n--RELATED PARTY DATA",
+				"activities": [
+					{
+						"name": "Turnover_Query_Sybase_To_Blob",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Turnover_Delete_if_Exists_load_date",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": "(select LCI.LCI_BCIF_NO AS BCIF_NO,\n    LCI.LCI_CUST_NAME AS NAME,\n    (CASE WHEN LFD_YEAR_SEQ_NO=3 THEN LFD_YEAR_3 WHEN LFD_YEAR_SEQ_NO=4 THEN LFD_YEAR_4 WHEN LFD_YEAR_SEQ_NO=5 THEN LFD_YEAR_5  ELSE 0 END)/10000000 AS Turnover\n\nFROM \"STG\".\"STG_LENDDB_LPCOM_CUST_INFO\"  LCI INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROP_PARTIES\" LPP ON LPP.LPP_CUST_ID_NEW = LCI.LCI_NEW_ID \n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROPOSAL\" LP ON LP.LP_PROP_NO = LPP.LPP_PROP_NO\n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_FIN_DATA\" LFD ON LFD.LFD_CUST_NEW_ID = LCI.LCI_NEW_ID\n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_FIN_DETAILS\" LFDS ON LFD.LFD_CMA_NO=LFDS.LFD_CMA_NO AND LFD.LFD_CUST_NEW_ID = LFDS.LFD_CUST_NEW_ID\n    INNER JOIN \"STG\".\"STG_LENDDB_LPSTP_FINMASTER\" LFM ON LFM.FIN_ROW_ID = LFD.LFD_FIN_ROW_ID\n    WHERE (LFD.LFD_FIN_ROW_ID=6548 OR LFD.LFD_FIN_ROW_ID=513550 OR LFD.LFD_FIN_ROW_ID=513630 OR LFD.LFD_FIN_ROW_ID=6558) AND LFDS.LFD_AUDIT_TYPE='A' AND LFD.LFD_CUST_NEW_ID=LCI.LCI_NEW_ID AND LFDS.LFD_FIN_PAGE = 'FI' \n--AND LFD.LFD_YEAR_3 AND LFD.LFD_YEAR_4 AND LFD.LFD_YEAR_5\n--AND (LFD_YEAR_SEQ_NO = 3 OR LFD_YEAR_SEQ_NO = 4 OR LFD_YEAR_SEQ_NO = 5)\nAND (LFD_YEAR_SEQ_NO = 4 )\nAND LCI.LCI_BCIF_NO IN ('353340260','68587054','68588872','235871246','238747057','240330893','84059532','84321420','48319078','58358561','29476556','87312352') AND LCI.LCI_RECENT = 'Y' \nORDER By LFDS.LFD_END_DATE DESC)"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Sybase_Turnover_Query_Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Blob_Turnover_Query_Destination",
+								"type": "DatasetReference",
+								"parameters": {
+									"load_date": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Debtors_For_Current_Receivables_Query_Sybase_To_Blob",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Debtors_For_Current_IF_Delete_Exists_load_date",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": "\n(select LCI.LCI_BCIF_NO AS BCIF_NO,\n    LCI.LCI_CUST_NAME AS NAME,\n    (CASE WHEN LFD_YEAR_SEQ_NO=3 THEN LFD_YEAR_3 WHEN LFD_YEAR_SEQ_NO=4 THEN LFD_YEAR_4 WHEN LFD_YEAR_SEQ_NO=5 THEN LFD_YEAR_5  ELSE 0 END)/10000000 AS   \nDebtors_For_Current_Receivables\nFROM \"STG\".\"STG_LENDDB_LPCOM_CUST_INFO\"  LCI INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROP_PARTIES\" LPP ON LPP.LPP_CUST_ID_NEW = LCI.LCI_NEW_ID \n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROPOSAL\" LP ON LP.LP_PROP_NO = LPP.LPP_PROP_NO\n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_FIN_DATA\" LFD ON LFD.LFD_CUST_NEW_ID = LCI.LCI_NEW_ID\n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_FIN_DETAILS\" LFDS ON LFD.LFD_CMA_NO=LFDS.LFD_CMA_NO AND LFD.LFD_CUST_NEW_ID = LFDS.LFD_CUST_NEW_ID\n    INNER JOIN \"STG\".\"STG_LENDDB_LPSTP_FINMASTER\" LFM ON LFM.FIN_ROW_ID = LFD.LFD_FIN_ROW_ID\n    WHERE (LFD.LFD_FIN_ROW_ID=6835 OR LFD.LFD_FIN_ROW_ID=513588 OR LFD.LFD_FIN_ROW_ID=513669 OR LFD.LFD_FIN_ROW_ID=6836) AND LFDS.LFD_AUDIT_TYPE='A' AND LFD.LFD_CUST_NEW_ID=LCI.LCI_NEW_ID AND LFDS.LFD_FIN_PAGE = 'FI' \n--AND (LFD_YEAR_SEQ_NO = 3 OR LFD_YEAR_SEQ_NO = 4 OR LFD_YEAR_SEQ_NO = 5)\nAND (LFD_YEAR_SEQ_NO = 4 )\nAND LCI.LCI_BCIF_NO IN ('353340260','68587054','68588872','235871246','238747057','240330893','84059532','84321420','48319078','58358561','29476556','87312352') AND LCI.LCI_RECENT = 'Y' \nORDER By LFDS.LFD_END_DATE DESC)"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Sybase_Debtors_For_Current_Receivables_Query_Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Blob_Debtors_For_Current_Receivables_Query_Destination",
+								"type": "DatasetReference",
+								"parameters": {
+									"load_date": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Debtors_For_Receivables_More_Than_6M_Sybase_To_Blob",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Debtors_For_Receivables_More_Than_6M_IF_Delete_Exists",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": "(select LCI.LCI_BCIF_NO AS BCIF_NO,\n    LCI.LCI_CUST_NAME AS NAME,\n    (CASE WHEN LFD_YEAR_SEQ_NO=3 THEN LFD_YEAR_3 WHEN LFD_YEAR_SEQ_NO=4 THEN LFD_YEAR_4 WHEN LFD_YEAR_SEQ_NO=5 THEN LFD_YEAR_5  ELSE 0 END)/10000000 AS Debtors_For_Receivables_More_Than_6M\n\nFROM \"STG\".\"STG_LENDDB_LPCOM_CUST_INFO\"  LCI INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROP_PARTIES\" LPP ON LPP.LPP_CUST_ID_NEW = LCI.LCI_NEW_ID \n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROPOSAL\" LP ON LP.LP_PROP_NO = LPP.LPP_PROP_NO\n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_FIN_DATA\" LFD ON LFD.LFD_CUST_NEW_ID = LCI.LCI_NEW_ID\n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_FIN_DETAILS\" LFDS ON LFD.LFD_CMA_NO=LFDS.LFD_CMA_NO AND LFD.LFD_CUST_NEW_ID = LFDS.LFD_CUST_NEW_ID\n    INNER JOIN \"STG\".\"STG_LENDDB_LPSTP_FINMASTER\" LFM ON LFM.FIN_ROW_ID = LFD.LFD_FIN_ROW_ID\n    WHERE (LFD.LFD_FIN_ROW_ID=6902 OR LFD.LFD_FIN_ROW_ID=513577 OR LFD.LFD_FIN_ROW_ID=513658) AND LFDS.LFD_AUDIT_TYPE='A' AND LFD.LFD_CUST_NEW_ID=LCI.LCI_NEW_ID AND LFDS.LFD_FIN_PAGE = 'FI' \n--AND (LFD_YEAR_SEQ_NO = 3 OR LFD_YEAR_SEQ_NO = 4 OR LFD_YEAR_SEQ_NO = 5)\nAND (LFD_YEAR_SEQ_NO = 4 )\nAND LCI.LCI_BCIF_NO IN ('353340260','68587054','68588872','235871246','238747057','240330893','84059532','84321420','48319078','58358561','29476556','87312352') AND LCI.LCI_RECENT = 'Y' \nORDER By LFDS.LFD_END_DATE DESC)"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Sybase_Debtors_For_Receivables_More_Than_6M_Query_Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Blob_Debtors_For_Receivables_More_Than_6M_Query_Destination",
+								"type": "DatasetReference",
+								"parameters": {
+									"load_date": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Creditors_Query_Sybase_To_Blob",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Creditors_IF_Delete_Exists_Load_date",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": "(select LCI.LCI_BCIF_NO AS BCIF_NO,\n    LCI.LCI_CUST_NAME AS NAME,\n    (CASE WHEN LFD_YEAR_SEQ_NO=3 THEN LFD_YEAR_3 WHEN LFD_YEAR_SEQ_NO=4 THEN LFD_YEAR_4 WHEN LFD_YEAR_SEQ_NO=5 THEN LFD_YEAR_5  ELSE 0 END)/10000000 AS Creditors\n\nFROM \"STG\".\"STG_LENDDB_LPCOM_CUST_INFO\"  LCI INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROP_PARTIES\" LPP ON LPP.LPP_CUST_ID_NEW = LCI.LCI_NEW_ID \n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROPOSAL\" LP ON LP.LP_PROP_NO = LPP.LPP_PROP_NO\n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_FIN_DATA\" LFD ON LFD.LFD_CUST_NEW_ID = LCI.LCI_NEW_ID\n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_FIN_DETAILS\" LFDS ON LFD.LFD_CMA_NO=LFDS.LFD_CMA_NO AND LFD.LFD_CUST_NEW_ID = LFDS.LFD_CUST_NEW_ID\n    INNER JOIN \"STG\".\"STG_LENDDB_LPSTP_FINMASTER\" LFM ON LFM.FIN_ROW_ID = LFD.LFD_FIN_ROW_ID\n    WHERE (LFD.LFD_FIN_ROW_ID=6746 OR LFD.LFD_FIN_ROW_ID=513594 OR LFD.LFD_FIN_ROW_ID=513675) AND LFDS.LFD_AUDIT_TYPE='A' AND LFD.LFD_CUST_NEW_ID=LCI.LCI_NEW_ID AND LFDS.LFD_FIN_PAGE = 'FI' \n--AND (LFD_YEAR_SEQ_NO = 3 OR LFD_YEAR_SEQ_NO = 4 OR LFD_YEAR_SEQ_NO = 5)\nAND (LFD_YEAR_SEQ_NO = 4 )\nAND LCI.LCI_BCIF_NO IN ('353340260','68587054','68588872','235871246','238747057','240330893','84059532','84321420','48319078','58358561','29476556','87312352') AND LCI.LCI_RECENT = 'Y' \nORDER By LFDS.LFD_END_DATE DESC)"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Sybase_Creditors_Query_Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Blob_Creditors_Query_Destination",
+								"type": "DatasetReference",
+								"parameters": {
+									"load_date": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Networth_Query_Sybase_To_Blob",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Networth_IF_Delete_Exists_Load_date",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": "(select LCI.LCI_BCIF_NO AS BCIF_NO,\n    LCI.LCI_CUST_NAME AS NAME,\n    (CASE WHEN LFD_YEAR_SEQ_NO=3 THEN LFD_YEAR_3 WHEN LFD_YEAR_SEQ_NO=4 THEN LFD_YEAR_4 WHEN LFD_YEAR_SEQ_NO=5 THEN LFD_YEAR_5  ELSE 0 END)/10000000 AS Networth\n\nFROM \"STG\".\"STG_LENDDB_LPCOM_CUST_INFO\"  LCI INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROP_PARTIES\" LPP ON LPP.LPP_CUST_ID_NEW = LCI.LCI_NEW_ID \n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROPOSAL\" LP ON LP.LP_PROP_NO = LPP.LPP_PROP_NO\n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_FIN_DATA\" LFD ON LFD.LFD_CUST_NEW_ID = LCI.LCI_NEW_ID\n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_FIN_DETAILS\" LFDS ON LFD.LFD_CMA_NO=LFDS.LFD_CMA_NO AND LFD.LFD_CUST_NEW_ID = LFDS.LFD_CUST_NEW_ID\n    INNER JOIN \"STG\".\"STG_LENDDB_LPSTP_FINMASTER\" LFM ON LFM.FIN_ROW_ID = LFD.LFD_FIN_ROW_ID\n    WHERE (LFD.LFD_FIN_ROW_ID=7061 OR LFD.LFD_FIN_ROW_ID=513574 OR LFD.LFD_FIN_ROW_ID=513655) AND LFDS.LFD_AUDIT_TYPE='A' AND LFD.LFD_CUST_NEW_ID=LCI.LCI_NEW_ID AND LFDS.LFD_FIN_PAGE = 'FI' \n--AND (LFD_YEAR_SEQ_NO = 3 OR LFD_YEAR_SEQ_NO = 4 OR LFD_YEAR_SEQ_NO = 5)\nAND (LFD_YEAR_SEQ_NO = 4 )\nAND LCI.LCI_BCIF_NO IN ('353340260','68587054','68588872','235871246','238747057','240330893','84059532','84321420','48319078','58358561','29476556','87312352') AND LCI.LCI_RECENT = 'Y' \nORDER By LFDS.LFD_END_DATE DESC)"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Sybase_Networth_Query_Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Blob_Networth_Query_Destination",
+								"type": "DatasetReference",
+								"parameters": {
+									"load_date": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Investment_And_Advances_To_Group_Companies",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Investment_And_Advances_IF_Delete_Exists_Load_date",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": "(select LCI.LCI_BCIF_NO AS BCIF_NO,\n    LCI.LCI_CUST_NAME AS NAME,\n    (CASE WHEN LFD_YEAR_SEQ_NO=3 THEN LFD_YEAR_3 WHEN LFD_YEAR_SEQ_NO=4 THEN LFD_YEAR_4 WHEN LFD_YEAR_SEQ_NO=5 THEN LFD_YEAR_5  ELSE 0 END)/10000000 AS Investment_And_Advances_To_Group_Companies\n\nFROM \"STG\".\"STG_LENDDB_LPCOM_CUST_INFO\"  LCI INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROP_PARTIES\" LPP ON LPP.LPP_CUST_ID_NEW = LCI.LCI_NEW_ID \n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROPOSAL\" LP ON LP.LP_PROP_NO = LPP.LPP_PROP_NO\n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_FIN_DATA\" LFD ON LFD.LFD_CUST_NEW_ID = LCI.LCI_NEW_ID\n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_FIN_DETAILS\" LFDS ON LFD.LFD_CMA_NO=LFDS.LFD_CMA_NO AND LFD.LFD_CUST_NEW_ID = LFDS.LFD_CUST_NEW_ID\n    INNER JOIN \"STG\".\"STG_LENDDB_LPSTP_FINMASTER\" LFM ON LFM.FIN_ROW_ID = LFD.LFD_FIN_ROW_ID\n    WHERE (LFD.LFD_FIN_ROW_ID=6897 OR LFD.LFD_FIN_ROW_ID=513576 OR LFD.LFD_FIN_ROW_ID=513657) AND LFDS.LFD_AUDIT_TYPE='A' AND LFD.LFD_CUST_NEW_ID=LCI.LCI_NEW_ID AND LFDS.LFD_FIN_PAGE = 'FI' \n--AND (LFD_YEAR_SEQ_NO = 3 OR LFD_YEAR_SEQ_NO = 4 OR LFD_YEAR_SEQ_NO = 5)\nAND (LFD_YEAR_SEQ_NO = 4 )\nAND LCI.LCI_BCIF_NO IN ('353340260','68587054','68588872','235871246','238747057','240330893','84059532','84321420','48319078','58358561','29476556','87312352') AND LCI.LCI_RECENT = 'Y' \nORDER By LFDS.LFD_END_DATE DESC)"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Sybase_Investment_And_Advances_To_Group_Companies_Query_Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Blob_Investment_And_Advances_To_Group_Companies_Query_Destination",
+								"type": "DatasetReference",
+								"parameters": {
+									"load_date": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Group_by_companies_Query_Sybase_To_Blob",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Group_By_Companies_IF_Delete_Exists_Load_date",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": "(SELECT LCI1.LCI_CUST_NAME AS CUSTNAME,LCI1.LCI_BCIF_NO AS BCIF_NO  FROM \"STG\".\"STG_LENDDB_LPCOM_PROP_PARTIES\" LPP1 \n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_CUST_INFO\"  LCI1 ON LCI1.LCI_NEW_ID=LPP1.LPP_CUST_ID_NEW \n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROPOSAL\" LP ON LP.LP_PROP_NO = LPP1.LPP_PROP_NO\n    WHERE  LCI1.LCI_BCIF_NO IN ('353340260','68587054','68588872','235871246','238747057','240330893','84059532','84321420','48319078','58358561','29476556','87312352') AND LCI1.LCI_RECENT = 'Y' \n    AND LPP1.LPP_PROP_NO=LP.LP_PROP_NO AND LPP1.LPP_CUST_TYPE='N')\n"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Sybase_Group_By_Companies_Query_Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Blob_Group_BY_Companies_Query_Destination",
+								"type": "DatasetReference",
+								"parameters": {
+									"load_date": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Adjusted_Tangible_Net_Worth_ATNW_Sybase_To_Blob",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Adjusted_Tangible_Networth_IF_Delete_Exists_Load_date",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SybaseSource",
+								"query": "(select LCI.LCI_BCIF_NO AS BCIF_NO,\n    LCI.LCI_CUST_NAME AS NAME,\n    (CASE WHEN LFD_YEAR_SEQ_NO=3 THEN LFD_YEAR_3 WHEN LFD_YEAR_SEQ_NO=4 THEN LFD_YEAR_4 WHEN LFD_YEAR_SEQ_NO=5 THEN LFD_YEAR_5  ELSE 0 END)/10000000 AS Adjusted_Tangible_Net_Worth_ATNW\n\nFROM \"STG\".\"STG_LENDDB_LPCOM_CUST_INFO\"  LCI INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROP_PARTIES\" LPP ON LPP.LPP_CUST_ID_NEW = LCI.LCI_NEW_ID \n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_PROPOSAL\" LP ON LP.LP_PROP_NO = LPP.LPP_PROP_NO\n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_FIN_DATA\" LFD ON LFD.LFD_CUST_NEW_ID = LCI.LCI_NEW_ID\n    INNER JOIN \"STG\".\"STG_LENDDB_LPCOM_FIN_DETAILS\" LFDS ON LFD.LFD_CMA_NO=LFDS.LFD_CMA_NO AND LFD.LFD_CUST_NEW_ID = LFDS.LFD_CUST_NEW_ID\n    INNER JOIN \"STG\".\"STG_LENDDB_LPSTP_FINMASTER\" LFM ON LFM.FIN_ROW_ID = LFD.LFD_FIN_ROW_ID\n    WHERE (LFD.LFD_FIN_ROW_ID=7066 OR LFD.LFD_FIN_ROW_ID=513578 OR LFD.LFD_FIN_ROW_ID=513659) AND LFDS.LFD_AUDIT_TYPE='A' AND LFD.LFD_CUST_NEW_ID=LCI.LCI_NEW_ID AND LFDS.LFD_FIN_PAGE = 'FI' \n--AND (LFD_YEAR_SEQ_NO = 3 OR LFD_YEAR_SEQ_NO = 4 OR LFD_YEAR_SEQ_NO = 5)\nAND (LFD_YEAR_SEQ_NO = 4 )\nAND LCI.LCI_BCIF_NO IN ('353340260','68587054','68588872','235871246','238747057','240330893','84059532','84321420','48319078','58358561','29476556','87312352') AND LCI.LCI_RECENT = 'Y' \nORDER By LFDS.LFD_END_DATE DESC)"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 1,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Sybase_Adjusted_Tangible_Net_Worth_ATNW_Query_Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LOS_Commercial_Financial_Blob_Adjusted_Tangible_Net_Worth_ATNW_Query_Destination",
+								"type": "DatasetReference",
+								"parameters": {
+									"load_date": {
+										"value": "@pipeline().parameters.date2run",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Turnover_Delete_if_Exists_load_date",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Turnover_Blob_Path')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Debtors_For_Current_IF_Delete_Exists_load_date",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Turnover_Query_Sybase_To_Blob",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Debtors_For_Current_Receivables')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Debtors_For_Receivables_More_Than_6M_IF_Delete_Exists",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Debtors_For_Current_Receivables_Query_Sybase_To_Blob",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Debtors_For_Current_Receivables_More_Than_6M')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Creditors_IF_Delete_Exists_Load_date",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Debtors_For_Receivables_More_Than_6M_Sybase_To_Blob",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('creditors')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Networth_IF_Delete_Exists_Load_date",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Creditors_Query_Sybase_To_Blob",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Networth')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Investment_And_Advances_IF_Delete_Exists_Load_date",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Networth_Query_Sybase_To_Blob",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Investment_And_Advances')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Group_By_Companies_IF_Delete_Exists_Load_date",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Investment_And_Advances_To_Group_Companies",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Group_By_Companies')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Adjusted_Tangible_Networth_IF_Delete_Exists_Load_date",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Group_by_companies_Query_Sybase_To_Blob",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"date2run": {
+									"value": "@pipeline().parameters.date2run",
+									"type": "Expression"
+								},
+								"Blob_File_Path_Location": {
+									"value": "@variables('Adjusted_Tangible_Networth_IF_Delete_Exists_Load_date')",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"date2run": {
+						"type": "string",
+						"defaultValue": "yyyyMMdd"
+					}
+				},
+				"variables": {
+					"Turnover_Blob_Path": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_TURNOVER/load_date="
+					},
+					"Debtors_For_Current_Receivables": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_DEBTORS_FOR_CURRENT_RECEIVABLES/load_date="
+					},
+					"Debtors_For_Current_Receivables_More_Than_6M": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_DEBTORS_FOR_RECEIVABLES_MORE_THAN_6M/load_date="
+					},
+					"creditors": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_CREDITORS/load_date="
+					},
+					"Networth": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_NETWORTH/load_date="
+					},
+					"Investment_And_Advances": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_INVESTMENT_AND_ADVANCES_TO_GROUP_COMPANIES/load_date="
+					},
+					"Group_By_Companies": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_GROUP_BY_COMPANIES/load_date="
+					},
+					"Adjusted_Tangible_Networth_IF_Delete_Exists_Load_date": {
+						"type": "String",
+						"defaultValue": "DERIVED_DATASETS/LOS_COMMERCIAL_FINANCIAL_ADJUSTED_TANGIBLE_NET_WORTH_ATNM/load_date="
+					}
+				},
+				"folder": {
+					"name": "stag2landing_deriveddatasets"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-08-04T04:31:32Z"
+			},
+			"dependsOn": []
+		}
+	]
+}
