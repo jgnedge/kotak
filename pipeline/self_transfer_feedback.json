@@ -1,121 +1,113 @@
 {
-    "name": "self_transfer_feedback",
-    "properties": {
-        "activities": [
-            {
-                "name": "Load Self Transfer",
-                "type": "Copy",
-                "dependsOn": [],
-                "policy": {
-                    "timeout": "0.12:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "source": {
-                        "type": "CosmosDbMongoDbApiSource",
-                        "batchSize": 100
-                    },
-                    "sink": {
-                        "type": "JsonSink",
-                        "storeSettings": {
-                            "type": "AzureBlobFSWriteSettings"
-                        },
-                        "formatSettings": {
-                            "type": "JsonWriteSettings"
-                        }
-                    },
-                    "enableStaging": false
-                },
-                "inputs": [
-                    {
-                        "referenceName": "cosmos_db_entity_store",
-                        "type": "DatasetReference",
-                        "parameters": {
-                            "tableName": "self_transfer_feedback"
-                        }
-                    }
-                ],
-                "outputs": [
-                    {
-                        "referenceName": "JsonGeneralized",
-                        "type": "DatasetReference",
-                        "parameters": {
-                            "container": "landing",
-                            "path": {
-                                "value": "@concat('cosmos_db/self_transfer_feedback/load_date=',replace(pipeline().parameters.p_date, '-','' ))",
-                                "type": "Expression"
-                            }
-                        }
-                    }
-                ]
-            },
-            {
-                "name": "Covnert Json to Parquet",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "Load Self Transfer",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.12:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": {
-                        "value": "@concat(pipeline().globalParameters.RootPathTransactionMining,'utils/Convert_JSON_2_PARQUET')",
-                        "type": "Expression"
-                    },
-                    "baseParameters": {
-                        "SRC": {
-                            "value": "@concat('abfss://landing@kmblewsproddatalake.dfs.core.windows.net/cosmos_db/self_transfer_feedback/load_date=',replace(pipeline().parameters.p_date, '-','' ))",
-                            "type": "Expression"
-                        },
-                        "DEST": {
-                            "value": "@concat('abfss://job-data@kmblewsproddatalake.dfs.core.windows.net/entity_store/self_transfer_feedback/p_date=',pipeline().parameters.p_date)",
-                            "type": "Expression"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@pipeline().globalParameters.Databricks_Node_Type",
-                            "type": "Expression"
-                        },
-                        "workers": "1",
-                        "clusterVersion": {
-                            "value": "@pipeline().globalParameters.Databricks_Cluster_Version",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            }
-        ],
-        "parameters": {
-            "p_date": {
-                "type": "string",
-                "defaultValue": "2023-06-19"
-            }
-        },
-        "folder": {
-            "name": "PROD/Loaders/Cosmos to Landing"
-        },
-        "annotations": [],
-        "lastPublishTime": "2023-06-19T12:36:28Z"
-    },
-    "type": "Microsoft.DataFactory/factories/pipelines"
+	"name": "self_transfer_feedback",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load Self Transfer",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "CosmosDbMongoDbApiSource",
+						"batchSize": 100
+					},
+					"sink": {
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "cosmos_db_entity_store",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": "self_transfer_feedback"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "JsonGeneralized",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "landing",
+							"path": {
+								"value": "@concat('cosmos_db/self_transfer_feedback/load_date=',replace(pipeline().parameters.p_date, '-','' ))",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Covnert Json to Parquet",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Load Self Transfer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "@concat(pipeline().globalParameters.RootPathTransactionMining,'utils/Convert_JSON_2_PARQUET')",
+						"type": "Expression"
+					},
+					"baseParameters": {
+						"SRC": {
+							"value": "@concat('abfss://landing@kmblewsproddatalake.dfs.core.windows.net/cosmos_db/self_transfer_feedback/load_date=',replace(pipeline().parameters.p_date, '-','' ))",
+							"type": "Expression"
+						},
+						"DEST": {
+							"value": "@concat('abfss://job-data@kmblewsproddatalake.dfs.core.windows.net/entity_store/self_transfer_feedback/p_date=',pipeline().parameters.p_date)",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"workers": "1"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"p_date": {
+				"type": "string",
+				"defaultValue": "2023-06-19"
+			}
+		},
+		"folder": {
+			"name": "PROD/Loaders/Cosmos to Landing"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-06-19T12:36:28Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }
