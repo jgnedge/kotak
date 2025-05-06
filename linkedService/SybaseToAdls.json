@@ -1,0 +1,15 @@
+{
+    "name": "SybaseToAdls",
+    "type": "Microsoft.DataFactory/factories/linkedservices",
+    "properties": {
+        "annotations": [],
+        "type": "AzureBlobFS",
+        "typeProperties": {
+            "url": "https://kmblewsproddatalake.dfs.core.windows.net/"
+        },
+        "connectVia": {
+            "referenceName": "Self-Hosted-Prod",
+            "type": "IntegrationRuntimeReference"
+        }
+    }
+}

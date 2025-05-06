@@ -1,0 +1,19 @@
+{
+    "name": "SybaseLS",
+    "type": "Microsoft.DataFactory/factories/linkedservices",
+    "properties": {
+        "annotations": [],
+        "type": "Sybase",
+        "typeProperties": {
+            "server": "10.240.55.130:2639",
+            "database": "KDWPROD_R2",
+            "authenticationType": "Basic",
+            "username": "KDW_EWS",
+            "encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI4OTMwOWJiNS02ZmEyLTRkNGYtOGY2YS05MzQzMjIwZWUzMmEiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+        },
+        "connectVia": {
+            "referenceName": "Self-Hosted-Prod",
+            "type": "IntegrationRuntimeReference"
+        }
+    }
+}

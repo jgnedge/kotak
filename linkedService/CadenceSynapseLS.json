@@ -1,0 +1,12 @@
+{
+    "name": "CadenceSynapseLS",
+    "type": "Microsoft.DataFactory/factories/linkedservices",
+    "properties": {
+        "annotations": [],
+        "type": "AzureSqlDW",
+        "typeProperties": {
+            "connectionString": "integrated security=False;encrypt=True;connection timeout=30;data source=kmbl-ews-prod-synapse.sql.azuresynapse.net;initial catalog=ews_prod_synapse_sqlpool;user id=sqladminuser",
+            "encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDExMDI1MzI0LUFFNUUtNDgyQi1CNjQ4LTg5OUE0OTk0Q0IwNl9lYzE5OGQzNS04MzIxLTRiMzgtODYwNC01NDViMWQ0ZWZkYzkiDQp9"
+        }
+    }
+}
