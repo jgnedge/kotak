@@ -1,0 +1,9 @@
+{
+	"name": "KotakADF",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "ed13eaab-5c47-49ce-bf14-1981b8085f3c",
+		"tenantId": "a3a5445b-30d1-41ed-9a80-d8ea75a1639f"
+	}
+}

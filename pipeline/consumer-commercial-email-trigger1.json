@@ -1,0 +1,61 @@
+{
+	"name": "consumer-commercial-email-trigger1",
+	"properties": {
+		"activities": [
+			{
+				"name": "consumer-email-trigger1",
+				"type": "AzureFunctionActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"functionName": "consumer-commercial-email-trigger1",
+					"body": {
+						"division": "consumer"
+					},
+					"method": "POST"
+				},
+				"linkedServiceName": {
+					"referenceName": "ufce_prod_fa",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "commercial-email-trigger1",
+				"type": "AzureFunctionActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"functionName": "consumer-commercial-email-trigger1",
+					"body": {
+						"division": "commercial"
+					},
+					"method": "POST"
+				},
+				"linkedServiceName": {
+					"referenceName": "ufce_prod_fa",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "DEV/Alerts-UFCE"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-05-05T10:21:57Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

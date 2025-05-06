@@ -1,0 +1,52 @@
+{
+	"name": "ufce_download_intermediate",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage_ufce",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"container": {
+				"type": "string",
+				"defaultValue": "ufce-download-intermediate"
+			},
+			"division": {
+				"type": "string"
+			},
+			"year": {
+				"type": "string"
+			},
+			"quarter": {
+				"type": "string"
+			},
+			"file_created_time": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@concat(dataset().division, '_', dataset().year, '_', dataset().quarter, '_', dataset().file_created_time, '.txt')",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@concat(dataset().division, '/', dataset().year, '_', dataset().quarter, '/download_date=', dataset().file_created_time)",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().container",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

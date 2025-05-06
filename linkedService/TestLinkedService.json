@@ -1,0 +1,15 @@
+{
+	"name": "TestLinkedService",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzurePostgreSql",
+		"typeProperties": {
+			"connectionString": "WPVpVXUqJjhf9gDmJKx9g4P5drS++9y/q+J3eYABjkb6iRVRUMk8NK57IhHbQmepnWDzqafiFWmW/t2iUmgVRg=="
+		},
+		"connectVia": {
+			"referenceName": "integrationRuntime2",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
