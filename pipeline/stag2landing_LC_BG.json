@@ -1,0 +1,223 @@
+{
+    "name": "stag2landing_LC_BG",
+    "properties": {
+        "activities": [
+            {
+                "name": "CHECK_BLOB_LOAD_DATE_EXISTS_STG_VIEW_KMB_BG_INVOK_OS",
+                "type": "ExecutePipeline",
+                "dependsOn": [],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@replace(pipeline().parameters.partitionValue,'-','')",
+                            "type": "Expression"
+                        },
+                        "Blob_File_Path_Location": {
+                            "value": "@variables('Blob_File_Path_STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS')",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "CHECK_BLOB_LOAD_DATE_EXISTS_STG_VIEW_KMB_BG_INVOK_OS",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "SybaseSource",
+                        "query": {
+                            "value": "@concat('select * from \"STG\".\"STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS\" where DATEFORMAT(AS_ON_DATE, ''yyyymmdd'') = ''',replace(pipeline().parameters.partitionValue,'-',''),'''')",
+                            "type": "Expression"
+                        }
+                    },
+                    "sink": {
+                        "type": "DelimitedTextSink",
+                        "storeSettings": {
+                            "type": "AzureBlobFSWriteSettings"
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextWriteSettings",
+                            "quoteAllText": true,
+                            "fileExtension": ".csv"
+                        }
+                    },
+                    "enableStaging": false,
+                    "parallelCopies": 1,
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "typeConversion": true,
+                        "typeConversionSettings": {
+                            "allowDataTruncation": true,
+                            "treatBooleanAsNumber": false
+                        }
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SybaseDataset_STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "csv_STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "partitionValue": {
+                                "value": "@replace(pipeline().parameters.partitionValue,'-','')",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "CHECK_BLOB_LOAD_DATE_EXISTS_LC_DEVELOP_REPORT",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@replace(pipeline().parameters.partitionValue,'-','')",
+                            "type": "Expression"
+                        },
+                        "Blob_File_Path_Location": {
+                            "value": "@variables('Blob_File_Path_STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT')",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "CHECK_BLOB_LOAD_DATE_EXISTS_LC_DEVELOP_REPORT",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "SybaseSource",
+                        "query": {
+                            "value": "@concat('select * from \"STG\".\"STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT\" where DATEFORMAT(AS_ON_DATE, ''yyyymmdd'') = ''',replace(pipeline().parameters.partitionValue,'-',''),'''')",
+                            "type": "Expression"
+                        }
+                    },
+                    "sink": {
+                        "type": "DelimitedTextSink",
+                        "storeSettings": {
+                            "type": "AzureBlobFSWriteSettings"
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextWriteSettings",
+                            "quoteAllText": true,
+                            "fileExtension": ".csv"
+                        }
+                    },
+                    "enableStaging": false,
+                    "parallelCopies": 1,
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "typeConversion": true,
+                        "typeConversionSettings": {
+                            "allowDataTruncation": true,
+                            "treatBooleanAsNumber": false
+                        }
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SybaseDataset_STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "csv_STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "partitionValue": {
+                                "value": "@replace(pipeline().parameters.partitionValue,'-','')",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            }
+        ],
+        "parameters": {
+            "partitionValue": {
+                "type": "string"
+            }
+        },
+        "variables": {
+            "Blob_File_Path_STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS": {
+                "type": "String",
+                "defaultValue": "MISYS/STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS/load_date="
+            },
+            "Blob_File_Path_STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT": {
+                "type": "String",
+                "defaultValue": "MISYS/STG_GLDSRC_MISYS_VIEW_KMB_LC_DEVELOP_REPORT/load_date="
+            }
+        },
+        "folder": {
+            "name": "stg2landingBrd2"
+        },
+        "annotations": [],
+        "lastPublishTime": "2022-08-16T10:16:12Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

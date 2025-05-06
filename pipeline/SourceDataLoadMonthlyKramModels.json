@@ -1,0 +1,54 @@
+{
+    "name": "SourceDataLoadMonthlyKramModels",
+    "properties": {
+        "activities": [
+            {
+                "name": "SourceLoadDateCheckKramModels",
+                "type": "IfCondition",
+                "dependsOn": [],
+                "userProperties": [],
+                "typeProperties": {
+                    "expression": {
+                        "value": "@equals(startOfMonth(pipeline().parameters.partitionValue,'yyyy-MM-dd'),pipeline().parameters.partitionValue)",
+                        "type": "Expression"
+                    },
+                    "ifTrueActivities": [
+                        {
+                            "name": "ExecuteKramModels",
+                            "type": "ExecutePipeline",
+                            "dependsOn": [],
+                            "policy": {
+                                "secureInput": false
+                            },
+                            "userProperties": [],
+                            "typeProperties": {
+                                "pipeline": {
+                                    "referenceName": "stage2landing_KramModel",
+                                    "type": "PipelineReference"
+                                },
+                                "waitOnCompletion": true,
+                                "parameters": {
+                                    "load_date": {
+                                        "value": "@replace(pipeline().parameters.partitionValue,'-','')",
+                                        "type": "Expression"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "parameters": {
+            "partitionValue": {
+                "type": "string"
+            }
+        },
+        "folder": {
+            "name": "stag2landing_deriveddatasets"
+        },
+        "annotations": [],
+        "lastPublishTime": "2023-02-23T07:05:48Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

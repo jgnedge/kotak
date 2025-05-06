@@ -1,0 +1,111 @@
+{
+    "name": "CheckPartitionValueBRD3Trigger",
+    "properties": {
+        "activities": [
+            {
+                "name": "CheckStartofMonthBrd2",
+                "type": "IfCondition",
+                "dependsOn": [],
+                "userProperties": [],
+                "typeProperties": {
+                    "expression": {
+                        "value": "@equals(startOfMonth(pipeline().parameters.partitionValue,'yyyy-MM-dd'),pipeline().parameters.partitionValue)",
+                        "type": "Expression"
+                    },
+                    "ifTrueActivities": [
+                        {
+                            "name": "ExecuteBrd3TransactionMining",
+                            "type": "ExecutePipeline",
+                            "dependsOn": [],
+                            "policy": {
+                                "secureInput": false
+                            },
+                            "userProperties": [],
+                            "typeProperties": {
+                                "pipeline": {
+                                    "referenceName": "Brd3TransactionMining",
+                                    "type": "PipelineReference"
+                                },
+                                "waitOnCompletion": true,
+                                "parameters": {
+                                    "partitionValue": {
+                                        "value": "@pipeline().parameters.partitionValue",
+                                        "type": "Expression"
+                                    },
+                                    "cosmosConfigTables": {
+                                        "value": "@pipeline().parameters.cosmosConfigTables",
+                                        "type": "Expression"
+                                    },
+                                    "cosmosDatabaseName": {
+                                        "value": "@pipeline().parameters.cosmosDatabaseName",
+                                        "type": "Expression"
+                                    },
+                                    "jobSubjectArea": {
+                                        "value": "@pipeline().parameters.jobSubjectArea",
+                                        "type": "Expression"
+                                    },
+                                    "jobExecutionType": {
+                                        "value": "@pipeline().parameters.jobExecutionType",
+                                        "type": "Expression"
+                                    },
+                                    "markerRootPath": {
+                                        "value": "@pipeline().parameters.markerRootPath",
+                                        "type": "Expression"
+                                    },
+                                    "schema": {
+                                        "value": "@pipeline().parameters.schema",
+                                        "type": "Expression"
+                                    },
+                                    "container": {
+                                        "value": "@pipeline().parameters.container",
+                                        "type": "Expression"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "parameters": {
+            "partitionValue": {
+                "type": "string",
+                "defaultValue": "2021-10-01"
+            },
+            "cosmosConfigTables": {
+                "type": "string",
+                "defaultValue": "job_capacity_details"
+            },
+            "cosmosDatabaseName": {
+                "type": "string",
+                "defaultValue": "config_store"
+            },
+            "jobSubjectArea": {
+                "type": "string",
+                "defaultValue": "brd3_mining_output"
+            },
+            "jobExecutionType": {
+                "type": "string",
+                "defaultValue": "entity"
+            },
+            "markerRootPath": {
+                "type": "string",
+                "defaultValue": "job-metadata/markers"
+            },
+            "schema": {
+                "type": "string",
+                "defaultValue": "dbo"
+            },
+            "container": {
+                "type": "string",
+                "defaultValue": "job-data"
+            }
+        },
+        "folder": {
+            "name": "PROD/CadenzFlow/BRD3"
+        },
+        "annotations": [],
+        "lastPublishTime": "2022-11-11T10:32:15Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

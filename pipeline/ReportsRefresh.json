@@ -1,0 +1,47 @@
+{
+    "name": "ReportsRefresh",
+    "properties": {
+        "activities": [
+            {
+                "name": "EWS_CONSOLIDATED_REPORT_REFRESH",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "storedProcedureName": "[dbo].[EWS_CONSOLIDATED_REPORT_REFRESH]",
+                    "storedProcedureParameters": {
+                        "partition_value": {
+                            "value": {
+                                "value": "@pipeline().parameters.partitionValue",
+                                "type": "Expression"
+                            },
+                            "type": "String"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "CadenceSynapseLS",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "parameters": {
+            "partitionValue": {
+                "type": "string"
+            }
+        },
+        "folder": {
+            "name": "Reports"
+        },
+        "annotations": [],
+        "lastPublishTime": "2021-12-06T07:43:53Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

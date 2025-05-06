@@ -1,0 +1,54 @@
+{
+    "name": "SourceDataLoadDateCheckBrd2",
+    "properties": {
+        "activities": [
+            {
+                "name": "SourceLoadDateCheckBrd2",
+                "type": "IfCondition",
+                "dependsOn": [],
+                "userProperties": [],
+                "typeProperties": {
+                    "expression": {
+                        "value": "@equals(startOfMonth(pipeline().parameters.partitionValue,'yyyy-MM-dd'),pipeline().parameters.partitionValue)",
+                        "type": "Expression"
+                    },
+                    "ifTrueActivities": [
+                        {
+                            "name": "ExecuteInwardChequeReturns",
+                            "type": "ExecutePipeline",
+                            "dependsOn": [],
+                            "policy": {
+                                "secureInput": false
+                            },
+                            "userProperties": [],
+                            "typeProperties": {
+                                "pipeline": {
+                                    "referenceName": "stag2landing_INWARD_CHEQUE_RETURN_REPORT",
+                                    "type": "PipelineReference"
+                                },
+                                "waitOnCompletion": true,
+                                "parameters": {
+                                    "partitionValue": {
+                                        "value": "@pipeline().parameters.partitionValue",
+                                        "type": "Expression"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "parameters": {
+            "partitionValue": {
+                "type": "string"
+            }
+        },
+        "folder": {
+            "name": "stg2landingBrd2"
+        },
+        "annotations": [],
+        "lastPublishTime": "2022-03-05T12:08:57Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

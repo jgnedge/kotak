@@ -1,0 +1,157 @@
+{
+    "name": "Stag2landing_Masterpipeline",
+    "properties": {
+        "activities": [
+            {
+                "name": "Stag2landing_KRAM_FINANCIAL_RATIOS",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "stag2landing_RP_INPUT_TABLE",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "stag2landing_KRAM_FINANCIAL_RATIOS",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "Stag2landing_LOS_BL_FINANCIAL_RATIOS",
+                "type": "ExecutePipeline",
+                "dependsOn": [],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "stag2landing_LOS_BL_FINANCIAL_RATIOS",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "stag2landing_LOS_HL_LP_RH",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "Stag2landing_LOS_BL_FINANCIAL_RATIOS",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "stag2landing_LOS_HL_LP_RH",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "stag2landing_RP_INPUT_TABLE",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "stag2landing_LOS_WC_FINANCIAL_RATIOS",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "stag2landing_RP_INPUT_TABLE",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "stag2landing_LOS_WC_FINANCIAL_RATIOS",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "stag2landing_LOS_HL_LP_RH",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "stag2landing_LOS_WC_FINANCIAL_RATIOS",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            }
+        ],
+        "parameters": {
+            "partitionValue": {
+                "type": "string",
+                "defaultValue": "yyyyMMdd"
+            }
+        },
+        "folder": {
+            "name": "stag2landing_deriveddatasets"
+        },
+        "annotations": [],
+        "lastPublishTime": "2024-09-14T08:53:21Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

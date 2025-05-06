@@ -1,0 +1,88 @@
+{
+    "name": "MonthlyKramExecution",
+    "properties": {
+        "activities": [
+            {
+                "name": "check_trigger_date",
+                "type": "IfCondition",
+                "dependsOn": [],
+                "userProperties": [],
+                "typeProperties": {
+                    "expression": {
+                        "value": "@equals(startOfMonth(pipeline().parameters.partitionValue,'yyyy-MM-dd'),pipeline().parameters.partitionValue)",
+                        "type": "Expression"
+                    },
+                    "ifTrueActivities": [
+                        {
+                            "name": "ExecuteKramEntityfor-1st-day-of-month",
+                            "type": "ExecutePipeline",
+                            "dependsOn": [],
+                            "policy": {
+                                "secureInput": false
+                            },
+                            "userProperties": [],
+                            "typeProperties": {
+                                "pipeline": {
+                                    "referenceName": "ExecuteKramEntites",
+                                    "type": "PipelineReference"
+                                },
+                                "waitOnCompletion": true,
+                                "parameters": {
+                                    "markerRootPath": {
+                                        "value": "@pipeline().parameters.markerRootPath",
+                                        "type": "Expression"
+                                    },
+                                    "cosmosDatabaseName": {
+                                        "value": "@pipeline().parameters.cosmosDatabaseName",
+                                        "type": "Expression"
+                                    },
+                                    "partitionValue": {
+                                        "value": "@pipeline().parameters.partitionValue",
+                                        "type": "Expression"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "parameters": {
+            "partitionValue": {
+                "type": "string",
+                "defaultValue": "2021-10-01"
+            },
+            "cosmosConfigTables": {
+                "type": "string"
+            },
+            "cosmosDatabaseName": {
+                "type": "string",
+                "defaultValue": "config_store"
+            },
+            "jobSubjectArea": {
+                "type": "string"
+            },
+            "jobExecutionType": {
+                "type": "string"
+            },
+            "markerRootPath": {
+                "type": "string",
+                "defaultValue": "job-metadata/markers"
+            },
+            "schema": {
+                "type": "string",
+                "defaultValue": "dbo"
+            },
+            "container": {
+                "type": "string",
+                "defaultValue": "job-data"
+            }
+        },
+        "folder": {
+            "name": "PROD/CadenzFlow/BRD3"
+        },
+        "annotations": [],
+        "lastPublishTime": "2023-02-23T07:15:34Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}
