@@ -1,0 +1,19 @@
+{
+    "name": "SybaseDataset_STG_FINACLE_HTD",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "SybaseLS",
+            "type": "LinkedServiceReference"
+        },
+        "folder": {
+            "name": "sybase"
+        },
+        "annotations": [],
+        "type": "SybaseTable",
+        "schema": [],
+        "typeProperties": {
+            "tableName": "\"STG\".\"STG_FINACLE_HTD\""
+        }
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}

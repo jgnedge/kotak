@@ -1,0 +1,35 @@
+{
+    "name": "synapse_store",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "CadenceSynapseLS",
+            "type": "LinkedServiceReference"
+        },
+        "parameters": {
+            "entityName": {
+                "type": "string"
+            },
+            "schema": {
+                "type": "string",
+                "defaultValue": "dbo"
+            }
+        },
+        "folder": {
+            "name": "cadence_datasets/PROD"
+        },
+        "annotations": [],
+        "type": "AzureSqlDWTable",
+        "schema": [],
+        "typeProperties": {
+            "schema": {
+                "value": "@dataset().schema",
+                "type": "Expression"
+            },
+            "table": {
+                "value": "@dataset().entityName",
+                "type": "Expression"
+            }
+        }
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}

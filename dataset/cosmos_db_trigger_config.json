@@ -1,0 +1,19 @@
+{
+    "name": "cosmos_db_trigger_config",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "CosmosDbMongoDbLS",
+            "type": "LinkedServiceReference"
+        },
+        "folder": {
+            "name": "cadence_datasets/PROD"
+        },
+        "annotations": [],
+        "type": "CosmosDbMongoDbApiCollection",
+        "schema": [],
+        "typeProperties": {
+            "collection": "trigger_config_details"
+        }
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}

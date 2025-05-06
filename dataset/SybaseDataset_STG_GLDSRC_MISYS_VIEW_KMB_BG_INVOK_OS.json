@@ -1,0 +1,19 @@
+{
+    "name": "SybaseDataset_STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "SybaseLS",
+            "type": "LinkedServiceReference"
+        },
+        "folder": {
+            "name": "sybase"
+        },
+        "annotations": [],
+        "type": "SybaseTable",
+        "schema": [],
+        "typeProperties": {
+            "tableName": "\"STG\".\"STG_GLDSRC_MISYS_VIEW_KMB_BG_INVOK_OS\""
+        }
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}

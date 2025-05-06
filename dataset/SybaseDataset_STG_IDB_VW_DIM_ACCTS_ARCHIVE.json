@@ -1,0 +1,19 @@
+{
+    "name": "SybaseDataset_STG_IDB_VW_DIM_ACCTS_ARCHIVE",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "SybaseLS",
+            "type": "LinkedServiceReference"
+        },
+        "folder": {
+            "name": "sybase"
+        },
+        "annotations": [],
+        "type": "SybaseTable",
+        "schema": [],
+        "typeProperties": {
+            "tableName": "\"STG\".\"STG_IDB_VW_DIM_ACCTS_ARCHIVE\""
+        }
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}

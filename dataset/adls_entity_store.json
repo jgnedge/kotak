@@ -1,0 +1,41 @@
+{
+    "name": "adls_entity_store",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "cadenceAdlsLS",
+            "type": "LinkedServiceReference"
+        },
+        "parameters": {
+            "partitionValue": {
+                "type": "string"
+            },
+            "entityName": {
+                "type": "string"
+            },
+            "container": {
+                "type": "string"
+            }
+        },
+        "folder": {
+            "name": "cadence_datasets/PROD"
+        },
+        "annotations": [],
+        "type": "Parquet",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobFSLocation",
+                "folderPath": {
+                    "value": "@concat('entity_store/', dataset().entityName, '/p_date=', dataset().partitionValue)",
+                    "type": "Expression"
+                },
+                "fileSystem": {
+                    "value": "@dataset().container",
+                    "type": "Expression"
+                }
+            },
+            "compressionCodec": "snappy"
+        },
+        "schema": []
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}

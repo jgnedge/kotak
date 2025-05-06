@@ -1,0 +1,16 @@
+{
+    "name": "LOS_Commercial_Financial_Sybase_Debtors_For_Current_Receivables_Query_Source",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "SybaseLS",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "SybaseTable",
+        "schema": [],
+        "typeProperties": {
+            "tableName": "\"STG\".\"STG_BCIF_PARTY_IT\""
+        }
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}

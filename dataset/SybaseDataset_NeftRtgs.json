@@ -1,0 +1,16 @@
+{
+    "name": "SybaseDataset_NeftRtgs",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "SybaseLS",
+            "type": "LinkedServiceReference"
+        },
+        "folder": {
+            "name": "sybase"
+        },
+        "annotations": [],
+        "type": "SybaseTable",
+        "schema": []
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}

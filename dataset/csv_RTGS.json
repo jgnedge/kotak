@@ -1,0 +1,42 @@
+{
+    "name": "csv_RTGS",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "SybaseToAdls",
+            "type": "LinkedServiceReference"
+        },
+        "parameters": {
+            "partitiondate": {
+                "type": "string",
+                "defaultValue": "yyyyMMdd"
+            },
+            "RtgsTable": {
+                "type": "string"
+            },
+            "loaddate": {
+                "type": "string"
+            }
+        },
+        "folder": {
+            "name": "adls"
+        },
+        "annotations": [],
+        "type": "DelimitedText",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobFSLocation",
+                "folderPath": {
+                    "value": "@concat('RTGS/',dataset().RtgsTable,'/load_date=',dataset().loaddate,'/partition_date=',dataset().partitiondate)",
+                    "type": "Expression"
+                },
+                "fileSystem": "landing"
+            },
+            "columnDelimiter": ",",
+            "escapeChar": "\\",
+            "firstRowAsHeader": true,
+            "quoteChar": "\""
+        },
+        "schema": []
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}

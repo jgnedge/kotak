@@ -1,0 +1,16 @@
+{
+    "name": "SybaseDataset_LOS_HL_LP_RH",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "SybaseLS",
+            "type": "LinkedServiceReference"
+        },
+        "folder": {
+            "name": "sybase"
+        },
+        "annotations": [],
+        "type": "SybaseTable",
+        "schema": []
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,33 @@
+{
+    "name": "blob_json",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "AzureBlobStorageLS",
+            "type": "LinkedServiceReference"
+        },
+        "parameters": {
+            "container": {
+                "type": "string",
+                "defaultValue": "job-data"
+            }
+        },
+        "folder": {
+            "name": "cadence_datasets/PROD"
+        },
+        "annotations": [],
+        "type": "Json",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobStorageLocation",
+                "folderPath": "may_15",
+                "container": {
+                    "value": "@dataset().container",
+                    "type": "Expression"
+                }
+            },
+            "encodingName": "UTF-8"
+        },
+        "schema": {}
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}

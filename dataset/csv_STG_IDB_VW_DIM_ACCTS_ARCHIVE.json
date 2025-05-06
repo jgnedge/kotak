@@ -1,0 +1,35 @@
+{
+    "name": "csv_STG_IDB_VW_DIM_ACCTS_ARCHIVE",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "SybaseToAdls",
+            "type": "LinkedServiceReference"
+        },
+        "parameters": {
+            "partitionValue": {
+                "type": "string"
+            }
+        },
+        "folder": {
+            "name": "adls"
+        },
+        "annotations": [],
+        "type": "DelimitedText",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobFSLocation",
+                "folderPath": {
+                    "value": "@concat('NPA_DATA/STG.STG_IDB_VW_DIM_ACCTS_ARCHIVE/load_date=',dataset().partitionValue)",
+                    "type": "Expression"
+                },
+                "fileSystem": "landing"
+            },
+            "columnDelimiter": ",",
+            "escapeChar": "\\",
+            "firstRowAsHeader": true,
+            "quoteChar": "\""
+        },
+        "schema": []
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}

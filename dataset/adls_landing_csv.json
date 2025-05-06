@@ -1,0 +1,38 @@
+{
+    "name": "adls_landing_csv",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "cadenceAdlsLS",
+            "type": "LinkedServiceReference"
+        },
+        "parameters": {
+            "load_date": {
+                "type": "string"
+            },
+            "jobSubjectArea": {
+                "type": "string"
+            }
+        },
+        "folder": {
+            "name": "cadence_datasets/PROD"
+        },
+        "annotations": [],
+        "type": "DelimitedText",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobFSLocation",
+                "folderPath": {
+                    "value": "@concat(dataset().jobSubjectArea,'/load_date=',replace(dataset().load_date, '-', ''))",
+                    "type": "Expression"
+                },
+                "fileSystem": "landing"
+            },
+            "columnDelimiter": ",",
+            "escapeChar": "\\",
+            "firstRowAsHeader": true,
+            "quoteChar": "\""
+        },
+        "schema": []
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}

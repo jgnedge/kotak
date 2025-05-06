@@ -1,0 +1,19 @@
+{
+    "name": "cosmos_db_feedback_profile",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "CosmosDbMongoDbFeedBackProfile",
+            "type": "LinkedServiceReference"
+        },
+        "folder": {
+            "name": "cadence_datasets/PROD/AlertWorkflow"
+        },
+        "annotations": [],
+        "type": "CosmosDbMongoDbApiCollection",
+        "schema": [],
+        "typeProperties": {
+            "collection": "ews_feedback_profile"
+        }
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}
