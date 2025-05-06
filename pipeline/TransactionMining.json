@@ -34,6 +34,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/utils/crn_lob_validations",
 					"baseParameters": {
 						"partitionValue": {
 							"value": "@pipeline().parameters.partitionValue",

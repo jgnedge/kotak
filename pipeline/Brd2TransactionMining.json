@@ -34,6 +34,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD2/brd2_uc5",
 					"baseParameters": {
 						"partitionValue": {
 							"value": "@pipeline().parameters.partitionValue",
@@ -88,6 +89,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD2/brd2_uc5",
 					"baseParameters": {
 						"partitionValue": {
 							"value": "@pipeline().parameters.partitionValue",
@@ -439,6 +441,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD2/brd2_uc6",
 					"baseParameters": {
 						"partitionValue": {
 							"value": "@pipeline().parameters.partitionValue",
@@ -530,6 +533,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD2/brd2_uc1_uc3",
 					"baseParameters": {
 						"partitionValue": {
 							"value": "@pipeline().parameters.partitionValue",
@@ -584,6 +588,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD2/brd2_uc4",
 					"baseParameters": {
 						"partitionValue": {
 							"value": "@pipeline().parameters.partitionValue",

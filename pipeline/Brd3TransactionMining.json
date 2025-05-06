@@ -807,6 +807,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD3/brd3_uc4_consumer",
 					"baseParameters": {
 						"partitionValue": {
 							"value": "@pipeline().parameters.partitionValue",
@@ -861,6 +862,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD3/brd3_uc4_consumer",
 					"baseParameters": {
 						"partitionValue": {
 							"value": "@pipeline().parameters.partitionValue",
@@ -915,6 +917,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD3/brd3_uc5_wbg_commerial_ard",
 					"baseParameters": {
 						"partitionValue": {
 							"value": "@pipeline().parameters.partitionValue",
@@ -969,6 +972,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD3/brd3_uc5_consumer",
 					"baseParameters": {
 						"partitionValue": {
 							"value": "@pipeline().parameters.partitionValue",
@@ -1023,6 +1027,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD3/brd3_uc6_wbg_commerial_ard",
 					"baseParameters": {
 						"partitionValue": {
 							"value": "@pipeline().parameters.partitionValue",
@@ -1077,6 +1082,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD3/brd3_uc6_consumer",
 					"baseParameters": {
 						"partitionValue": {
 							"value": "@pipeline().parameters.partitionValue",
@@ -1131,6 +1137,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/BRD3/brd3_uc10_finacle",
 					"baseParameters": {
 						"partitionValue": {
 							"value": "@pipeline().parameters.partitionValue",
