@@ -1,244 +1,244 @@
 {
-    "name": "Check_Blob_Load_date_wise_Delete_source",
-    "properties": {
-        "linkedServiceName": {
-            "referenceName": "cadenceAdlsLS",
-            "type": "LinkedServiceReference"
-        },
-        "parameters": {
-            "date2run": {
-                "type": "string"
-            },
-            "Load_date_blob_path": {
-                "type": "string"
-            }
-        },
-        "annotations": [],
-        "type": "DelimitedText",
-        "typeProperties": {
-            "location": {
-                "type": "AzureBlobFSLocation",
-                "folderPath": {
-                    "value": "@concat(dataset().Load_date_blob_path,dataset().date2run)",
-                    "type": "Expression"
-                },
-                "fileSystem": "landing"
-            },
-            "columnDelimiter": ",",
-            "escapeChar": "\\",
-            "firstRowAsHeader": true,
-            "quoteChar": "\""
-        },
-        "schema": [
-            {
-                "name": "PARTY_ID",
-                "type": "String"
-            },
-            {
-                "name": "SEARCH_KEY",
-                "type": "String"
-            },
-            {
-                "name": "PARTY_TYPE_LU",
-                "type": "String"
-            },
-            {
-                "name": "PARTY_TYPE_LU_CODE1",
-                "type": "String"
-            },
-            {
-                "name": "SHORT_NAME",
-                "type": "String"
-            },
-            {
-                "name": "FIRST_NAME",
-                "type": "String"
-            },
-            {
-                "name": "MIDDLE_NAME",
-                "type": "String"
-            },
-            {
-                "name": "LAST_NAME",
-                "type": "String"
-            },
-            {
-                "name": "TITLE_LU",
-                "type": "String"
-            },
-            {
-                "name": "TITLE_LU_CODE1",
-                "type": "String"
-            },
-            {
-                "name": "SHAREHOLDER_FLAG",
-                "type": "String"
-            },
-            {
-                "name": "ACTIVE_YN",
-                "type": "String"
-            },
-            {
-                "name": "GROUP_ID",
-                "type": "String"
-            },
-            {
-                "name": "EMPLOYEE_FLAG",
-                "type": "String"
-            },
-            {
-                "name": "BLACK_LISTED_FLAG",
-                "type": "String"
-            },
-            {
-                "name": "DEDUP_KEY",
-                "type": "String"
-            },
-            {
-                "name": "CLASSIFICATION_CAT_LU",
-                "type": "String"
-            },
-            {
-                "name": "CLASSIFICATION_CAT_LU_CODE1",
-                "type": "String"
-            },
-            {
-                "name": "PARTY_IC",
-                "type": "String"
-            },
-            {
-                "name": "PREF_INTERACT_LANG_LU",
-                "type": "String"
-            },
-            {
-                "name": "PREF_INTERACT_LANG_LU_CODE1",
-                "type": "String"
-            },
-            {
-                "name": "HOME_BRANCH_LU",
-                "type": "String"
-            },
-            {
-                "name": "HOME_BRANCH_LU_CODE1",
-                "type": "String"
-            },
-            {
-                "name": "AUTHZ_BY",
-                "type": "String"
-            },
-            {
-                "name": "AUTHZ_DT",
-                "type": "String"
-            },
-            {
-                "name": "CREATED_BY",
-                "type": "String"
-            },
-            {
-                "name": "CREATED_DATE",
-                "type": "String"
-            },
-            {
-                "name": "MODIFIED_BY",
-                "type": "String"
-            },
-            {
-                "name": "MODIFIED_DATE",
-                "type": "String"
-            },
-            {
-                "name": "ACCESS_LEVEL",
-                "type": "String"
-            },
-            {
-                "name": "EMPLOYEE_CODE",
-                "type": "String"
-            },
-            {
-                "name": "COMPANY_LU",
-                "type": "String"
-            },
-            {
-                "name": "COMPANY_LU_CODE1",
-                "type": "String"
-            },
-            {
-                "name": "FAMILY_ID",
-                "type": "String"
-            },
-            {
-                "name": "SUB_CLASSIFICATION_CAT_LU_CODE",
-                "type": "String"
-            },
-            {
-                "name": "HOME_BRANCH_EFF_DATE",
-                "type": "String"
-            },
-            {
-                "name": "SUB_CLASSIFICATION_CAT_LU",
-                "type": "String"
-            },
-            {
-                "name": "CLASSIFICATION_EFF_DATE",
-                "type": "String"
-            },
-            {
-                "name": "UIN_STATUS_LU",
-                "type": "String"
-            },
-            {
-                "name": "UIN_STATUS_LU_CODE1",
-                "type": "String"
-            },
-            {
-                "name": "PRIMARY_SEGMENT",
-                "type": "String"
-            },
-            {
-                "name": "UIN_NO",
-                "type": "String"
-            },
-            {
-                "name": "RISK_PROFILE_LU",
-                "type": "String"
-            },
-            {
-                "name": "RISK_PROFILE_LU_CODE1",
-                "type": "String"
-            },
-            {
-                "name": "RISK_PROFILE_EFF_DATE",
-                "type": "String"
-            },
-            {
-                "name": "ETL_CREATED_BY",
-                "type": "String"
-            },
-            {
-                "name": "ETL_CREATED_TIME",
-                "type": "String"
-            },
-            {
-                "name": "ETL_LAST_UPDATED_BY",
-                "type": "String"
-            },
-            {
-                "name": "ETL_LAST_UPDATED_TIME",
-                "type": "String"
-            },
-            {
-                "name": "ETL_CHANGE_FLAG",
-                "type": "String"
-            },
-            {
-                "name": "WF_AUDIT_ID",
-                "type": "String"
-            },
-            {
-                "name": "load_date",
-                "type": "String"
-            }
-        ]
-    },
-    "type": "Microsoft.DataFactory/factories/datasets"
+	"name": "Check_Blob_Load_date_wise_Delete_source",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "cadenceAdlsLS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"date2run": {
+				"type": "string"
+			},
+			"Load_date_blob_path": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@concat(dataset().Load_date_blob_path,dataset().date2run)",
+					"type": "Expression"
+				},
+				"fileSystem": "landing"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "PARTY_ID",
+				"type": "String"
+			},
+			{
+				"name": "SEARCH_KEY",
+				"type": "String"
+			},
+			{
+				"name": "PARTY_TYPE_LU",
+				"type": "String"
+			},
+			{
+				"name": "PARTY_TYPE_LU_CODE1",
+				"type": "String"
+			},
+			{
+				"name": "SHORT_NAME",
+				"type": "String"
+			},
+			{
+				"name": "FIRST_NAME",
+				"type": "String"
+			},
+			{
+				"name": "MIDDLE_NAME",
+				"type": "String"
+			},
+			{
+				"name": "LAST_NAME",
+				"type": "String"
+			},
+			{
+				"name": "TITLE_LU",
+				"type": "String"
+			},
+			{
+				"name": "TITLE_LU_CODE1",
+				"type": "String"
+			},
+			{
+				"name": "SHAREHOLDER_FLAG",
+				"type": "String"
+			},
+			{
+				"name": "ACTIVE_YN",
+				"type": "String"
+			},
+			{
+				"name": "GROUP_ID",
+				"type": "String"
+			},
+			{
+				"name": "EMPLOYEE_FLAG",
+				"type": "String"
+			},
+			{
+				"name": "BLACK_LISTED_FLAG",
+				"type": "String"
+			},
+			{
+				"name": "DEDUP_KEY",
+				"type": "String"
+			},
+			{
+				"name": "CLASSIFICATION_CAT_LU",
+				"type": "String"
+			},
+			{
+				"name": "CLASSIFICATION_CAT_LU_CODE1",
+				"type": "String"
+			},
+			{
+				"name": "PARTY_IC",
+				"type": "String"
+			},
+			{
+				"name": "PREF_INTERACT_LANG_LU",
+				"type": "String"
+			},
+			{
+				"name": "PREF_INTERACT_LANG_LU_CODE1",
+				"type": "String"
+			},
+			{
+				"name": "HOME_BRANCH_LU",
+				"type": "String"
+			},
+			{
+				"name": "HOME_BRANCH_LU_CODE1",
+				"type": "String"
+			},
+			{
+				"name": "AUTHZ_BY",
+				"type": "String"
+			},
+			{
+				"name": "AUTHZ_DT",
+				"type": "String"
+			},
+			{
+				"name": "CREATED_BY",
+				"type": "String"
+			},
+			{
+				"name": "CREATED_DATE",
+				"type": "String"
+			},
+			{
+				"name": "MODIFIED_BY",
+				"type": "String"
+			},
+			{
+				"name": "MODIFIED_DATE",
+				"type": "String"
+			},
+			{
+				"name": "ACCESS_LEVEL",
+				"type": "String"
+			},
+			{
+				"name": "EMPLOYEE_CODE",
+				"type": "String"
+			},
+			{
+				"name": "COMPANY_LU",
+				"type": "String"
+			},
+			{
+				"name": "COMPANY_LU_CODE1",
+				"type": "String"
+			},
+			{
+				"name": "FAMILY_ID",
+				"type": "String"
+			},
+			{
+				"name": "SUB_CLASSIFICATION_CAT_LU_CODE",
+				"type": "String"
+			},
+			{
+				"name": "HOME_BRANCH_EFF_DATE",
+				"type": "String"
+			},
+			{
+				"name": "SUB_CLASSIFICATION_CAT_LU",
+				"type": "String"
+			},
+			{
+				"name": "CLASSIFICATION_EFF_DATE",
+				"type": "String"
+			},
+			{
+				"name": "UIN_STATUS_LU",
+				"type": "String"
+			},
+			{
+				"name": "UIN_STATUS_LU_CODE1",
+				"type": "String"
+			},
+			{
+				"name": "PRIMARY_SEGMENT",
+				"type": "String"
+			},
+			{
+				"name": "UIN_NO",
+				"type": "String"
+			},
+			{
+				"name": "RISK_PROFILE_LU",
+				"type": "String"
+			},
+			{
+				"name": "RISK_PROFILE_LU_CODE1",
+				"type": "String"
+			},
+			{
+				"name": "RISK_PROFILE_EFF_DATE",
+				"type": "String"
+			},
+			{
+				"name": "ETL_CREATED_BY",
+				"type": "String"
+			},
+			{
+				"name": "ETL_CREATED_TIME",
+				"type": "String"
+			},
+			{
+				"name": "ETL_LAST_UPDATED_BY",
+				"type": "String"
+			},
+			{
+				"name": "ETL_LAST_UPDATED_TIME",
+				"type": "String"
+			},
+			{
+				"name": "ETL_CHANGE_FLAG",
+				"type": "String"
+			},
+			{
+				"name": "WF_AUDIT_ID",
+				"type": "String"
+			},
+			{
+				"name": "load_date",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }

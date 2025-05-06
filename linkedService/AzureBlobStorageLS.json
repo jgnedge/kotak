@@ -1,12 +1,12 @@
 {
-    "name": "AzureBlobStorageLS",
-    "type": "Microsoft.DataFactory/factories/linkedservices",
-    "properties": {
-        "annotations": [],
-        "type": "AzureBlobStorage",
-        "typeProperties": {
-            "serviceEndpoint": "https://kmblewsproddatalake.blob.core.windows.net",
-            "accountKind": "StorageV2"
-        }
-    }
+	"name": "AzureBlobStorageLS",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"serviceEndpoint": "https://kmblewsproddatalake.blob.core.windows.net",
+			"accountKind": "StorageV2"
+		}
+	}
 }

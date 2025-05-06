@@ -1,42 +1,42 @@
 {
-    "name": "adls_profile_store",
-    "properties": {
-        "linkedServiceName": {
-            "referenceName": "cadenceAdlsLS",
-            "type": "LinkedServiceReference"
-        },
-        "parameters": {
-            "partitionValue": {
-                "type": "string"
-            },
-            "subjectArea": {
-                "type": "string"
-            },
-            "container": {
-                "type": "string",
-                "defaultValue": "job-data"
-            }
-        },
-        "folder": {
-            "name": "cadence_datasets/PROD"
-        },
-        "annotations": [],
-        "type": "Parquet",
-        "typeProperties": {
-            "location": {
-                "type": "AzureBlobFSLocation",
-                "folderPath": {
-                    "value": "@concat('profiles/', dataset().subjectArea,'/', dataset().subjectArea, '_profile', '/p_date=', dataset().partitionValue)",
-                    "type": "Expression"
-                },
-                "fileSystem": {
-                    "value": "@dataset().container",
-                    "type": "Expression"
-                }
-            },
-            "compressionCodec": "snappy"
-        },
-        "schema": []
-    },
-    "type": "Microsoft.DataFactory/factories/datasets"
+	"name": "adls_profile_store",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "cadenceAdlsLS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"partitionValue": {
+				"type": "string"
+			},
+			"subjectArea": {
+				"type": "string"
+			},
+			"container": {
+				"type": "string",
+				"defaultValue": "job-data"
+			}
+		},
+		"folder": {
+			"name": "cadence_datasets/PROD"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@concat('profiles/', dataset().subjectArea,'/', dataset().subjectArea, '_profile', '/p_date=', dataset().partitionValue)",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().container",
+					"type": "Expression"
+				}
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
 }

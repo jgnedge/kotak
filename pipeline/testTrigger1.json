@@ -31,7 +31,7 @@
 			"name": "DEV/Alerts-UFCE"
 		},
 		"annotations": [],
-		"lastPublishTime": "2025-05-05T10:21:57Z"
+		"lastPublishTime": "2025-05-06T12:00:49Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }
