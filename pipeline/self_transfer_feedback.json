@@ -73,10 +73,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": {
-						"value": "@concat(pipeline().globalParameters.RootPathTransactionMining,'utils/Convert_JSON_2_PARQUET')",
-						"type": "Expression"
-					},
+					"notebookPath": "/Repos/anjo@watern.tech/kotak-transaction-mining/src/utils/Convert_JSON_2_PARQUET",
 					"baseParameters": {
 						"SRC": {
 							"value": "@concat('abfss://landing@kmblewsproddatalake.dfs.core.windows.net/cosmos_db/self_transfer_feedback/load_date=',replace(pipeline().parameters.p_date, '-','' ))",

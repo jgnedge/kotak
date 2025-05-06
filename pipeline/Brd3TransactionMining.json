@@ -1,1291 +1,1263 @@
 {
-    "name": "Brd3TransactionMining",
-    "properties": {
-        "activities": [
-            {
-                "name": "Brd3Uc7",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "SetClusterVersion",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    },
-                    {
-                        "activity": "SetNodeType",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    },
-                    {
-                        "activity": "SetWorker",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.02:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": "/Shared/PROD/brd3_uc7",
-                    "baseParameters": {
-                        "partitionValue": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "configFile": {
-                            "value": "@variables('configFile')",
-                            "type": "Expression"
-                        },
-                        "commonFilter": {
-                            "value": "@variables('commonFilter')",
-                            "type": "Expression"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@variables('nodeType')",
-                            "type": "Expression"
-                        },
-                        "workers": {
-                            "value": "@variables('workers')",
-                            "type": "Expression"
-                        },
-                        "clusterVersion": {
-                            "value": "@variables('clusterVersion')",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            },
-            {
-                "name": "Brd3Uc8",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "Brd3Uc7",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.02:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": "/Shared/PROD/brd3_uc8",
-                    "baseParameters": {
-                        "partitionValue": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "configFile": {
-                            "value": "@variables('configFile')",
-                            "type": "Expression"
-                        },
-                        "commonFilter": {
-                            "value": "@variables('commonFilter')",
-                            "type": "Expression"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@variables('nodeType')",
-                            "type": "Expression"
-                        },
-                        "workers": {
-                            "value": "@variables('workers')",
-                            "type": "Expression"
-                        },
-                        "clusterVersion": {
-                            "value": "@variables('clusterVersion')",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            },
-            {
-                "name": "SetWorker",
-                "type": "SetVariable",
-                "dependsOn": [
-                    {
-                        "activity": "GetConfig",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "variableName": "workers",
-                    "value": {
-                        "value": "@{int(json(activity('GetConfig').output.config).job_capacity_details.workers)}",
-                        "type": "Expression"
-                    }
-                }
-            },
-            {
-                "name": "GetConfig",
-                "type": "AzureFunctionActivity",
-                "dependsOn": [
-                    {
-                        "activity": "StartMarker",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.00:05:00",
-                    "retry": 1,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "functionName": "GetConfigs",
-                    "headers": {
-                        "config_tables": {
-                            "value": "@pipeline().parameters.cosmosConfigTables",
-                            "type": "Expression"
-                        },
-                        "job_name": {
-                            "value": "@pipeline().parameters.jobSubjectArea",
-                            "type": "Expression"
-                        },
-                        "job_type": {
-                            "value": "@pipeline().parameters.jobExecutionType",
-                            "type": "Expression"
-                        },
-                        "database_name": {
-                            "value": "@pipeline().parameters.cosmosDatabaseName",
-                            "type": "Expression"
-                        }
-                    },
-                    "method": "GET"
-                },
-                "linkedServiceName": {
-                    "referenceName": "ewscadenceLS",
-                    "type": "LinkedServiceReference"
-                }
-            },
-            {
-                "name": "SetNodeType",
-                "type": "SetVariable",
-                "dependsOn": [
-                    {
-                        "activity": "GetConfig",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "variableName": "nodeType",
-                    "value": {
-                        "value": "@{json(activity('GetConfig').output.config).job_capacity_details.nodeType}",
-                        "type": "Expression"
-                    }
-                }
-            },
-            {
-                "name": "SetClusterVersion",
-                "type": "SetVariable",
-                "dependsOn": [
-                    {
-                        "activity": "GetConfig",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "variableName": "clusterVersion",
-                    "value": {
-                        "value": "@{json(activity('GetConfig').output.config).job_capacity_details.clusterVersion}",
-                        "type": "Expression"
-                    }
-                }
-            },
-            {
-                "name": "StartMarker",
-                "type": "SqlServerStoredProcedure",
-                "dependsOn": [],
-                "policy": {
-                    "timeout": "0.00:05:00",
-                    "retry": 2,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "storedProcedureName": "[dbo].[ONEVIEW_JOB_METADATA]",
-                    "storedProcedureParameters": {
-                        "job_name": {
-                            "value": {
-                                "value": "@pipeline().parameters.jobSubjectArea",
-                                "type": "Expression"
-                            },
-                            "type": "String"
-                        },
-                        "job_type": {
-                            "value": {
-                                "value": "@pipeline().parameters.jobExecutionType",
-                                "type": "Expression"
-                            },
-                            "type": "String"
-                        },
-                        "partition_value": {
-                            "value": {
-                                "value": "@pipeline().parameters.partitionValue",
-                                "type": "Expression"
-                            },
-                            "type": "String"
-                        },
-                        "status": {
-                            "value": "start",
-                            "type": "String"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "CadenceSynapseLS",
-                    "type": "LinkedServiceReference"
-                }
-            },
-            {
-                "name": "SuccessMarker",
-                "type": "SqlServerStoredProcedure",
-                "dependsOn": [
-                    {
-                        "activity": "LoadToSynapse",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.00:05:00",
-                    "retry": 2,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "storedProcedureName": "[dbo].[ONEVIEW_JOB_METADATA]",
-                    "storedProcedureParameters": {
-                        "job_name": {
-                            "value": {
-                                "value": "@pipeline().parameters.jobSubjectArea",
-                                "type": "Expression"
-                            },
-                            "type": "String"
-                        },
-                        "job_type": {
-                            "value": {
-                                "value": "@pipeline().parameters.jobExecutionType",
-                                "type": "Expression"
-                            },
-                            "type": "String"
-                        },
-                        "partition_value": {
-                            "value": {
-                                "value": "@pipeline().parameters.partitionValue",
-                                "type": "Expression"
-                            },
-                            "type": "String"
-                        },
-                        "status": {
-                            "value": "success",
-                            "type": "String"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "CadenceSynapseLS",
-                    "type": "LinkedServiceReference"
-                }
-            },
-            {
-                "name": "FailureMarker",
-                "type": "SqlServerStoredProcedure",
-                "dependsOn": [
-                    {
-                        "activity": "Brd3Uc8",
-                        "dependencyConditions": [
-                            "Failed"
-                        ]
-                    },
-                    {
-                        "activity": "Brd3Uc7",
-                        "dependencyConditions": [
-                            "Failed"
-                        ]
-                    },
-                    {
-                        "activity": "Brd3Uc11",
-                        "dependencyConditions": [
-                            "Failed"
-                        ]
-                    },
-                    {
-                        "activity": "Brd3Uc1",
-                        "dependencyConditions": [
-                            "Failed"
-                        ]
-                    },
-                    {
-                        "activity": "Brd3Uc9",
-                        "dependencyConditions": [
-                            "Failed"
-                        ]
-                    },
-                    {
-                        "activity": "Brd3Uc2",
-                        "dependencyConditions": [
-                            "Failed"
-                        ]
-                    },
-                    {
-                        "activity": "Brd3Uc3",
-                        "dependencyConditions": [
-                            "Failed"
-                        ]
-                    },
-                    {
-                        "activity": "BRD3 UC4 Commercial WBG ARD",
-                        "dependencyConditions": [
-                            "Failed"
-                        ]
-                    },
-                    {
-                        "activity": "BRD3 UC4 Consumer",
-                        "dependencyConditions": [
-                            "Failed"
-                        ]
-                    },
-                    {
-                        "activity": "BRD3 UC5 Commercial WBG ARD",
-                        "dependencyConditions": [
-                            "Failed"
-                        ]
-                    },
-                    {
-                        "activity": "BRD3 UC5 Consumer",
-                        "dependencyConditions": [
-                            "Failed"
-                        ]
-                    },
-                    {
-                        "activity": "BRD3 UC6 Commercial WBG ARD",
-                        "dependencyConditions": [
-                            "Failed"
-                        ]
-                    },
-                    {
-                        "activity": "BRD3 UC6 Consumer",
-                        "dependencyConditions": [
-                            "Failed"
-                        ]
-                    },
-                    {
-                        "activity": "BRD3 UC10 Finacle",
-                        "dependencyConditions": [
-                            "Failed"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.00:05:00",
-                    "retry": 2,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "storedProcedureName": "[dbo].[ONEVIEW_JOB_METADATA]",
-                    "storedProcedureParameters": {
-                        "job_name": {
-                            "value": {
-                                "value": "@pipeline().parameters.jobSubjectArea",
-                                "type": "Expression"
-                            },
-                            "type": "String"
-                        },
-                        "job_type": {
-                            "value": {
-                                "value": "@pipeline().parameters.jobExecutionType",
-                                "type": "Expression"
-                            },
-                            "type": "String"
-                        },
-                        "partition_value": {
-                            "value": {
-                                "value": "@pipeline().parameters.partitionValue",
-                                "type": "Expression"
-                            },
-                            "type": "String"
-                        },
-                        "status": {
-                            "value": "failure",
-                            "type": "String"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "CadenceSynapseLS",
-                    "type": "LinkedServiceReference"
-                }
-            },
-            {
-                "name": "Brd3Uc11",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "Brd3Uc8",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.02:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": "/Shared/PROD/brd3_uc11",
-                    "baseParameters": {
-                        "partitionValue": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "configFile": {
-                            "value": "@variables('configFile')",
-                            "type": "Expression"
-                        },
-                        "commonFilter": {
-                            "value": "@variables('commonFilter')",
-                            "type": "Expression"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@variables('nodeType')",
-                            "type": "Expression"
-                        },
-                        "workers": {
-                            "value": "@variables('workers')",
-                            "type": "Expression"
-                        },
-                        "clusterVersion": {
-                            "value": "@variables('clusterVersion')",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            },
-            {
-                "name": "LoadToSynapse",
-                "type": "ExecutePipeline",
-                "dependsOn": [
-                    {
-                        "activity": "BRD3 UC10 Finacle",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "pipeline": {
-                        "referenceName": "CheckBrd3EntityStore",
-                        "type": "PipelineReference"
-                    },
-                    "waitOnCompletion": true,
-                    "parameters": {
-                        "partitionDate": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "container": {
-                            "value": "@pipeline().parameters.container",
-                            "type": "Expression"
-                        },
-                        "schema": {
-                            "value": "@pipeline().parameters.schema",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            },
-            {
-                "name": "Brd3Uc1",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "Brd3Uc11",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.02:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": "/Shared/PROD/brd3_uc1",
-                    "baseParameters": {
-                        "partitionValue": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "configFile": {
-                            "value": "@variables('configFile')",
-                            "type": "Expression"
-                        },
-                        "commonFilter": {
-                            "value": "@variables('commonFilter')",
-                            "type": "Expression"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@variables('nodeType')",
-                            "type": "Expression"
-                        },
-                        "workers": {
-                            "value": "@variables('workers')",
-                            "type": "Expression"
-                        },
-                        "clusterVersion": {
-                            "value": "@variables('clusterVersion')",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            },
-            {
-                "name": "Brd3Uc9",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "Brd3Uc1",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.02:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": "/Shared/PROD/brd3_uc9",
-                    "baseParameters": {
-                        "partitionValue": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "configFile": {
-                            "value": "@variables('configFile')",
-                            "type": "Expression"
-                        },
-                        "commonFilter": {
-                            "value": "@variables('commonFilter')",
-                            "type": "Expression"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@variables('nodeType')",
-                            "type": "Expression"
-                        },
-                        "workers": {
-                            "value": "@variables('workers')",
-                            "type": "Expression"
-                        },
-                        "clusterVersion": {
-                            "value": "@variables('clusterVersion')",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            },
-            {
-                "name": "Brd3Uc2",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "Brd3Uc9",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.02:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": "/Shared/PROD/brd3_uc2",
-                    "baseParameters": {
-                        "partitionValue": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "configFile": {
-                            "value": "@variables('configFile')",
-                            "type": "Expression"
-                        },
-                        "commonFilter": {
-                            "value": "@variables('commonFilter')",
-                            "type": "Expression"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@variables('nodeType')",
-                            "type": "Expression"
-                        },
-                        "workers": {
-                            "value": "@variables('workers')",
-                            "type": "Expression"
-                        },
-                        "clusterVersion": {
-                            "value": "@variables('clusterVersion')",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            },
-            {
-                "name": "Brd3Uc3",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "Brd3Uc2",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.02:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": "/Shared/PROD/brd3_uc3",
-                    "baseParameters": {
-                        "partitionValue": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "configFile": {
-                            "value": "@variables('configFile')",
-                            "type": "Expression"
-                        },
-                        "commonFilter": {
-                            "value": "@variables('commonFilter')",
-                            "type": "Expression"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@variables('nodeType')",
-                            "type": "Expression"
-                        },
-                        "workers": {
-                            "value": "@variables('workers')",
-                            "type": "Expression"
-                        },
-                        "clusterVersion": {
-                            "value": "@variables('clusterVersion')",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            },
-            {
-                "name": "BRD3 UC4 Commercial WBG ARD",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "Brd3Uc3",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.12:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": {
-                        "value": "@concat(pipeline().globalParameters.RootPathTransactionMining,'BRD3/brd3_uc4_wbg_commerial_ard')",
-                        "type": "Expression"
-                    },
-                    "baseParameters": {
-                        "partitionValue": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "configFile": {
-                            "value": "@variables('configFile')",
-                            "type": "Expression"
-                        },
-                        "commonFilter": {
-                            "value": "@variables('commonFilter')",
-                            "type": "Expression"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@variables('nodeType')",
-                            "type": "Expression"
-                        },
-                        "workers": {
-                            "value": "@variables('workers')",
-                            "type": "Expression"
-                        },
-                        "clusterVersion": {
-                            "value": "@variables('clusterVersion')",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            },
-            {
-                "name": "BRD3 UC4 Consumer",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "BRD3 UC4 Commercial WBG ARD",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.12:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": {
-                        "value": "@concat(pipeline().globalParameters.RootPathTransactionMining,'BRD3/brd3_uc4_consumer')",
-                        "type": "Expression"
-                    },
-                    "baseParameters": {
-                        "partitionValue": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "configFile": {
-                            "value": "@variables('configFile')",
-                            "type": "Expression"
-                        },
-                        "commonFilter": {
-                            "value": "@variables('commonFilter')",
-                            "type": "Expression"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@variables('nodeType')",
-                            "type": "Expression"
-                        },
-                        "workers": {
-                            "value": "@variables('workers')",
-                            "type": "Expression"
-                        },
-                        "clusterVersion": {
-                            "value": "@variables('clusterVersion')",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            },
-            {
-                "name": "BRD3 UC5 Commercial WBG ARD",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "BRD3 UC4 Consumer",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.12:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": {
-                        "value": "@concat(pipeline().globalParameters.RootPathTransactionMining,'BRD3/brd3_uc5_wbg_commerial_ard')",
-                        "type": "Expression"
-                    },
-                    "baseParameters": {
-                        "partitionValue": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "configFile": {
-                            "value": "@variables('configFile')",
-                            "type": "Expression"
-                        },
-                        "commonFilter": {
-                            "value": "@variables('commonFilter')",
-                            "type": "Expression"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@variables('nodeType')",
-                            "type": "Expression"
-                        },
-                        "workers": {
-                            "value": "@variables('workers')",
-                            "type": "Expression"
-                        },
-                        "clusterVersion": {
-                            "value": "@variables('clusterVersion')",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            },
-            {
-                "name": "BRD3 UC5 Consumer",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "BRD3 UC5 Commercial WBG ARD",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.12:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": {
-                        "value": "@concat(pipeline().globalParameters.RootPathTransactionMining,'BRD3/brd3_uc5_consumer')",
-                        "type": "Expression"
-                    },
-                    "baseParameters": {
-                        "partitionValue": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "configFile": {
-                            "value": "@variables('configFile')",
-                            "type": "Expression"
-                        },
-                        "commonFilter": {
-                            "value": "@variables('commonFilter')",
-                            "type": "Expression"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@variables('nodeType')",
-                            "type": "Expression"
-                        },
-                        "workers": {
-                            "value": "@variables('workers')",
-                            "type": "Expression"
-                        },
-                        "clusterVersion": {
-                            "value": "@variables('clusterVersion')",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            },
-            {
-                "name": "BRD3 UC6 Commercial WBG ARD",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "BRD3 UC5 Consumer",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.12:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": {
-                        "value": "@concat(pipeline().globalParameters.RootPathTransactionMining,'BRD3/brd3_uc6_wbg_commerial_ard')",
-                        "type": "Expression"
-                    },
-                    "baseParameters": {
-                        "partitionValue": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "configFile": {
-                            "value": "@variables('configFile')",
-                            "type": "Expression"
-                        },
-                        "commonFilter": {
-                            "value": "@variables('commonFilter')",
-                            "type": "Expression"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@variables('nodeType')",
-                            "type": "Expression"
-                        },
-                        "workers": {
-                            "value": "@variables('workers')",
-                            "type": "Expression"
-                        },
-                        "clusterVersion": {
-                            "value": "@variables('clusterVersion')",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            },
-            {
-                "name": "BRD3 UC6 Consumer",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "BRD3 UC6 Commercial WBG ARD",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.12:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": {
-                        "value": "@concat(pipeline().globalParameters.RootPathTransactionMining,'BRD3/brd3_uc6_consumer')",
-                        "type": "Expression"
-                    },
-                    "baseParameters": {
-                        "partitionValue": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "configFile": {
-                            "value": "@variables('configFile')",
-                            "type": "Expression"
-                        },
-                        "commonFilter": {
-                            "value": "@variables('commonFilter')",
-                            "type": "Expression"
-                        }
-                    }
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@variables('nodeType')",
-                            "type": "Expression"
-                        },
-                        "workers": {
-                            "value": "@variables('workers')",
-                            "type": "Expression"
-                        },
-                        "clusterVersion": {
-                            "value": "@variables('clusterVersion')",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            },
-            {
-                "name": "BRD3 UC10 Finacle",
-                "type": "DatabricksNotebook",
-                "dependsOn": [
-                    {
-                        "activity": "BRD3 UC6 Consumer",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "0.12:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "notebookPath": {
-                        "value": "@concat(pipeline().globalParameters.RootPathTransactionMining,'BRD3/brd3_uc10_finacle')",
-                        "type": "Expression"
-                    },
-                    "baseParameters": {
-                        "partitionValue": {
-                            "value": "@pipeline().parameters.partitionValue",
-                            "type": "Expression"
-                        },
-                        "configFile": {
-                            "value": "@variables('configFile')",
-                            "type": "Expression"
-                        },
-                        "commonFilter": {
-                            "value": "@variables('commonFilter')",
-                            "type": "Expression"
-                        }
-                    },
-                    "libraries": [
-                        {
-                            "whl": "dbfs:/FileStore/wheels/cadenz_lib/attrs-21.2.0-py2.py3-none-any.whl"
-                        },
-                        {
-                            "whl": "dbfs:/FileStore/wheels/cadenz_lib/fuzzysearch-0.7.3-cp38-cp38-linux_x86_64.whl"
-                        },
-                        {
-                            "whl": "dbfs:/FileStore/wheels/cadenz_lib/fuzzywuzzy-0.18.0-py2.py3-none-any.whl"
-                        },
-                        {
-                            "whl": "dbfs:/FileStore/wheels/cadenz_lib/python_Levenshtein-0.12.2-cp38-cp38-linux_x86_64.whl"
-                        },
-                        {
-                            "whl": "dbfs:/FileStore/wheels/cadenz_lib/rapidfuzz-1.4.1-cp38-cp38-manylinux2010_x86_64.whl"
-                        },
-                        {
-                            "whl": "dbfs:/FileStore/wheels/cadenz_lib/setuptools-56.2.0-py3-none-any.whl"
-                        },
-                        {
-                            "whl": "dbfs:/FileStore/wheels/cadenz_lib/fuzzyCheck-1.0-py2.py3-none-any.whl"
-                        },
-                        {
-                            "whl": "dbfs:/FileStore/wheels/cadenz_lib/relatedPartyFuzzy-1.0-py2.py3-none-any.whl"
-                        },
-                        {
-                            "whl": "dbfs:/FileStore/wheels/cadenz_lib/selfTransferFuzzy-1.0-py2.py3-none-any.whl"
-                        },
-                        {
-                            "whl": "dbfs:/FileStore/wheels/cadenz_lib/bankingArrangementFuzzy-1.0-py2.py3-none-any.whl"
-                        }
-                    ]
-                },
-                "linkedServiceName": {
-                    "referenceName": "cadenceProcessingLS",
-                    "type": "LinkedServiceReference",
-                    "parameters": {
-                        "nodeType": {
-                            "value": "@variables('nodeType')",
-                            "type": "Expression"
-                        },
-                        "workers": {
-                            "value": "@variables('workers')",
-                            "type": "Expression"
-                        },
-                        "clusterVersion": {
-                            "value": "@variables('clusterVersion')",
-                            "type": "Expression"
-                        }
-                    }
-                }
-            }
-        ],
-        "parameters": {
-            "partitionValue": {
-                "type": "string"
-            },
-            "cosmosConfigTables": {
-                "type": "string",
-                "defaultValue": "job_capacity_details"
-            },
-            "cosmosDatabaseName": {
-                "type": "string",
-                "defaultValue": "config_store"
-            },
-            "jobSubjectArea": {
-                "type": "string",
-                "defaultValue": "brd3_mining_output"
-            },
-            "jobExecutionType": {
-                "type": "string",
-                "defaultValue": "entity"
-            },
-            "markerRootPath": {
-                "type": "string",
-                "defaultValue": "job-metadata/markers"
-            },
-            "schema": {
-                "type": "string",
-                "defaultValue": "dbo"
-            },
-            "container": {
-                "type": "string",
-                "defaultValue": "job-data"
-            }
-        },
-        "variables": {
-            "nodeType": {
-                "type": "String",
-                "defaultValue": "Standard_DSS_v2"
-            },
-            "workers": {
-                "type": "String",
-                "defaultValue": "3"
-            },
-            "clusterVersion": {
-                "type": "String",
-                "defaultValue": "8.1.x-scala2.12"
-            },
-            "configFile": {
-                "type": "String",
-                "defaultValue": "/dbfs/FileStore/configs/trigger_config_details.json"
-            },
-            "commonFilter": {
-                "type": "String",
-                "defaultValue": "/dbfs/FileStore/configs/global_filter_config_details.json"
-            }
-        },
-        "folder": {
-            "name": "PROD/CadenzFlow/BRD3"
-        },
-        "annotations": [],
-        "lastPublishTime": "2023-05-11T07:12:56Z"
-    },
-    "type": "Microsoft.DataFactory/factories/pipelines"
+	"name": "Brd3TransactionMining",
+	"properties": {
+		"activities": [
+			{
+				"name": "Brd3Uc7",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "SetClusterVersion",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "SetNodeType",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "SetWorker",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.02:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/PROD/brd3_uc7",
+					"baseParameters": {
+						"partitionValue": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"configFile": {
+							"value": "@variables('configFile')",
+							"type": "Expression"
+						},
+						"commonFilter": {
+							"value": "@variables('commonFilter')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"nodeType": {
+							"value": "@variables('nodeType')",
+							"type": "Expression"
+						},
+						"workers": {
+							"value": "@variables('workers')",
+							"type": "Expression"
+						},
+						"clusterVersion": {
+							"value": "@variables('clusterVersion')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Brd3Uc8",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Brd3Uc7",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.02:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/PROD/brd3_uc8",
+					"baseParameters": {
+						"partitionValue": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"configFile": {
+							"value": "@variables('configFile')",
+							"type": "Expression"
+						},
+						"commonFilter": {
+							"value": "@variables('commonFilter')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"nodeType": {
+							"value": "@variables('nodeType')",
+							"type": "Expression"
+						},
+						"workers": {
+							"value": "@variables('workers')",
+							"type": "Expression"
+						},
+						"clusterVersion": {
+							"value": "@variables('clusterVersion')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "SetWorker",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "GetConfig",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "workers",
+					"value": {
+						"value": "@{int(json(activity('GetConfig').output.config).job_capacity_details.workers)}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "GetConfig",
+				"type": "AzureFunctionActivity",
+				"dependsOn": [
+					{
+						"activity": "StartMarker",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.00:05:00",
+					"retry": 1,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"functionName": "GetConfigs",
+					"headers": {
+						"config_tables": {
+							"value": "@pipeline().parameters.cosmosConfigTables",
+							"type": "Expression"
+						},
+						"job_name": {
+							"value": "@pipeline().parameters.jobSubjectArea",
+							"type": "Expression"
+						},
+						"job_type": {
+							"value": "@pipeline().parameters.jobExecutionType",
+							"type": "Expression"
+						},
+						"database_name": {
+							"value": "@pipeline().parameters.cosmosDatabaseName",
+							"type": "Expression"
+						}
+					},
+					"method": "GET"
+				},
+				"linkedServiceName": {
+					"referenceName": "ewscadenceLS",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "SetNodeType",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "GetConfig",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "nodeType",
+					"value": {
+						"value": "@{json(activity('GetConfig').output.config).job_capacity_details.nodeType}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SetClusterVersion",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "GetConfig",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "clusterVersion",
+					"value": {
+						"value": "@{json(activity('GetConfig').output.config).job_capacity_details.clusterVersion}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "StartMarker",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.00:05:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[ONEVIEW_JOB_METADATA]",
+					"storedProcedureParameters": {
+						"job_name": {
+							"value": {
+								"value": "@pipeline().parameters.jobSubjectArea",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"job_type": {
+							"value": {
+								"value": "@pipeline().parameters.jobExecutionType",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"partition_value": {
+							"value": {
+								"value": "@pipeline().parameters.partitionValue",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"status": {
+							"value": "start",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "CadenceSynapseLS",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "SuccessMarker",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "LoadToSynapse",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.00:05:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[ONEVIEW_JOB_METADATA]",
+					"storedProcedureParameters": {
+						"job_name": {
+							"value": {
+								"value": "@pipeline().parameters.jobSubjectArea",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"job_type": {
+							"value": {
+								"value": "@pipeline().parameters.jobExecutionType",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"partition_value": {
+							"value": {
+								"value": "@pipeline().parameters.partitionValue",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"status": {
+							"value": "success",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "CadenceSynapseLS",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "FailureMarker",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Brd3Uc8",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "Brd3Uc7",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "Brd3Uc11",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "Brd3Uc1",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "Brd3Uc9",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "Brd3Uc2",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "Brd3Uc3",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "BRD3 UC4 Commercial WBG ARD",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "BRD3 UC4 Consumer",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "BRD3 UC5 Commercial WBG ARD",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "BRD3 UC5 Consumer",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "BRD3 UC6 Commercial WBG ARD",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "BRD3 UC6 Consumer",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "BRD3 UC10 Finacle",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.00:05:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[ONEVIEW_JOB_METADATA]",
+					"storedProcedureParameters": {
+						"job_name": {
+							"value": {
+								"value": "@pipeline().parameters.jobSubjectArea",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"job_type": {
+							"value": {
+								"value": "@pipeline().parameters.jobExecutionType",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"partition_value": {
+							"value": {
+								"value": "@pipeline().parameters.partitionValue",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"status": {
+							"value": "failure",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "CadenceSynapseLS",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Brd3Uc11",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Brd3Uc8",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.02:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/PROD/brd3_uc11",
+					"baseParameters": {
+						"partitionValue": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"configFile": {
+							"value": "@variables('configFile')",
+							"type": "Expression"
+						},
+						"commonFilter": {
+							"value": "@variables('commonFilter')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"nodeType": {
+							"value": "@variables('nodeType')",
+							"type": "Expression"
+						},
+						"workers": {
+							"value": "@variables('workers')",
+							"type": "Expression"
+						},
+						"clusterVersion": {
+							"value": "@variables('clusterVersion')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "LoadToSynapse",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "BRD3 UC10 Finacle",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CheckBrd3EntityStore",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"partitionDate": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@pipeline().parameters.container",
+							"type": "Expression"
+						},
+						"schema": {
+							"value": "@pipeline().parameters.schema",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Brd3Uc1",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Brd3Uc11",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.02:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/PROD/brd3_uc1",
+					"baseParameters": {
+						"partitionValue": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"configFile": {
+							"value": "@variables('configFile')",
+							"type": "Expression"
+						},
+						"commonFilter": {
+							"value": "@variables('commonFilter')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"nodeType": {
+							"value": "@variables('nodeType')",
+							"type": "Expression"
+						},
+						"workers": {
+							"value": "@variables('workers')",
+							"type": "Expression"
+						},
+						"clusterVersion": {
+							"value": "@variables('clusterVersion')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Brd3Uc9",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Brd3Uc1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.02:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/PROD/brd3_uc9",
+					"baseParameters": {
+						"partitionValue": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"configFile": {
+							"value": "@variables('configFile')",
+							"type": "Expression"
+						},
+						"commonFilter": {
+							"value": "@variables('commonFilter')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"nodeType": {
+							"value": "@variables('nodeType')",
+							"type": "Expression"
+						},
+						"workers": {
+							"value": "@variables('workers')",
+							"type": "Expression"
+						},
+						"clusterVersion": {
+							"value": "@variables('clusterVersion')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Brd3Uc2",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Brd3Uc9",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.02:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/PROD/brd3_uc2",
+					"baseParameters": {
+						"partitionValue": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"configFile": {
+							"value": "@variables('configFile')",
+							"type": "Expression"
+						},
+						"commonFilter": {
+							"value": "@variables('commonFilter')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"nodeType": {
+							"value": "@variables('nodeType')",
+							"type": "Expression"
+						},
+						"workers": {
+							"value": "@variables('workers')",
+							"type": "Expression"
+						},
+						"clusterVersion": {
+							"value": "@variables('clusterVersion')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Brd3Uc3",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Brd3Uc2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.02:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/PROD/brd3_uc3",
+					"baseParameters": {
+						"partitionValue": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"configFile": {
+							"value": "@variables('configFile')",
+							"type": "Expression"
+						},
+						"commonFilter": {
+							"value": "@variables('commonFilter')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"nodeType": {
+							"value": "@variables('nodeType')",
+							"type": "Expression"
+						},
+						"workers": {
+							"value": "@variables('workers')",
+							"type": "Expression"
+						},
+						"clusterVersion": {
+							"value": "@variables('clusterVersion')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "BRD3 UC4 Commercial WBG ARD",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Brd3Uc3",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"baseParameters": {
+						"partitionValue": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"configFile": {
+							"value": "@variables('configFile')",
+							"type": "Expression"
+						},
+						"commonFilter": {
+							"value": "@variables('commonFilter')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"nodeType": {
+							"value": "@variables('nodeType')",
+							"type": "Expression"
+						},
+						"workers": {
+							"value": "@variables('workers')",
+							"type": "Expression"
+						},
+						"clusterVersion": {
+							"value": "@variables('clusterVersion')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "BRD3 UC4 Consumer",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "BRD3 UC4 Commercial WBG ARD",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"baseParameters": {
+						"partitionValue": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"configFile": {
+							"value": "@variables('configFile')",
+							"type": "Expression"
+						},
+						"commonFilter": {
+							"value": "@variables('commonFilter')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"nodeType": {
+							"value": "@variables('nodeType')",
+							"type": "Expression"
+						},
+						"workers": {
+							"value": "@variables('workers')",
+							"type": "Expression"
+						},
+						"clusterVersion": {
+							"value": "@variables('clusterVersion')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "BRD3 UC5 Commercial WBG ARD",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "BRD3 UC4 Consumer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"baseParameters": {
+						"partitionValue": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"configFile": {
+							"value": "@variables('configFile')",
+							"type": "Expression"
+						},
+						"commonFilter": {
+							"value": "@variables('commonFilter')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"nodeType": {
+							"value": "@variables('nodeType')",
+							"type": "Expression"
+						},
+						"workers": {
+							"value": "@variables('workers')",
+							"type": "Expression"
+						},
+						"clusterVersion": {
+							"value": "@variables('clusterVersion')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "BRD3 UC5 Consumer",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "BRD3 UC5 Commercial WBG ARD",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"baseParameters": {
+						"partitionValue": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"configFile": {
+							"value": "@variables('configFile')",
+							"type": "Expression"
+						},
+						"commonFilter": {
+							"value": "@variables('commonFilter')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"nodeType": {
+							"value": "@variables('nodeType')",
+							"type": "Expression"
+						},
+						"workers": {
+							"value": "@variables('workers')",
+							"type": "Expression"
+						},
+						"clusterVersion": {
+							"value": "@variables('clusterVersion')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "BRD3 UC6 Commercial WBG ARD",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "BRD3 UC5 Consumer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"baseParameters": {
+						"partitionValue": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"configFile": {
+							"value": "@variables('configFile')",
+							"type": "Expression"
+						},
+						"commonFilter": {
+							"value": "@variables('commonFilter')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"nodeType": {
+							"value": "@variables('nodeType')",
+							"type": "Expression"
+						},
+						"workers": {
+							"value": "@variables('workers')",
+							"type": "Expression"
+						},
+						"clusterVersion": {
+							"value": "@variables('clusterVersion')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "BRD3 UC6 Consumer",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "BRD3 UC6 Commercial WBG ARD",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"baseParameters": {
+						"partitionValue": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"configFile": {
+							"value": "@variables('configFile')",
+							"type": "Expression"
+						},
+						"commonFilter": {
+							"value": "@variables('commonFilter')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"nodeType": {
+							"value": "@variables('nodeType')",
+							"type": "Expression"
+						},
+						"workers": {
+							"value": "@variables('workers')",
+							"type": "Expression"
+						},
+						"clusterVersion": {
+							"value": "@variables('clusterVersion')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "BRD3 UC10 Finacle",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "BRD3 UC6 Consumer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"baseParameters": {
+						"partitionValue": {
+							"value": "@pipeline().parameters.partitionValue",
+							"type": "Expression"
+						},
+						"configFile": {
+							"value": "@variables('configFile')",
+							"type": "Expression"
+						},
+						"commonFilter": {
+							"value": "@variables('commonFilter')",
+							"type": "Expression"
+						}
+					},
+					"libraries": [
+						{
+							"whl": "dbfs:/FileStore/wheels/cadenz_lib/attrs-21.2.0-py2.py3-none-any.whl"
+						},
+						{
+							"whl": "dbfs:/FileStore/wheels/cadenz_lib/fuzzysearch-0.7.3-cp38-cp38-linux_x86_64.whl"
+						},
+						{
+							"whl": "dbfs:/FileStore/wheels/cadenz_lib/fuzzywuzzy-0.18.0-py2.py3-none-any.whl"
+						},
+						{
+							"whl": "dbfs:/FileStore/wheels/cadenz_lib/python_Levenshtein-0.12.2-cp38-cp38-linux_x86_64.whl"
+						},
+						{
+							"whl": "dbfs:/FileStore/wheels/cadenz_lib/rapidfuzz-1.4.1-cp38-cp38-manylinux2010_x86_64.whl"
+						},
+						{
+							"whl": "dbfs:/FileStore/wheels/cadenz_lib/setuptools-56.2.0-py3-none-any.whl"
+						},
+						{
+							"whl": "dbfs:/FileStore/wheels/cadenz_lib/fuzzyCheck-1.0-py2.py3-none-any.whl"
+						},
+						{
+							"whl": "dbfs:/FileStore/wheels/cadenz_lib/relatedPartyFuzzy-1.0-py2.py3-none-any.whl"
+						},
+						{
+							"whl": "dbfs:/FileStore/wheels/cadenz_lib/selfTransferFuzzy-1.0-py2.py3-none-any.whl"
+						},
+						{
+							"whl": "dbfs:/FileStore/wheels/cadenz_lib/bankingArrangementFuzzy-1.0-py2.py3-none-any.whl"
+						}
+					]
+				},
+				"linkedServiceName": {
+					"referenceName": "cadenceProcessingLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"nodeType": {
+							"value": "@variables('nodeType')",
+							"type": "Expression"
+						},
+						"workers": {
+							"value": "@variables('workers')",
+							"type": "Expression"
+						},
+						"clusterVersion": {
+							"value": "@variables('clusterVersion')",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"partitionValue": {
+				"type": "string"
+			},
+			"cosmosConfigTables": {
+				"type": "string",
+				"defaultValue": "job_capacity_details"
+			},
+			"cosmosDatabaseName": {
+				"type": "string",
+				"defaultValue": "config_store"
+			},
+			"jobSubjectArea": {
+				"type": "string",
+				"defaultValue": "brd3_mining_output"
+			},
+			"jobExecutionType": {
+				"type": "string",
+				"defaultValue": "entity"
+			},
+			"markerRootPath": {
+				"type": "string",
+				"defaultValue": "job-metadata/markers"
+			},
+			"schema": {
+				"type": "string",
+				"defaultValue": "dbo"
+			},
+			"container": {
+				"type": "string",
+				"defaultValue": "job-data"
+			}
+		},
+		"variables": {
+			"nodeType": {
+				"type": "String",
+				"defaultValue": "Standard_DSS_v2"
+			},
+			"workers": {
+				"type": "String",
+				"defaultValue": "3"
+			},
+			"clusterVersion": {
+				"type": "String",
+				"defaultValue": "8.1.x-scala2.12"
+			},
+			"configFile": {
+				"type": "String",
+				"defaultValue": "/dbfs/FileStore/configs/trigger_config_details.json"
+			},
+			"commonFilter": {
+				"type": "String",
+				"defaultValue": "/dbfs/FileStore/configs/global_filter_config_details.json"
+			}
+		},
+		"folder": {
+			"name": "PROD/CadenzFlow/BRD3"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-05-11T07:12:56Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }
