@@ -1,0 +1,132 @@
+{
+    "name": "stag2landing_Finacle1",
+    "properties": {
+        "activities": [
+            {
+                "name": "STG-STG_FINACLE_HTD",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "CHECK_BLOB_PARTITION_EXISTS_STG_FINACLE_HTD",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "SybaseSource",
+                        "query": {
+                            "value": "@concat('select * into #derivedhtd from (\nselect *, DERIVED_TRANS_ID = (LEFT(CONVERT(VARCHAR(30),TRAN_DATE),10)+ TRAN_ID + ''_'' + PART_TRAN_SRL_NUM), ROW_NUMBER() over (PARTITION BY TRAN_ID, PART_TRAN_SRL_NUM order by PSTD_DATE desc) as RNK  from \"STG\".\"STG_FINACLE_HTD\" where ACID in (select distinct ACID from \"STG\".\"STG_FINACLE_GAM\" where \n\"SCHM_TYPE\" in (''CA'',''CCA'',''ODA'') and \nCUST_ID in (select distinct \"BCIF_BANK Id\" from \"STG\".\"STG_GLEMS_MVIEW_FAC_DTLS\" where \"Limit Suffix\" in (''AJANT'',''ALKEM'',''BAIR'',''BANF'',''BC'',''BCCAP'',''BCCPX'',''BCCXP'',''BCD'',''BCL'',''BCLM'',''BCTL'',''BCWC'',''BG1'',''BG2'',''BG3'',''BG4'',''BGADH'',''BGBBD'',''BGFIN'',''BGLIM'',''BGPER'',''BGR2'',''BILLL'',''BLUEC'',''BUCR'',''BURCR'',''BUYCD'',''BUYCR'',''BUYER'',''BUYRC'',''BYCR'',''CADIL'',''CAPEX'',''CAPLC'',''CBDST'',''CC'',''CCOD'',''CHAN'',''CLNBI'',''CLNBL'',''CVVJK'',''DBAC1'',''DBAC2'',''DBAC5'',''DBDAC'',''DBDDW'',''DOMBD'',''DRWR'',''EBDMM'',''EBDTA'',''EBDTM'',''EBDTT'',''EBDVE'',''EPC'',''EPC1'',''EPC2'',''EPCCR'',''EPCFC'',''FACTO'',''FBD'',''FBN'',''FBP'',''FBP2'',''FBPAD'',''FDCLT'',''FLCIN'',''FRGNA'',''FRGNB'',''IDEA'',''ILCFL'',''IMCLR'',''IMSTR'',''INBAL'',''INDIS'',''INHHM'',''INMNM'',''INMUL'',''INOT1'',''INOT2'',''INOT3'',''INOT4'',''INOT6'',''INTAF'',''INTAS'',''INVAD'',''INVDF'',''INVDI'',''INVFI'',''INVO'',''INVPU'',''KCCL'',''LALOU'',''LC'',''LCBD'',''LCBDC'',''LCBDL'',''LCBDS'',''LCBL'',''LCCAP'',''LCCP1'',''LCCP2'',''LCCPX'',''LCFBL'',''LCIBL'',''LCIMP'',''LCIND'',''LCLIM'',''LCNPB'',''LCNSB'',''LCPBD'',''LCPXF'',''LCPXI'',''LCSBD'',''LCWC'',''LCWCF'',''LCWCI'',''LOTML'',''LOU'',''MEDLE'',''MICRO'',''MULDI'',''NICHO'',''OD'',''ODFD'',''ODHAN'',''PBD1'',''PBD2'',''PBUY1'',''PBUY2'',''PBUY3'',''PBUY4'',''PC'',''PCFC1'',''PCFC2'',''PCFCI'',''PCFCL'',''PCFCN'',''PCFCR'',''PCFCY'',''PCFRN'',''PCINR'',''PCLI'',''PCLIM'',''PCRUP'',''PCWC'',''PION'',''POBAL'',''POFUN'',''POHOS'',''POMNM'',''POMUL'',''POONA'',''POTML'',''PSC'',''PSCFC'',''PSCIN'',''PUR'',''PURC1'',''RECEV'',''RFACT'',''SBD1'',''SBD11'',''SBD2'',''SBD3'',''SBD4'',''SBD5'',''SBD6'',''SBDAL'',''SBDB'',''SBDCE'',''SBDGB'',''SBDMM'',''SBDS'',''SBDTM'',''SBLC'',''SBLCB'',''SBLCI'',''SBLCM'',''SBLCY'',''SIF'',''SPENG'',''STL'',''STLAD'',''STLCP'',''STLFC'',''STLL'',''STLLI'',''STLWD'',''SUNPH'',''SUPL'',''SUPP'',''TATA'',''TCD'',''TREDS'',''VAPIP'',''WCCLI'',''WCDL'',''WCDL2'',''WCDLA'',''WCDLD'',''WCDLM''))) and DATEFORMAT(LCHG_TIME, ''yyyymmdd'') = ''',pipeline().parameters.delta,''' ','\n)a\n\nselect * from #derivedhtd where RNK=1 ')",
+                            "type": "Expression"
+                        }
+                    },
+                    "sink": {
+                        "type": "DelimitedTextSink",
+                        "storeSettings": {
+                            "type": "AzureBlobFSWriteSettings"
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextWriteSettings",
+                            "maxRowsPerFile": 100000,
+                            "quoteAllText": true,
+                            "fileExtension": ".csv"
+                        }
+                    },
+                    "enableStaging": false,
+                    "parallelCopies": 1,
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "typeConversion": true,
+                        "typeConversionSettings": {
+                            "allowDataTruncation": true,
+                            "treatBooleanAsNumber": false
+                        }
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SybaseDataset_STG_FINACLE_HTD",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "csv_STG_FINACLE_HTD1",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "date2run": {
+                                "value": "@pipeline().parameters.partitionValue",
+                                "type": "Expression"
+                            },
+                            "date2runm1": {
+                                "value": "@pipeline().parameters.delta",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "CHECK_BLOB_PARTITION_EXISTS_STG_FINACLE_HTD",
+                "type": "ExecutePipeline",
+                "dependsOn": [],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "Check_Blob_Partition_Exists_Delete_Activity_Pipeline",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "date2runm1": {
+                            "value": "@pipeline().parameters.delta",
+                            "type": "Expression"
+                        },
+                        "Blob_File_path": {
+                            "value": "@variables('Blob_File_Path_STG_FINACLE_HTD')",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            }
+        ],
+        "parameters": {
+            "partitionValue": {
+                "type": "string",
+                "defaultValue": "yyyyMMdd"
+            },
+            "delta": {
+                "type": "string",
+                "defaultValue": "yyyyMMdd"
+            }
+        },
+        "variables": {
+            "Blob_File_Path_STG_FINACLE_HTD": {
+                "type": "String",
+                "defaultValue": "FINACLE/STG.STG_FINACLE_HTD/load_date="
+            }
+        },
+        "folder": {
+            "name": "HistoricalRun"
+        },
+        "annotations": [],
+        "lastPublishTime": "2022-04-11T12:58:00Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

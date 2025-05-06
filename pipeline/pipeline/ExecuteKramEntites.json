@@ -1,0 +1,611 @@
+{
+    "name": "ExecuteKramEntites",
+    "properties": {
+        "activities": [
+            {
+                "name": "kram_broker_entity_model",
+                "type": "ExecutePipeline",
+                "dependsOn": [],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_broker_entity_model",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "kram_broker_model",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "kram_broker_entity_model",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "derived_entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_broker_model",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "kram_corporate_entity_model",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "kram_broker_model",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_corporate_entity_model",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "kram_corporate_model",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "kram_corporate_entity_model",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "derived_entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_corporate_model",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "kram_nbfc_entity_model",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "kram_corporate_model",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_nbfc_entity_model",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "kram_nbfc_model",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "kram_nbfc_entity_model",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "derived_entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_nbfc_model",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "kram_real_estate_entity_model",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "kram_nbfc_model",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_real_estate_entity_model",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "kram_real_estate_model",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "kram_real_estate_entity_model",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "derived_entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_real_estate_model",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "kram_se_entity_model",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "kram_real_estate_model",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_se_entity_model",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "kram_se_model",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "kram_se_entity_model",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "derived_entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_se_model",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "kram_services_entity_model",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "kram_se_model",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_services_entity_model",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "kram_services_model",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "kram_services_entity_model",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "derived_entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_services_model",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "kram_trader_entity_model",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "kram_services_model",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_trader_entity_model",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "kram_trader_model",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "kram_trader_entity_model",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "derived_entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_trader_model",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "kram_union_table",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "kram_trader_model",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "EntityProcessing",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "derived_entity",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "markerRootPath": {
+                            "value": "@pipeline().parameters.markerRootPath",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "kram_union_table",
+                        "cosmosDatabaseName": {
+                            "value": "@pipeline().parameters.cosmosDatabaseName",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            }
+        ],
+        "parameters": {
+            "markerRootPath": {
+                "type": "string",
+                "defaultValue": "job-metadata/markers"
+            },
+            "jobExecutionType": {
+                "type": "string"
+            },
+            "cosmosConfigTables": {
+                "type": "string",
+                "defaultValue": "job_capacity_details,entity_run_details"
+            },
+            "cosmosDatabaseName": {
+                "type": "string",
+                "defaultValue": "config_store"
+            },
+            "partitionValue": {
+                "type": "string"
+            }
+        },
+        "folder": {
+            "name": "PROD/CadenzFlow/BRD3"
+        },
+        "annotations": [],
+        "lastPublishTime": "2023-02-21T08:14:25Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

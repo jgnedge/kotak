@@ -1,0 +1,304 @@
+{
+    "name": "SynapseConsumptionLayerProcessingProfile",
+    "properties": {
+        "activities": [
+            {
+                "name": "entity_synapse_loading",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "StartMarker",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.02:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "ParquetSource",
+                        "additionalColumns": [
+                            {
+                                "name": "p_date",
+                                "value": {
+                                    "value": "@pipeline().parameters.partitionValue",
+                                    "type": "Expression"
+                                }
+                            }
+                        ],
+                        "storeSettings": {
+                            "type": "AzureBlobFSReadSettings",
+                            "recursive": true,
+                            "wildcardFolderPath": {
+                                "value": "@concat('profiles/', pipeline().parameters.jobSubjectArea,'/', pipeline().parameters.jobSubjectArea, '_profile', '/p_date=', pipeline().parameters.partitionValue)",
+                                "type": "Expression"
+                            },
+                            "wildcardFileName": "*.parquet",
+                            "enablePartitionDiscovery": false
+                        }
+                    },
+                    "sink": {
+                        "type": "SqlDWSink",
+                        "preCopyScript": {
+                            "value": "@{concat('IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ''', pipeline().parameters.schema, ''' AND  TABLE_NAME = ''' , pipeline().parameters.jobSubjectArea, ''')) BEGIN DELETE FROM [', pipeline().parameters.schema, '].[',pipeline().parameters.jobSubjectArea, '] WHERE p_date=''', pipeline().parameters.partitionValue, ''' END')}",
+                            "type": "Expression"
+                        },
+                        "tableOption": "autoCreate",
+                        "disableMetricsCollection": false
+                    },
+                    "enableStaging": false,
+                    "validateDataConsistency": false,
+                    "logSettings": {
+                        "enableCopyActivityLog": true,
+                        "copyActivityLogSettings": {
+                            "logLevel": "Warning",
+                            "enableReliableLogging": false
+                        },
+                        "logLocationSettings": {
+                            "linkedServiceName": {
+                                "referenceName": "cadenceAdlsLS",
+                                "type": "LinkedServiceReference"
+                            },
+                            "path": "job-metadata/adf_logs"
+                        }
+                    },
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "typeConversion": true,
+                        "typeConversionSettings": {
+                            "allowDataTruncation": true,
+                            "treatBooleanAsNumber": false
+                        }
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "adls_profile_store",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "partitionValue": {
+                                "value": "@pipeline().parameters.partitionValue",
+                                "type": "Expression"
+                            },
+                            "subjectArea": {
+                                "value": "@pipeline().parameters.jobSubjectArea",
+                                "type": "Expression"
+                            },
+                            "container": "job-data"
+                        }
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "synapse_store",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "entityName": {
+                                "value": "@pipeline().parameters.jobSubjectArea",
+                                "type": "Expression"
+                            },
+                            "schema": {
+                                "value": "@pipeline().parameters.schema",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "StartMarker",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.00:05:00",
+                    "retry": 2,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "storedProcedureName": "[dbo].[ONEVIEW_JOB_METADATA]",
+                    "storedProcedureParameters": {
+                        "job_name": {
+                            "value": {
+                                "value": "@pipeline().parameters.jobSubjectArea",
+                                "type": "Expression"
+                            },
+                            "type": "String"
+                        },
+                        "job_type": {
+                            "value": {
+                                "value": "@pipeline().parameters.jobExecutionType",
+                                "type": "Expression"
+                            },
+                            "type": "String"
+                        },
+                        "partition_value": {
+                            "value": {
+                                "value": "@pipeline().parameters.partitionValue",
+                                "type": "Expression"
+                            },
+                            "type": "String"
+                        },
+                        "status": {
+                            "value": "start",
+                            "type": "String"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "CadenceSynapseLS",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "SuccessMarker",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [
+                    {
+                        "activity": "entity_synapse_loading",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.00:05:00",
+                    "retry": 2,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "storedProcedureName": "[dbo].[ONEVIEW_JOB_METADATA]",
+                    "storedProcedureParameters": {
+                        "job_name": {
+                            "value": {
+                                "value": "@pipeline().parameters.jobSubjectArea",
+                                "type": "Expression"
+                            },
+                            "type": "String"
+                        },
+                        "job_type": {
+                            "value": {
+                                "value": "@pipeline().parameters.jobExecutionType",
+                                "type": "Expression"
+                            },
+                            "type": "String"
+                        },
+                        "partition_value": {
+                            "value": {
+                                "value": "@pipeline().parameters.partitionValue",
+                                "type": "Expression"
+                            },
+                            "type": "String"
+                        },
+                        "status": {
+                            "value": "success",
+                            "type": "String"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "CadenceSynapseLS",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "FailureMarker",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [
+                    {
+                        "activity": "entity_synapse_loading",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.00:05:00",
+                    "retry": 2,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "storedProcedureName": "[dbo].[ONEVIEW_JOB_METADATA]",
+                    "storedProcedureParameters": {
+                        "job_name": {
+                            "value": {
+                                "value": "@pipeline().parameters.jobSubjectArea",
+                                "type": "Expression"
+                            },
+                            "type": "String"
+                        },
+                        "job_type": {
+                            "value": {
+                                "value": "@pipeline().parameters.jobExecutionType",
+                                "type": "Expression"
+                            },
+                            "type": "String"
+                        },
+                        "partition_value": {
+                            "value": {
+                                "value": "@pipeline().parameters.partitionValue",
+                                "type": "Expression"
+                            },
+                            "type": "String"
+                        },
+                        "status": {
+                            "value": "failure",
+                            "type": "String"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "CadenceSynapseLS",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "parameters": {
+            "jobExecutionType": {
+                "type": "string",
+                "defaultValue": "synapse"
+            },
+            "partitionValue": {
+                "type": "string",
+                "defaultValue": "2021-04-12"
+            },
+            "markerRootPath": {
+                "type": "string",
+                "defaultValue": "job-metadata/markers"
+            },
+            "jobSubjectArea": {
+                "type": "string",
+                "defaultValue": "customer"
+            },
+            "schema": {
+                "type": "string",
+                "defaultValue": "dbo"
+            },
+            "container": {
+                "type": "string",
+                "defaultValue": "job-data"
+            }
+        },
+        "folder": {
+            "name": "PROD/CadenzFlow"
+        },
+        "annotations": [],
+        "lastPublishTime": "2022-11-11T10:31:37Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

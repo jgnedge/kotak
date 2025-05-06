@@ -1,0 +1,215 @@
+{
+    "name": "stage2landing_KramModel",
+    "properties": {
+        "activities": [
+            {
+                "name": "KRAM_BROKER_MODEL",
+                "type": "ExecutePipeline",
+                "dependsOn": [],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "stag2landing_KRAM_BROKER_MODEL",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@pipeline().parameters.load_date",
+                            "type": "Expression"
+                        },
+                        "table": "KRAM_BROKER_MODEL"
+                    }
+                }
+            },
+            {
+                "name": "KRAM_LARGE_CORPORATE_MODEL",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "KRAM_BROKER_MODEL",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "stag2landing_KRAM_LARGE_CORPORATE_MODEL",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@pipeline().parameters.load_date",
+                            "type": "Expression"
+                        },
+                        "table": "KRAM_LARGE_CORPORATE_MODEL"
+                    }
+                }
+            },
+            {
+                "name": "KRAM_SE_MODEL",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "KRAM_REAL_ESTATE_DEVELOPER_MODEL",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "stag2landing_KRAM_SE_MODEL",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@pipeline().parameters.load_date",
+                            "type": "Expression"
+                        },
+                        "table": "KRAM_SE_MODEL"
+                    }
+                }
+            },
+            {
+                "name": "KRAM_NBFC_MODEL",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "KRAM_LARGE_CORPORATE_MODEL",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "stag2landing_KRAM_NBFC_MODEL",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@pipeline().parameters.load_date",
+                            "type": "Expression"
+                        },
+                        "table": "KRAM_NBFC_MODEL"
+                    }
+                }
+            },
+            {
+                "name": "KRAM_REAL_ESTATE_DEVELOPER_MODEL",
+                "type": "ExecutePipeline",
+                "dependsOn": [],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "stag2landing_KRAM_REAL_ESTATE_DEVELOPER_MODEL",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@pipeline().parameters.load_date",
+                            "type": "Expression"
+                        },
+                        "table": "KRAM_REAL_ESTATE_DEVELOPER_MODEL"
+                    }
+                }
+            },
+            {
+                "name": "KRAM_SERVICES_MODEL",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "KRAM_SE_MODEL",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "stag2landing_KRAM_SERVICES_MODEL",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@pipeline().parameters.load_date",
+                            "type": "Expression"
+                        },
+                        "table": "KRAM_SERVICES_MODEL"
+                    }
+                }
+            },
+            {
+                "name": "KRAM_TRADER_MODEL",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "KRAM_SERVICES_MODEL",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "stag2landing_KRAM_TRADER_MODEL",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@pipeline().parameters.load_date",
+                            "type": "Expression"
+                        },
+                        "table": "KRAM_TRADER_MODEL"
+                    }
+                }
+            }
+        ],
+        "parameters": {
+            "load_date": {
+                "type": "string",
+                "defaultValue": "yyyyMMdd"
+            }
+        },
+        "folder": {
+            "name": "stag2landing_deriveddatasets"
+        },
+        "annotations": [],
+        "lastPublishTime": "2023-02-23T06:42:48Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

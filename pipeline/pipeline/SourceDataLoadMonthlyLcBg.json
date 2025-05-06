@@ -1,0 +1,54 @@
+{
+    "name": "SourceDataLoadMonthlyLcBg",
+    "properties": {
+        "activities": [
+            {
+                "name": "SourceLoadDateCheckLcBg",
+                "type": "IfCondition",
+                "dependsOn": [],
+                "userProperties": [],
+                "typeProperties": {
+                    "expression": {
+                        "value": "@equals(startOfMonth(pipeline().parameters.partitionValue,'yyyy-MM-dd'),pipeline().parameters.partitionValue)",
+                        "type": "Expression"
+                    },
+                    "ifTrueActivities": [
+                        {
+                            "name": "ExecuteLcBg",
+                            "type": "ExecutePipeline",
+                            "dependsOn": [],
+                            "policy": {
+                                "secureInput": false
+                            },
+                            "userProperties": [],
+                            "typeProperties": {
+                                "pipeline": {
+                                    "referenceName": "stag2landing_LC_BG",
+                                    "type": "PipelineReference"
+                                },
+                                "waitOnCompletion": true,
+                                "parameters": {
+                                    "partitionValue": {
+                                        "value": "@pipeline().parameters.partitionValue",
+                                        "type": "Expression"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "parameters": {
+            "partitionValue": {
+                "type": "string"
+            }
+        },
+        "folder": {
+            "name": "stg2landingBrd2"
+        },
+        "annotations": [],
+        "lastPublishTime": "2022-08-16T10:17:57Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

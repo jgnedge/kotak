@@ -1,0 +1,181 @@
+{
+    "name": "Check_Blob_Partition_Exists_Delete_Activity_Pipeline",
+    "properties": {
+        "activities": [
+            {
+                "name": "Check_Blob_Files_Exits",
+                "type": "GetMetadata",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "dataset": {
+                        "referenceName": "check_blob_files_source",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "date2run": {
+                                "value": "@pipeline().parameters.date2run",
+                                "type": "Expression"
+                            },
+                            "date2runm1": {
+                                "value": "@pipeline().parameters.date2runm1",
+                                "type": "Expression"
+                            },
+                            "Blob_File_path": {
+                                "value": "@pipeline().parameters.Blob_File_path",
+                                "type": "Expression"
+                            }
+                        }
+                    },
+                    "fieldList": [
+                        "exists"
+                    ],
+                    "storeSettings": {
+                        "type": "AzureBlobFSReadSettings",
+                        "recursive": true,
+                        "enablePartitionDiscovery": false
+                    },
+                    "formatSettings": {
+                        "type": "DelimitedTextReadSettings"
+                    }
+                }
+            },
+            {
+                "name": "IF_Files_Exists_Return_True_or_False",
+                "type": "SetVariable",
+                "dependsOn": [
+                    {
+                        "activity": "Check_Blob_Files_Exits",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "variableName": "FileExists",
+                    "value": {
+                        "value": "@activity('Check_Blob_Files_Exits').output.exists",
+                        "type": "Expression"
+                    }
+                }
+            },
+            {
+                "name": "IF_Condition_True_Delete_Exists_partitions",
+                "type": "IfCondition",
+                "dependsOn": [
+                    {
+                        "activity": "IF_Files_Exists_Return_True_or_False",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "expression": {
+                        "value": "@variables('FileExists')",
+                        "type": "Expression"
+                    },
+                    "ifFalseActivities": [
+                        {
+                            "name": "Partition_Not_Found",
+                            "type": "SetVariable",
+                            "dependsOn": [],
+                            "policy": {
+                                "secureOutput": false,
+                                "secureInput": false
+                            },
+                            "userProperties": [],
+                            "typeProperties": {
+                                "variableName": "FileNotThere",
+                                "value": "'There is no Load_date or Partition_date Folder'"
+                            }
+                        }
+                    ],
+                    "ifTrueActivities": [
+                        {
+                            "name": "Delete_partitions",
+                            "type": "Delete",
+                            "dependsOn": [],
+                            "policy": {
+                                "timeout": "7.00:00:00",
+                                "retry": 0,
+                                "retryIntervalInSeconds": 30,
+                                "secureOutput": false,
+                                "secureInput": false
+                            },
+                            "userProperties": [],
+                            "typeProperties": {
+                                "dataset": {
+                                    "referenceName": "check_blob_files_source",
+                                    "type": "DatasetReference",
+                                    "parameters": {
+                                        "date2run": {
+                                            "value": "@pipeline().parameters.date2run",
+                                            "type": "Expression"
+                                        },
+                                        "date2runm1": {
+                                            "value": "@pipeline().parameters.date2runm1",
+                                            "type": "Expression"
+                                        },
+                                        "Blob_File_path": {
+                                            "value": "@pipeline().parameters.Blob_File_path",
+                                            "type": "Expression"
+                                        }
+                                    }
+                                },
+                                "enableLogging": false,
+                                "storeSettings": {
+                                    "type": "AzureBlobFSReadSettings",
+                                    "recursive": true,
+                                    "enablePartitionDiscovery": false
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "parameters": {
+            "date2run": {
+                "type": "string",
+                "defaultValue": "yyyyMMdd"
+            },
+            "date2runm1": {
+                "type": "string",
+                "defaultValue": "yyyyMMdd"
+            },
+            "Blob_File_path": {
+                "type": "string"
+            }
+        },
+        "variables": {
+            "FileExists": {
+                "type": "Boolean"
+            },
+            "Fileisthere": {
+                "type": "String"
+            },
+            "FileNotThere": {
+                "type": "String"
+            }
+        },
+        "folder": {
+            "name": "misc"
+        },
+        "annotations": [],
+        "lastPublishTime": "2021-07-21T06:06:30Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

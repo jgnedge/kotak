@@ -1,0 +1,118 @@
+{
+    "name": "stag2landing_NPA",
+    "properties": {
+        "activities": [
+            {
+                "name": "CHECK_BLOB_LOAD_DATE_EXISTS_STG_IDB_VW_DIM_ACCTS",
+                "type": "ExecutePipeline",
+                "dependsOn": [],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@replace(pipeline().parameters.partitionValue,'-','')",
+                            "type": "Expression"
+                        },
+                        "Blob_File_Path_Location": {
+                            "value": "@variables('Blob_File_Path_NPA_DATA')",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "STG-STG_IDB_VW_DIM_ACCTS_ARCHIVE",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "CHECK_BLOB_LOAD_DATE_EXISTS_STG_IDB_VW_DIM_ACCTS",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "SybaseSource",
+                        "query": {
+                            "value": "@concat('SELECT * FROM\nSTG.STG_IDB_VW_DIM_ACCTS_ARCHIVE\nWHERE\nDPD BETWEEN 6 AND 90\nAND DATEFORMAT(REPORT_DATE, ''yyyy-MM-dd'')  BETWEEN ''',  startOfMonth(subtractFromTime(pipeline().parameters.partitionValue, 1, 'MONTH'),'yyyy-MM-dd'),''' AND ''', subtractFromTime(pipeline().parameters.partitionValue, 1, 'DAY','yyyy-MM-dd'), '''')",
+                            "type": "Expression"
+                        }
+                    },
+                    "sink": {
+                        "type": "DelimitedTextSink",
+                        "storeSettings": {
+                            "type": "AzureBlobFSWriteSettings"
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextWriteSettings",
+                            "quoteAllText": true,
+                            "fileExtension": ".csv"
+                        }
+                    },
+                    "enableStaging": false,
+                    "parallelCopies": 1,
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "typeConversion": true,
+                        "typeConversionSettings": {
+                            "allowDataTruncation": true,
+                            "treatBooleanAsNumber": false
+                        }
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SybaseDataset_STG_IDB_VW_DIM_ACCTS_ARCHIVE",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "csv_STG_IDB_VW_DIM_ACCTS_ARCHIVE",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "partitionValue": {
+                                "value": "@replace(pipeline().parameters.partitionValue, '-', '')",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            }
+        ],
+        "parameters": {
+            "partitionValue": {
+                "type": "string"
+            }
+        },
+        "variables": {
+            "Blob_File_Path_NPA_DATA": {
+                "type": "String",
+                "defaultValue": "NPA_DATA/STG.STG_IDB_VW_DIM_ACCTS_ARCHIVE/load_date="
+            }
+        },
+        "folder": {
+            "name": "stg2landingBrd2"
+        },
+        "annotations": [],
+        "lastPublishTime": "2023-02-22T07:37:36Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,118 @@
+{
+    "name": "RpInputFromUI",
+    "properties": {
+        "activities": [
+            {
+                "name": "Rp_input_from_ui",
+                "type": "Copy",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "CosmosDbMongoDbApiSource",
+                        "batchSize": 100
+                    },
+                    "sink": {
+                        "type": "ParquetSink",
+                        "storeSettings": {
+                            "type": "AzureBlobFSWriteSettings"
+                        },
+                        "formatSettings": {
+                            "type": "ParquetWriteSettings"
+                        }
+                    },
+                    "enableStaging": false,
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "mappings": [
+                            {
+                                "source": {
+                                    "path": "$['CRN']"
+                                },
+                                "sink": {
+                                    "name": "CRN",
+                                    "type": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "path": "$['RELATED_ENTITY_NAME']"
+                                },
+                                "sink": {
+                                    "name": "RELATED_ENTITY_NAME",
+                                    "type": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "path": "$['RELATIONSHIP']"
+                                },
+                                "sink": {
+                                    "name": "RELATIONSHIP",
+                                    "type": "String"
+                                }
+                            }
+                        ]
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "cosmos_db_entity_store",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "tableName": "rp_union_input_table"
+                        }
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "adls_entity_store",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "partitionValue": {
+                                "value": "@pipeline().parameters.partitionValue",
+                                "type": "Expression"
+                            },
+                            "entityName": {
+                                "value": "@variables('entity')",
+                                "type": "Expression"
+                            },
+                            "container": {
+                                "value": "@variables('container')",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            }
+        ],
+        "parameters": {
+            "partitionValue": {
+                "type": "string"
+            }
+        },
+        "variables": {
+            "container": {
+                "type": "String",
+                "defaultValue": "job-data"
+            },
+            "entity": {
+                "type": "String",
+                "defaultValue": "rp_input_table_ui"
+            }
+        },
+        "folder": {
+            "name": "cosmos2entity"
+        },
+        "annotations": [],
+        "lastPublishTime": "2022-12-13T07:42:10Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

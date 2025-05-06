@@ -1,0 +1,150 @@
+{
+    "name": "stag2landing_INWARD_CHEQUE_RETURN_REPORT",
+    "properties": {
+        "activities": [
+            {
+                "name": "CHECK_BLOB_LOAD_DATE_EXISTS_INWARD_CHEQUE_RETURN_REPORT",
+                "type": "ExecutePipeline",
+                "dependsOn": [],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@replace(pipeline().parameters.partitionValue,'-','')",
+                            "type": "Expression"
+                        },
+                        "Blob_File_Path_Location": {
+                            "value": "@variables('Blob_File_Path_INWARD_CHEQUE_RETURN_REPORT')",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "INWARD_CHEQUE_RETURN_REPORT",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "CHECK_BLOB_LOAD_DATE_EXISTS_INWARD_CHEQUE_RETURN_REPORT",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "SybaseSource",
+                        "query": {
+                            "value": "@concat('SELECT\n  ICI.ACCT_SOL_ID AS \"ACCT_SOL_ID\",\n  GAC.SECTOR_CODE ,\n  (\n    CASE\n      WHEN ICI.ACID = GAM.ACID\n      THEN GAM.FORACID\n      ELSE ''''\n    END) AS \"ACCT_NUMBER\",\n  (\n    CASE\n      WHEN ICI.ACID = GAM.ACID\n      THEN GAM.ACCT_NAME\n      ELSE ''''\n    END) AS \"ACCT_NAME\",\n  (\n    CASE\n      WHEN GAM.ACID=ICI.ACID\n      THEN GAM.SCHM_CODE\n      ELSE ''''\n    END)AS \"SCHEME_CODE\" ,\n  (\n    CASE\n      WHEN GAM.ACID=ICI.ACID\n      THEN GAM.SCHM_TYPE\n      ELSE ''''\n    END)AS SCHM_TYPE ,\n  (\n    CASE\n      WHEN GAM.ACID=ICI.ACID\n      THEN CONVERT(VARCHAR,GAM.ACCT_OPN_DATE)\n      ELSE ''''\n    END)       AS ACCT_OPN_DATE ,\n  ICI.INST_NUM AS \"INSTR_NO\",\n  ICI.INST_AMT AS \"AMOUNT\",\n  ICI.VALUE_DATE ,\n  ICI.ZONE_CODE AS \"ZONE_CODE\",\n  ICI.SOL_ID    AS \"ZONE_SOL\",\n  (\n    CASE\n      WHEN GAM.FREZ_CODE <> ''''\n      THEN ''FREEZED''\n      ELSE (\n          CASE GAM.SCHM_TYPE\n            WHEN ''SBA''\n            THEN SMT.ACCT_STATUS\n            WHEN ''CAA''\n            THEN SMT.ACCT_STATUS\n            WHEN ''ODA''\n            THEN CAM.ACCT_STATUS\n            WHEN ''CCA''\n            THEN CAM.ACCT_STATUS\n          END)\n    END) AS \"CASA_ACCOUNT_STATUS\",\n  CASE\n    WHEN ICI.REJ_CODE_1 IS NOT NULL\n    THEN ISNULL(ICI.REJ_CODE_1,'''') +'' - ''+ CRC.CLG_REJ_DESC\n  END AS \"RETN_CODE_1\",\n  CASE\n    WHEN ICI.REJ_CODE_2 IS NOT NULL\n    THEN ISNULL(ICI.REJ_CODE_2,'''') +'' - ''+ CRC.CLG_REJ_DESC\n  END AS \"RETN_CODE_2\",\n  CASE\n    WHEN ICI.REJ_CODE_3 IS NOT NULL\n    THEN ISNULL(ICI.REJ_CODE_3,'''') +'' - ''+ CRC.CLG_REJ_DESC\n  END AS \"RETN_CODE_3\",\n  CASE\n    WHEN ICI.REJ_CODE_4 IS NOT NULL\n    THEN ISNULL(ICI.REJ_CODE_4,'''') +'' - ''+ CRC.CLG_REJ_DESC\n  END AS \"RETN_CODE_4\",\n  CASE\n    WHEN ICI.REJ_CODE_5 IS NOT NULL\n    THEN ISNULL(ICI.REJ_CODE_5,'''') +'' - ''+ CRC.CLG_REJ_DESC\n  END AS \"RETN_CODE_5\",\n  ICI.PRES_SORT_CODE ,\n  (\n    CASE\n      WHEN CMG.CIF_ID = GAM.CIF_ID\n      THEN CMG.CUST_TYPE_CODE\n      ELSE ''''\n    END)        AS \"CUST_TYPE\",\n  ICI.ZONE_DATE AS \"ZONE_DATE\",\n  CUSTTYPE.CUST_TYPE_DESC,\n  GAM.CIF_ID\nFROM\n  STG.STG_FINACLE_ICI ICI\nINNER JOIN STG.STG_FINACLE_GAM GAM\nON\n  ICI.ACID      = GAM.ACID\nAND ICI.BANK_ID = GAM.BANK_ID\nINNER JOIN STG.STG_FINACLE_CMG CMG\nON\n  GAM.CIF_ID    = CMG.CIF_ID\nAND CMG.BANK_ID = GAM.BANK_ID\nINNER JOIN STG.STG_FINACLE_CRC CRC\nON\n  ICI.REJ_CODE_1 = CRC.CLG_REJ_CODE\nLEFT JOIN STG.STG_FINACLE_SMT SMT\nON\n  GAM.ACID      = SMT.ACID\nAND GAM.BANK_ID = SMT.BANK_ID\nLEFT JOIN STG.STG_FINACLE_CAM CAM\nON\n  GAM.ACID      = CAM.ACID\nAND GAM.BANK_ID = CAM.BANK_ID\nINNER JOIN STG.STG_FINACLE_GAC GAC\nON\n  GAC.ACID=ICI.ACID\nINNER JOIN\n  (\n    SELECT\n      A.VALUE,\n      A.CATEGORYID,\n      B.LOCALETEXT AS CUST_TYPE_DESC\n    FROM\n      STG.STG_FINACLE_CATEGORIES A\n    INNER JOIN STG.STG_FINACLE_CATEGORY_LANG B\n    ON\n      A.CATEGORYID = B.CATEGORYID\n    WHERE\n      CATEGORYTYPE = ''ACCOUNT_TYPE''\n  )\n  CUSTTYPE ON CMG.CUST_TYPE_CODE = CUSTTYPE.VALUE\nWHERE\n  GAM.ENTITY_CRE_FLG   =''Y''\nAND GAM.DEL_FLG        = ''N''\nAND GAM.CIF_ID in (select DISTINCT `BCIF_BANK Id` FROM STG.STG_GLEMS_MVIEW_FAC_DTLS\nWHERE \n`Limit Suffix` IN (''AJANT'',''ALKEM'',''BAIR'',''BANF'',''BC'',''BCCAP'',''BCCPX'',''BCCXP'',''BCD'',''BCL'',''BCLM'',''BCTL'',\n''BCWC'',''BG1'',''BG2'',''BG3'',''BG4'',''BGADH'',''BGBBD'',''BGFIN'',''BGLIM'',''BGPER'',''BGR2'',''BILLL'',\n''BLUEC'',''BUCR'',''BURCR'',''BUYCD'',''BUYCR'',''BUYER'',''BUYRC'',''BYCR'',''CADIL'',''CAPEX'',''CAPLC'',\n''CBDST'',''CC'',''CCOD'',''CHAN'',''CLNBI'',''CLNBL'',''CVVJK'',''DBAC1'',''DBAC2'',''DBAC5'',''DBDAC'',\n''DBDDW'',''DOMBD'',''DRWR'',''EBDMM'',''EBDTA'',''EBDTM'',''EBDTT'',''EBDVE'',''EPC'',''EPC1'',''EPC2'',\n''EPCCR'',''EPCFC'',''FACTO'',''FBD'',''FBN'',''FBP'',''FBP2'',''FBPAD'',''FDCLT'',''FLCIN'',''FRGNA'',\n''FRGNB'',''IDEA'',''ILCFL'',''IMCLR'',''IMSTR'',''INBAL'',''INDIS'',''INHHM'',''INMNM'',''INMUL'',\n''INOT1'',''INOT2'',''INOT3'',''INOT4'',''INOT6'',''INTAF'',''INTAS'',''INVAD'',''INVDF'',''INVDI'',\n''INVFI'',''INVO'',''INVPU'',''KCCL'',''LALOU'',''LC'',''LCBD'',''LCBDC'',''LCBDL'',''LCBDS'',''LCBL'',\n''LCCAP'',''LCCP1'',''LCCP2'',''LCCPX'',''LCFBL'',''LCIBL'',''LCIMP'',''LCIND'',''LCLIM'',''LCNPB'',\n''LCNSB'',''LCPBD'',''LCPXF'',''LCPXI'',''LCSBD'',''LCWC'',''LCWCF'',''LCWCI'',''LOTML'',''LOU'',\n''MEDLE'',''MICRO'',''MULDI'',''NICHO'',''OD'',''ODFD'',''ODHAN'',''PBD1'',''PBD2'',''PBUY1'',''PBUY2'',\n''PBUY3'',''PBUY4'',''PC'',''PCFC1'',''PCFC2'',''PCFCI'',''PCFCL'',''PCFCN'',''PCFCR'',''PCFCY'',''PCFRN'',\n''PCINR'',''PCLI'',''PCLIM'',''PCRUP'',''PCWC'',''PION'',''POBAL'',''POFUN'',''POHOS'',''POMNM'',''POMUL'',\n''POONA'',''POTML'',''PSC'',''PSCFC'',''PSCIN'',''PUR'',''PURC1'',''RECEV'',''RFACT'',''SBD1'',''SBD11'',\n''SBD2'',''SBD3'',''SBD4'',''SBD5'',''SBD6'',''SBDAL'',''SBDB'',''SBDCE'',''SBDGB'',''SBDMM'',''SBDS'',''SBDTM'',\n''SBLC'',''SBLCB'',''SBLCI'',''SBLCM'',''SBLCY'',''SIF'',''SPENG'',''STL'',''STLAD'',''STLCP'',''STLFC'',''STLL'',\n''STLLI'',''STLWD'',''SUNPH'',''SUPL'',''SUPP'',''TATA'',''TCD'',''TREDS'',''VAPIP'',''WCCLI'',''WCDL'',''WCDL2'',\n''WCDLA'',''WCDLD'',''WCDLM'')\n)\nAND CMG.ENTITY_CRE_FLG =''Y''\nAND CMG.DEL_FLG        =''N''\nand REJ_TYPE = ''I''\nAND ICI.ZONE_DATE BETWEEN ''',  startOfMonth(subtractFromTime(pipeline().parameters.partitionValue, 1, 'MONTH'),'yyyy-MM-dd'),''' AND ''', subtractFromTime(pipeline().parameters.partitionValue, 1, 'DAY','yyyy-MM-dd'), '''')",
+                            "type": "Expression"
+                        }
+                    },
+                    "sink": {
+                        "type": "DelimitedTextSink",
+                        "storeSettings": {
+                            "type": "AzureBlobFSWriteSettings"
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextWriteSettings",
+                            "quoteAllText": true,
+                            "fileExtension": ".csv"
+                        }
+                    },
+                    "enableStaging": false,
+                    "parallelCopies": 1,
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "typeConversion": true,
+                        "typeConversionSettings": {
+                            "allowDataTruncation": true,
+                            "treatBooleanAsNumber": false
+                        }
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SybaseDataset_INWARD_CHEQUE_RETURN_REPORT",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "csv_INWARD_CHEQUE_RETURN_REPORT",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "partitionValue": {
+                                "value": "@pipeline().parameters.partitionValue",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "synapse_consumption",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "INWARD_CHEQUE_RETURN_REPORT",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "SynapseConsumptionLayerProcessingLanding",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "jobExecutionType": "synapse",
+                        "partitionValue": {
+                            "value": "@pipeline().parameters.partitionValue",
+                            "type": "Expression"
+                        },
+                        "jobSubjectArea": "INWARD_CHEQUE_RETURN_REPORT",
+                        "schema": "dbo"
+                    }
+                }
+            }
+        ],
+        "parameters": {
+            "partitionValue": {
+                "type": "string"
+            }
+        },
+        "variables": {
+            "Blob_File_Path_INWARD_CHEQUE_RETURN_REPORT": {
+                "type": "String",
+                "defaultValue": "INWARD_CHEQUE_RETURN_REPORT/load_date="
+            }
+        },
+        "folder": {
+            "name": "stg2landingBrd2"
+        },
+        "annotations": [],
+        "lastPublishTime": "2022-04-11T12:58:00Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

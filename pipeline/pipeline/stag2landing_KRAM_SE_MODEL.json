@@ -1,0 +1,126 @@
+{
+    "name": "stag2landing_KRAM_SE_MODEL",
+    "properties": {
+        "activities": [
+            {
+                "name": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+                "type": "ExecutePipeline",
+                "dependsOn": [],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "Check_Blob_Load_date_wise_Delete_Activity_pipeline",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "date2run": {
+                            "value": "@pipeline().parameters.date2run",
+                            "type": "Expression"
+                        },
+                        "Blob_File_Path_Location": {
+                            "value": "@variables('Blob_File_Path_Location')",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "KRAM_SE_MODEL",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "CHECK_BLOB_LOAD_DATE_EXISTS_DELETE_AND_RECREATE",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "SybaseSource",
+                        "query": {
+                            "value": "@concat('select\n    mc.company_code as ''COMPANY CODE'',\n    mc.company_name as ''COMPANY NAME'',\n    mc.company_bankcode as ''CUSTOMER ID'',\n    mc.bcif as ''BCIF'',\n    mm.m_name as ''MODEL NAME'',\n    DATEFORMAT(ch.comp_inidate , ''yyyy-MM-dd'') as ''INITATION DATE'',\n    DATEFORMAT(ch.comp_datefinal, ''yyyy-MM-dd'') as ''FINALISATION DATE'',\n    ch.comp_baseyear as ''BASE YEAR'',\n    ch.rating_year as ''RATING YEAR'',\n    mf.comp_findesc as ''LINEITEM'',\n    df.data2_year as ''FINANCIAL YEAR'',\n    df.data2_value as ''VALUE'',\n    ch.comp_overallgrade as ''LATEST OBLIGOR RATING'',\n    df.data2_year ''LAST AUDITED YEAR''\nfrom\n    STG.STG_KRAM_MST_COMPANY mc,\n    STG.STG_KRAM_COMP_HEADER ch,\n    STG.STG_KRAM_MST_MODEL mm,\n    STG.STG_KRAM_MST_COMPFIN mf,\n    STG.STG_KRAM_DATA_COMPFIN1 df\nwhere\n    mc.company_code = ch.comp_compcode\n    and ch.comp_casefinal = ''Y''\n    and ch.comp_model = mm.m_code\n    and mm.m_code = ''M04''\n    and df.data2_assesscode = ch.comp_assesscode\n    and df.data2_year = ch.comp_baseyear\n    and mf.comp_fincode = df.data2_compfincode\n    and mf.comp_mcode = ch.comp_model\n    and ch.comp_baseyear > ',substring(pipeline().parameters.date2run,0 ,4 ),'-3\n    and ch.comp_baseyear <= ',substring(pipeline().parameters.date2run,0 ,4 ))\n",
+                            "type": "Expression"
+                        }
+                    },
+                    "sink": {
+                        "type": "DelimitedTextSink",
+                        "storeSettings": {
+                            "type": "AzureBlobFSWriteSettings"
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextWriteSettings",
+                            "quoteAllText": true,
+                            "fileExtension": ".csv"
+                        }
+                    },
+                    "enableStaging": false,
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "typeConversion": true,
+                        "typeConversionSettings": {
+                            "allowDataTruncation": true,
+                            "treatBooleanAsNumber": false
+                        }
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SybaseDataset_KRAM_FINANCIAL_RATIOS",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "csv_Derived_KRAM_Models",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "date2run": {
+                                "value": "@pipeline().parameters.date2run",
+                                "type": "Expression"
+                            },
+                            "table": {
+                                "value": "@pipeline().parameters.table",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            }
+        ],
+        "parameters": {
+            "date2run": {
+                "type": "string",
+                "defaultValue": "yyyyMMdd"
+            },
+            "table": {
+                "type": "string",
+                "defaultValue": "KRAM_SE_MODEL"
+            }
+        },
+        "variables": {
+            "Blob_File_Path_Location": {
+                "type": "String",
+                "defaultValue": "DERIVED_DATASETS/KRAM_SE_MODEL/load_date="
+            }
+        },
+        "folder": {
+            "name": "stag2landing_deriveddatasets"
+        },
+        "annotations": [],
+        "lastPublishTime": "2023-02-21T13:13:28Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}
